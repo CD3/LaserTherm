@@ -1,0 +1,255 @@
+\documentclass[letterpaper,12pt]{article}
+
+\usepackage{graphicx}
+\usepackage{cancel}
+\usepackage{units}
+\usepackage{amsmath}
+\usepackage{txfonts}
+\usepackage{tensor}
+
+\parindent=0in
+
+
+\newcommand{\func}[1]{\left(#1\right)}
+
+\title{Notes on a 1D Finite-Difference Steady-state Heat Solver}
+\author{C.D. Clark III}
+
+
+\begin{document}
+\maketitle
+
+\section{Motivation}
+While we require a time-dependent heat solver to simulate the temperature response of tissue exposed to laser energy, it is often the case that a steady-state heat solver would be beneficial.
+A steady-state heat solver is a solver that computes the steady-state temperature distribution, which is the solution to the heat equation that does not change with time. The
+steady-state solution is the temperature distribution that the time-dependent temperature distribution tends to for long times, so it is possible in principle to obtain the steady-state
+solution by running a time-dependent solver for a long time. However, this is often impractical.
+
+In the context of simulating the thermo-optical response of tissue, there are to instances in which having a steady-state heat solver would be useful. First, when simulating the exposure of a tissue
+with a surface boundary and blood perfusion (such as skin), it is important to determine the initial temperature distribution in the tissue before simulating a laser exposure. Heat is lost at the surface boundary,
+which will lead to a temperature gradient in the tissue. This temperature gradient would just be linear if not for
+blood perfusion, which can be modeled as a temperature dependent source term. Therefore, in order to accurately simulate
+skin exposures, it is necessary to first determine the initial temperature distribution in tissue, which amounts to finding
+the steady-state solution without a laser source term. Without a steady-state solver, this requires running a time-dependent
+heat solver for a long period of time until the temperature distribution ceases (or nearly ceases) to change. Depending on
+the model configuration, this can be very time consuming. A steady-state heat solver would allow this to initial temperature
+to be quickly determined.
+
+While not nearly as critical, a steady-state solver could also be used to determine the maximum temperature that would be reached for a given exposure. This would allow the simulated temperature to the actual exposure to be compared to this maximum temperature, or even provide a method for determining when a time-dependent simulation can be terminated by deciding if it has reached steady-state.
+
+\section{Model}
+The 1D, steady-state heat equation is
+\begin{equation}
+  \label{eqn:heat_eqn}
+  \frac{\partial }{\partial x}\left[ \kappa\func{x} \frac{\partial }{\partial x} \nu\func{x} \right] = -A\func{x}
+\end{equation}
+We proceed in the usual way, first we chain rule the left-hand side and then finite-differencing the derivatives
+\begin{equation}
+  \frac{\partial }{\partial x}\left[ \kappa\func{x} \frac{\partial  }{\partial x  } \nu\func{x} \right] = 
+                                     \kappa\func{x} \frac{\partial^2}{\partial x^2} \nu\func{x}
+ +\frac{\partial }{\partial x}       \kappa\func{x} \frac{\partial  }{\partial x  } \nu\func{x}
+\end{equation}
+Let
+\begin{equation}
+  \begin{array}{rrrr}
+  \delta_x   f_i \equiv &\frac{                 \Delta x_{i-} }{ \Delta x_{i+}\Delta x_{i } } f_{i-1}
+                       +&\frac{ \Delta x_{i+} - \Delta x_{i-} }{ \Delta x_{i+}\Delta x_{i-} } f_{i  }
+                       +&\frac{-\Delta x_{i+}                 }{ \Delta x_{i }\Delta x_{i-} } f_{i+1} \\
+  \delta^2_x f_i \equiv &\frac{               2               }{ \Delta x_{i+}\Delta x_{i } } f_{i-1}
+                       +&\frac{              -2               }{ \Delta x_{i+}\Delta x_{i-} } f_{i  }
+                       +&\frac{               2               }{ \Delta x_{i }\Delta x_{i-} } f_{i+1}
+\end{array}
+\end{equation}
+The finite difference representation of \ref{eqn:heat_eqn} is
+\begin{equation}
+   \kappa_i \delta^2_x \nu_i
++  \delta_x \kappa_i \delta_x \nu_i
+= -A_i
+\end{equation}
+We may at times need to implement a "source term" that depends on the
+temperature. This wouldn't really be a source term in the strict definition,
+but if we consider a source term as anything that adds or removes energy from
+the system, then we could consider something like energy transfer due to blood perfusion,
+which depends on the temperature, a source term.
+
+We will only consider source terms that have at most a linear dependence on temperature. In general, this will include all
+source terms of the form,
+\begin{equation}
+  A_i = B_i \nu + C_i.
+\end{equation}
+With this generalization, we have
+\begin{equation}
+   \kappa_i \delta^2_x \nu_i
++  \delta_x \kappa_i \delta_x \nu_i
+= -B_i \nu_i - C_i,
+\end{equation}
+which, when expanded becomes
+\begin{equation}
+   \frac{ 2 \kappa_i                                                     }{ \Delta x_{i+}\Delta x_{i } } \nu_{i-1}
+ + \frac{-2 \kappa_i                                                     }{ \Delta x_{i+}\Delta x_{i-} } \nu_{i  }
+ + \frac{ 2 \kappa_i                                                     }{ \Delta x_{i }\Delta x_{i-} } \nu_{i+1}
+ + \frac{                        \Delta x_{i-}         \delta_x \kappa_i }{ \Delta x_{i+}\Delta x_{i } } \nu_{i-1}
+ + \frac{ \left( \Delta x_{i+} - \Delta x_{i-} \right) \delta_x \kappa_i }{ \Delta x_{i+}\Delta x_{i-} } \nu_{i  }
+ +\frac{        -\Delta x_{i+}                         \delta_x \kappa_i }{ \Delta x_{i }\Delta x_{i-} } \nu_{i+1} \\
+= -B_i \nu_i - C_i.
+\end{equation}
+
+Now, if we define three constants,
+\begin{align}
+  a_i&\equiv \frac{ 2 \kappa_i }{ \Delta x_{i+}\Delta x_{i } }
+           + \frac{ \Delta x_{i-} \delta_x \kappa_i }{ \Delta x_{i+}\Delta x_{i } } \\
+  b_i&\equiv \frac{-2 \kappa_i }{ \Delta x_{i+}\Delta x_{i-} }
+           + \frac{ \left( \Delta x_{i+} - \Delta x_{i-} \right) \delta_x \kappa_i }{ \Delta x_{i+}\Delta x_{i-} } 
+           + B_i \\
+  c_i&\equiv \frac{ 2 \kappa_i }{ \Delta x_{i }\Delta x_{i-} }
+           + \frac{ -\Delta x_{i+}\delta_x \kappa_i }{ \Delta x_{i }\Delta x_{i-} }
+\end{align}
+we can write this in a simplified form,
+\begin{align}
+  \label{eqn:heat_eqn_FD}
+  a_i \nu_{i-1}
+ +b_i \nu_{i  }
+ +c_i \nu_{i+1}
+= C_i
+\end{align}
+
+To specify a unique solution, we must specify two boundary conditions; one each for the min and max coordinates.
+These boundary conditions are required to handle the cases at $i=0$ and $i=N-1$ points. For example, at $i=0$, equation
+\ref{eqn:heat_eqn_FD} is
+\begin{align}
+  \label{eqn:boundary_eqn}
+  a_0 \nu_{-1}
+ +b_0 \nu_{0  }
+ +c_0 \nu_{1}
+= C_i
+\end{align}
+This equation refers to the tempature at $i=-1$, which is not known. To handle this, we use a boundary condition.
+
+In practice, we will either specify the temperature, or its  derivative at the boundary.
+\begin{align}
+  \nu &= \alpha \\
+  \frac{\partial \nu}{\partial x} &= \beta\func{\nu}\\
+\end{align}
+The first type, Dirichlet boundary conditions, are simple enough to implement.
+At the $i=0$ and $i=N-1$, the temperatures on the other side of the boundary
+that are not known in equation \ref{eqn:heat_eqn_FD} are directly given by the
+boundary conditions. At $i=0$, we have
+\begin{align}
+  \alpha
+ +b_0 \nu_{0}
+ +c_0 \nu_{1}
+= C_0
+\end{align}
+Defining a new constant
+\begin{align}
+  C'_0 \equiv  C_0 - \alpha
+\end{align}
+we can write a new version of the equation \ref{eqn:boundary_eqn} at the boundary.
+\begin{align}
+  b_0 \nu_{0}
+ +c_0 \nu_{1}
+= C'_0
+\end{align}
+The $i=N-1$ boundary is almost identical
+\begin{align}
+  a_0 \nu_{N-2}
+ +b_0 \nu_{N-1}
+ = C'_{N-1}
+\end{align}
+where $C'$ is defined the same as before.
+
+The second type of boundary condition, Nuemann, are only slightly more difficult to implement. First, we finite-difference the derivative,
+\begin{align}
+  \frac{\nu_{i+1} - \nu_{i-1}}{x_{i+1} - x_{i-1}} &= \beta\func{\nu_i}\\
+\end{align}
+Now, for $i=0$, we can write the $\nu_{i-1}$, which is not known, in terms of the things we do know.
+\begin{align}
+   \nu_{-1} &= \nu_{1} - \Delta x \beta\func{\nu_0}
+\end{align}
+and also for $i=N-1$,
+\begin{align}
+  \nu_{N} &= \nu_{N-2} + \Delta x \beta\func{\nu_{N-1}}
+\end{align}
+Using these, we can replace the unknown terms in the finite-difference equation. For the $i=0$ case,
+\ref{eqn:heat_eqn_FD} is
+\begin{align}
+  a_0 \left[ \nu_{1} - \Delta x \beta\func{\nu_0} \right]
+ +b_0 \nu_{0  }
+ +c_0 \nu_{1}
+= C
+\end{align}
+As before, we can define a set of "primed" constants,
+\begin{align}
+  c'_0&\equiv c_0 + a_0\\
+  C'_0&\equiv  C + a_0 \Delta x \beta\func{\nu_0}
+\end{align}
+so that we have
+\begin{align}
+  b_0 \nu_{0}
+ +c'_0 \nu_{1}
+= C'_0
+\end{align}
+For the $i=N-1$ case we have
+\begin{align}
+  a'_{N-1}&\equiv a_{N-1} + c_{N-1} \\
+  C'_{N-1}&\equiv  C_{N-1} - c_{N-1} \Delta x \beta\func{\nu_{N-1}}
+\end{align}
+and
+\begin{align}
+  a'_{N-1} \nu_{N-2}
++ b_{N-1} \nu_{N-1}
+= C'_{N-1}
+\end{align}
+
+Now, to solve the heat equation, we are going to use a "relaxation" method. We
+note that, for the solution, the temperature at any point is related to its two
+neighbors,
+\ref{eqn:heat_eqn_FD} is
+\begin{align}
+  \label{eqn:relax}
+ \nu_{i  }
+ = \frac{C_{i} - a_i \nu_{i-1} - c_i \nu_{i+1}}{b_i}
+\end{align}
+At the two boundaries we have
+\begin{align}
+  \label{eqn:relax_minBC}
+ \nu_{0  } = \frac{C'_{0} -  c'_0 \nu_{1}}{b_0}
+\end{align}
+and
+\begin{align}
+  \label{eqn:relax_maxBC}
+  \nu_{N-1} = \frac{C'_{N-1} -  a'_{N-1} \nu_{N-2}}{b_{N-1}}
+\end{align}
+The relaxation method works by looping through all points and recalculating its value using equations \ref{eqn:relax} - \ref{eqn:relax_maxBC}. We do this until the temperature "stops" changing. Of course, we will have to define some sort of metric to define when then temperature stops changing.
+
+\section{Analytic Solutions}
+In the following, we will develop a few analytic solution to the steady-state heat equation that can be used to validate a numerical heat solver.
+\subsection{Single slab with heat convection at one surface}
+Consider a single, homogeneous slab of material, with a sink boundary condition on one end, and a convective boundary condition at the other. We will have the heat equation,
+\begin{align}
+  k \frac{\partial^2}{\partial x^2} v(x) &= 0,
+\end{align}
+with the following boundary conditions,
+\begin{align}
+              v(0) &= 0, \\
+  k \left. \frac{\partial}{\partial x} v(x) \right|_{x=X} &= -h_e \left( v - v_\infty \right).
+\end{align}
+The solution will be a straight line, but the slope will depend on the convection at the surface,
+\begin{align}
+  v(x) &= m x + b \\
+  v(0) &= 0 \rightarrow b = 0\\
+  v(x) &= m x \\
+  k \frac{\partial}{\partial x} v(x) &= k m = -h \left( mX - v_\infty \right)
+  \rightarrow
+  m  = \frac{ h v_\infty }{ k + h X }
+\end{align}
+So, we have
+\begin{equation}
+  v(x) = \frac{ h v_\infty }{ k + h X } x
+\end{equation}
+
+\end{document}
+
+
+
+

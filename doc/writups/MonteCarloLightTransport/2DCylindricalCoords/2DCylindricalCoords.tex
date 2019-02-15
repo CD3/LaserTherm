@@ -1,0 +1,107 @@
+\documentclass[letterpaper,12pt]{article}
+
+\usepackage{graphicx}
+\usepackage{cancel}
+\usepackage{siunitx}
+\usepackage{amsmath}
+\usepackage{txfonts}
+\usepackage{tensor}
+
+\parindent=0.5in
+
+
+\newcommand{\func}[1]{\left(#1\right)}
+
+\title{Notes on Monte Carlo simulation for light transport in 2D cylindrical coordinates.}
+\author{C.D. Clark III}
+
+
+\begin{document}
+\maketitle
+
+\section{Introduction}
+Monte Carlo simulations, such as the Monte Carlo Multiple Layer (MCML) model, are very common for simulating the distribution of absorbed power in turbid media (such as tissue).
+The concept is quite simple. At it most basic level, the simulation is based on propagating each photon through a random walk. Photons travel between interaction sites where they can
+be absorbed or scattered. The probability of absorption, scattering, and the direction of scattering are related to the media properties (absorption coefficient, scattering coefficient, anisotropy).
+
+The most direct way to program a MC simulation is to use 3-dimensional Cartesian coordinates. A full 3D simulation would store the absorbed photon power in a 3D grid, but we often only need the absorbed
+power on a 2D grid that corresponds to a slice out of a cylinder, i.e. cylindrical coordinates. If the system has azimuthal symmetry, then we can use this to determine the absorbed power in the 2D grid and speed
+up the simulation by requiring fewer photons. However, we must be careful to do this mapping correctly.
+
+\section{The Problem}
+We want to compute the power density function in 2D cylindrical coordinates, $A(r,z)$, using a 3D Cartesian coordinate Monte Carlo simulation. Our simulation yields an absorbed power grid, $P_{i,j}$, corresponding
+to the total photon power absorbed within the region $( i\Delta r < r < (i+1)\Delta r, i\Delta z < z < (j+1)\Delta z)$. Our problem is to obtain $A(r,z)$ from $P_{i,j}$.
+
+\section{Derivation}
+
+Assume that we have computed the photon absorbed power density, $A$, in 3D, Cartesian coordinates, $A \rightarrow A(x,y,z)$. The dimensions of $A$ are power per unit volume. In SI units, we have \si{\watt\per\meter\cubed}.
+We could also write $A$ in cylindrical coordinates, $A \rightarrow A(r,\theta,z)$. The dimensions are the same, they do not depend on the coordinates used.
+
+Now, if the function $A$ is azimuthally symmetric, then $A$ will not depend on $\theta$ and
+\begin{align*}
+  A(r,\theta,z) &= A(r,\phi,z) \\
+  A(r,\theta,z) &\rightarrow A(r,z).
+\end{align*}
+This means that the average of $A$ over $\theta$ will be equal to $A$ at any $\theta$. Consider a line along constant $r$ and $z$. It will be a circle. The average power density over the line is
+\begin{align}
+  \label{eq:avg_A}
+  \bar{A}(r,z) &= \frac{1}{2\pi r} \int\limits_0^{2\pi}  A(r,\theta,z) \; r d\theta \nonumber \\
+               &= \frac{1}{2\pi} \int\limits_0^{2\pi}  A(r,\theta,z) \; d\theta \nonumber \\
+               &= A(r,z)
+\end{align}
+In other words, just add up $A$ along the line and then divide by the length of the line.
+\textbf{Note that the dimensions of $A(r,z)$ are still power per unit volume.}
+
+Simulations in 2D cylindrical coordinates usually perform Monte Carlo
+simulation in 3D Cartesian coordinates, but ``score'' photons onto a two
+dimensional grid. When a photon is absorbed, its absorbed power is added to
+the grid by mapping the photon's Cartesian coordinates to cylindrical
+coordinates: $r = \sqrt{x^2 + y^2}$, $z = z$. 
+
+Let a superscript $i$ denote the parameters corresponding to the $i$'th absorption event. Meaning, $P^i(r^i,\theta^i,z^i)$ is the power absorbed
+at $(r^i,\theta^i,z^i)$ during the $i$'th absorption event. The total absorbed power then is just the sum of $P^i$ over all $i$. The total power
+must also correspond to the integral of $A$. Therefore,
+\begin{equation}
+  \int_{0}^{2\pi}
+  \int_{0}^{\infty}
+  \int_{-\infty}^{\infty}
+  A(r,\theta,z)
+  r d\theta
+  d r
+  d z \approx \sum_i P^i
+\end{equation}
+
+This is the connection between the power density $A$ that we want
+to compute and the scoring grid that we have.  Consider the total power
+absorbed in a ring of width $\Delta r$ and thickness $\Delta z$ at $(r_i =
+i\Delta r, z_j = j\Delta z)$, When we score photon power on a 2D grid by binning
+power according to $r = \sqrt{x^2 + y^2}$, this is exactly what we are
+computing.  Therefore, the relationship between the power density $A$
+that we want to compute and the scoring grid that we have is
+\begin{equation}
+  dP = \int_{0}^{2\pi}
+       A( r_i, \theta, z_j)
+       r_i d\theta
+       \Delta r
+       \Delta z = P_{i,j}.
+\end{equation}
+Using Equation \ref{eq:avg_A} gives
+\begin{equation}
+       P_{i,j} =
+       2\pi r_i A(r_i,z_j)
+       \Delta r
+       \Delta z
+\end{equation}
+which is the relationship we are looking for,
+\begin{equation}
+  A(r_i,z_j) = \frac{1}{2\pi \Delta r \Delta z r_i } P_{i,j}.
+\end{equation}
+The factor $2\pi\Delta r \Delta z$ can often be ignored because the function $A(r,z)$ will be normalized to give a specific power and these constants will be have no effect on the normalization. The
+factor $r_i$ however must be included as it depends on the radial position of the bin. So, to correctly compute the absorbed photon power distribution on a 2D cylindrical grid from a 3D Cartesian simulation,
+each bin weight should be divided by its radial position.
+
+\end{document}
+
+
+
+

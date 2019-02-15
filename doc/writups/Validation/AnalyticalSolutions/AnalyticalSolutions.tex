@@ -1,0 +1,172 @@
+\documentclass[letterpaper,12pt]{article}
+
+\usepackage{graphicx}
+\usepackage{cancel}
+\usepackage{siunitx}
+\usepackage{amsmath}
+\usepackage{txfonts}
+\usepackage{tensor}
+\parindent=0in
+
+
+
+\title{Analytical solutions to the Heat Equation for validating numerical solvers}
+\author{C.D. Clark III}
+
+
+\begin{document}
+\maketitle
+
+\section{Introduction}
+\label{sec:intro}
+This document provides a number of Heat Equation solutions that can be used to validate numerical heat solvers. 
+
+\section{Eigen Modes}
+The homogeneous heat equation can be written generally (without reference to a specific coordinate system) as:
+\begin{equation}
+  \label{eq:hom_heat_eq}
+  \rho c \partial_t T = \nabla \cdot k \nabla T.
+\end{equation}
+For a material with uniform properties (actually, only the conductivity needs to be uniform), this can be simplified:
+\begin{equation}
+  \label{eq:simp_heat_eq}
+  \rho c \partial_t T = k \nabla^2 T.
+\end{equation}
+
+This is similar to the wave equation, except that the time derivative is first order rather than second order. The eigen functions of
+the $\nabla^2$ operator are also useful here. We can in fact determine the general solution by transforming to the eigen basis of
+the Laplace operator, but here we want to find a specific solution suitable for comparing numerical heat solvers to.
+
+The eigen functions of the Laplace operator have the interesting property that they decay in time without changing shape. So, if the initial
+temperature distribution is an eigen function of $\nabla^2$, then the temperature distribution will not change shape in time, but simply
+scale instead. These special eigen temperature distributions can be used to validate a heat solver in much the same way that a beam propagator
+can be validated by propagating the eigen mode of a waveguide. We note that the eigen function equation for the Laplace operator is typically
+written as
+\begin{equation}
+  \nabla^2 \phi = -\lambda^2 \phi
+\end{equation}
+
+Consider a temperature distribution which is an eigen function of the Laplace operator with eigenvalue $\lambda$.
+The time-evolution of this temperature distribution is given by equation \ref{eq:simp_heat_eq}:
+\begin{align}
+  \rho c \partial_t \phi &= k \nabla^2 \phi = -k \lambda^2 \phi, \\
+         \partial_t \phi &= \frac{-k \lambda^2}{\rho c} \phi.
+\end{align}
+This is just an ordinary first-order differential equations in time, which has
+a simple exponential solution in time. Let $\alpha = \frac{k \lambda^2}{\rho c}$, then
+\begin{equation}
+  \phi(t,\vec{r}) = e^{-\alpha t} \phi(0,\vec{r}).
+\end{equation}
+
+\subsection{1D Cartesian Coordinates}
+In one-dimensional Cartesian coordinates, equation \ref{eq:simp_heat_eq} becomes:
+\begin{equation}
+  \label{eq:1d_simp_heat_eq}
+  \rho c \partial_t T = k \partial_{xx} T.
+\end{equation}
+The eigen equation for the conduction operator is
+\begin{equation}
+  \label{eq:1d_eigen_eq}
+  \partial_{xx} \phi = -\lambda^2 \phi,
+\end{equation}
+which has solutions
+\begin{equation}
+  \phi \propto \sin(\lambda x), \cos(\lambda x).
+\end{equation}
+The eigenvalues, $\lambda$, are determined by the boundary conditions.
+
+
+\subsubsection{Dirichlet Boundary Conditions}
+Consider a uniform material over the domain $(0,L)$ with boundary conditions $T(0) = T(L) = 0$. The eigen functions satisfying these boundary
+conditions are $A \sin(\lambda_m x)$ where $\lambda_m = \frac{m\pi}{L}$. So, for an initial temperature distribution $T(0,x) = A \sin(\frac{m\pi}{L} x)$
+we will have
+\begin{equation}
+T(t,x) = e^{-\alpha t} A \sin\left(\frac{m\pi}{L} x\right) = 
+e^{-\frac{k m^2\pi^2}{\rho c L^2} t} A \sin\left(\frac{m\pi}{L} x\right)
+\end{equation}
+
+\subsubsection{Neumann Boundary Conditions}
+Consider a uniform material over the domain $(0,L)$ with boundary conditions
+$\left.\partial_x T \right|_{x = 0} = \left.\partial_x T \right|_{x = L}= 0$.
+The eigen functions satisfying these boundary
+conditions are $A \cos(\lambda_m x)$ where $\lambda_m = \frac{m\pi}{L}$. So, for an initial temperature distribution $T(0,x) = A \cos(\frac{m\pi}{L} x)$
+we will have
+\begin{equation}
+T(t,x) = 
+e^{-\frac{k m^2\pi^2}{\rho c L^2} t} A \cos\left(\frac{m\pi}{L} x\right)
+\end{equation}
+
+\subsection{2D Cylindrical Coordinates}
+For problems exhibiting azimuthal symmetry, we work in two-dimensional cylindrical coordinates, $r$ and $z$. The eigen
+equation is
+\begin{equation}
+  \frac{1}{r} \partial_r (r \partial_r \phi) + \partial_{zz} \phi = -\lambda^2 \phi.
+\end{equation}
+The eigenfunctions $\phi(r,z)$ can be written as the product of a function of $r$ and a function of $z$, $\phi(r,z) = \phi_r(r) \phi_z(z)$.
+The eigen equation can be rewritten
+\begin{equation}
+  \phi_z \frac{1}{r} \partial_r (r \partial_r \phi_r) + \phi_r \partial_{zz} \phi_z =
+  -\lambda^2 \phi_r\phi_z
+\end{equation}
+The above equation implies that
+\begin{align}
+ \label{eq:r_eigen_eq}
+ \frac{1}{r} \partial_r (r \partial_r \phi_r)&= -\lambda_r^2 \phi_r \\
+ \label{eq:z_eigen_eq}
+                        \partial_{zz} \phi_z &= -\lambda_z^2 \phi_z
+\end{align}
+Equation \ref{eq:z_eigen_eq} is just equation \ref{eq:1d_simp_heat_eq}, so the eigen functions $\phi_z$ will also be sine and
+cosine functions. Equation \ref{eq:r_eigen_eq} can be rewritten as
+\begin{equation}
+ \partial_{rr} \phi_r + \frac{1}{r} \partial_r \phi_r = -\lambda_r^2 \phi_r.
+\end{equation}
+Multiplying by $r^2$ and substituting $\rho  = \lambda_r r$ shows that this is just Bessel's differential equation with $\alpha = 0$,
+\begin{align}
+ r^2\partial_{rr} \phi_r + r \partial_r \phi_r = -r^2 \lambda_r^2 \phi_r \\
+ \frac{\rho^2}{\lambda^2} \partial_{\rho\rho} \phi_r + \frac{\rho}{\lambda} \partial_\rho \phi_r = -\rho^2 \phi_r \\
+ \frac{\rho^2}{\lambda^2} \partial_{ r   r  } \phi_r + \frac{\rho}{\lambda} \partial_r    \phi_r + \rho^2 \phi_r = 0 \\
+       \rho^2             \partial_{\rho\rho} \phi_r +       \rho           \partial_\rho \phi_r + \rho^2 \phi_r = 0
+\end{align}
+The solutions are Bessel functions, we require the temperature to be finite at $r=0$, so they are of the first kind,
+\begin{equation}
+ \phi_r(r \propto J_0(\rho) = J_0(\lambda_r r).
+\end{equation}
+Again, the eigenvalues are determined by the boundary conditions.
+
+Once both $\lambda_z$ and $\lambda_r$ are set, the value of $\lambda$ will be $\lambda^2 = \lambda_z^2 + \lambda_r^2$.
+
+\subsubsection{Dirichlet Boundary Conditions}
+Consider a uniform material over the domain $(r,z) \in (0,R)\times(0,L)$ with boundary conditions $T(r,0) = T(r,L) = T(R,z) = 0$.
+The $z$ eigen functions satisfying these boundary conditions are again 
+$A \sin(\lambda_{zm} z)$ where $\lambda_{zm} = \frac{m\pi}{L}$.
+The $r$ eigen functions will be Bessel function, $A J_0(\lambda_{rn} r)$ with $\lambda_{rn} = \frac{\alpha_n}{R}$ where
+$\alpha_n$ is the $n$'th zero of $J_0(\rho)$.
+\begin{equation}
+T(t,r,x) = e^{-\alpha t} A \sin\left(\frac{m\pi}{L} z\right) J_0\left(\frac{\alpha_n}{R} r\right) = 
+e^{-\frac{k}{\rho c}\left( \frac{m^2\pi^2}{L^2} + \frac{\alpha_n^2}{R^2}\right) t} A \sin\left(\frac{m\pi}{L} z\right) J_0\left(\frac{\alpha_n}{R} r\right)
+\end{equation}
+
+In order to compare this solution to a numerical solution, we will need to have a value for $\alpha_n$. An analytical expression
+for these zeros does not exist, but there are several numerical libraries that provide functions to calculate them.
+
+\subsubsection{Neumann Boundary Conditions}
+Consider a uniform material over the domain $(r,z) \in (0,R)\times(0,L)$ with boundary conditions
+$\left.\partial_z T\right|_{(r,0)} = \left.\partial_z T\right|_{(r,L)} = \left.\partial_r T\right|_{(R,z)} = 0$.
+The $z$ eigen functions satisfying these boundary conditions are
+$A \cos(\lambda_{zm} z)$ where $\lambda_{zm} = \frac{m\pi}{L}$.
+The $r$ eigen functions will again be Bessel function, $A J_0(\lambda_{rn} r)$, but now the derivative must
+be zero $r = R$. This means that one of the peaks (or valleys) must be at the boundary. Let $\lambda_{rn} = \frac{\beta_n}{R}$ where
+$\beta_n$ is the coordinates of the $n$'th peak or valley of $J_0(\rho)$. This gives
+\begin{equation}
+T(t,r,x) = e^{-\alpha t} A \cos\left(\frac{m\pi}{L} z\right) J_0\left(\frac{\alpha_n}{R} r\right) = 
+e^{-\frac{k}{\rho c}\left( \frac{m^2\pi^2}{L^2} + \frac{\beta_n^2}{R^2}\right) t} A \sin\left(\frac{m\pi}{L} z\right) J_0\left(\frac{\beta_n}{R} r\right)
+\end{equation}
+The zero's $\beta_n$ are again not known analytically, and numerical libraries do not calculate them, but we can determine them by using
+the properties of Bessesl functions. The derivative of $J_0(\rho)$ is itself a Bessel function,
+\begin{equation}
+  \partial_\rho J_0(\rho) = -J_1(\rho)
+\end{equation}
+So, the peaks and valleys of $J_0$ can be determined by computing the zeros of $J_1$.
+\end{document}
+
+

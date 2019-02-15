@@ -1,0 +1,315 @@
+\documentclass[letterpaper,12pt]{article}
+
+\usepackage{graphicx}
+\usepackage{cancel}
+\usepackage{units}
+\usepackage{amsmath}
+\usepackage{txfonts}
+\usepackage{tensor}
+\parindent=0in
+
+
+
+\title{Notes on the Boundary Conditions in Finite-Difference Algorithms}
+\author{C.D. Clark III}
+
+
+\begin{document}
+\maketitle
+
+
+\section{Implicit Algorithms}
+Any implicit finite difference algorithm is based on getting a matrix equation of the form
+\begin{equation}
+\mathbb{A} \nu = b
+\end{equation}
+where, $\mathbb{A}$ is a known matrix, $b$ is a known vector, and $\nu$ is the vector of unknowns to be solved for.
+For most common Finite-Difference methods, the matrix $\mathbb{A}$ is tridiagonal, and so only three elements of $\nu$ appear in each equation. The vector of knowns, $b$, must be calculated, and this to typically involves three elements of the "current" solution. In other words, in general we usually have something like this:
+\begin{equation}
+  \mathbb{A} \nu^{n+1} = \mathbb{C} \nu^{n} + d
+\end{equation}
+where $\mathbb{C}$ is a known matrix that operates on the current solution and gives a vector of constants, and $d$ is a vector of constants that do not depend on the current solution.
+
+This matrix equation represents a system of equation. One equation in this system can be written
+\begin{equation}
+  \label{eqn:FD_eqn}
+  a\indices{^L_i} \nu\indices{^{n+1}_{i-1}}
++ b\indices{^L_i} \nu\indices{^{n+1}_{i  }}
++ c\indices{^L_i} \nu\indices{^{n+1}_{i+1}}
+=
+  a\indices{^R_i} \nu\indices{^{n  }_{i-1}}
++ b\indices{^R_i} \nu\indices{^{n  }_{i  }}
++ c\indices{^R_i} \nu\indices{^{n  }_{i+1}}
++ d_i
+\end{equation}
+There are two "boundaries" that have to be considered here. When $i = 0$,
+\ref{eqn:FD_eqn}, refers to $\nu\indices{_{-1}}$, which does not exist. At $i =
+N-1$, $\nu\indices{_N}$ is referred to, which also does not exist. These two
+equation, $i = 0$ and $i = N-1$, have to be replaced with equations that do not
+refer to the non-existent elements of $\nu$. Actually, these two equation are
+just modified to only refer to actual elements of $\nu$.  To write the
+modification, a second equation relating the non-existent element of $\nu$ to
+the existing elements is required. This equation is called the ``boundary
+condition''. The boundary condition used is determined by the physics.
+
+The simplest boundary condition to implement is the ``sink''. In this case, the
+solution is required to be zero at the boundary, so for example if the element
+$\nu\indices{_i}$ did exist, it would be zero. In this case, the terms in
+\ref{eqn:FD_eqn} referring to $\nu\indices{_{-1}}$ and  $\nu\indices{_{N}}$ can
+just be ignored. The $i=0$ equation is then
+\begin{equation}
+  \label{eqn:FD_sink_eqn}
+  b\indices{^L_0} \nu\indices{^{n+1}_{0}}
++ c\indices{^L_0} \nu\indices{^{n+1}_{1}}
+=
+  b\indices{^R_0} \nu\indices{^{n  }_{0}}
++ c\indices{^R_0} \nu\indices{^{n  }_{1}}
++ d_0
+\end{equation}
+and the $i = N-1$ equation is similar,
+\begin{equation}
+  \label{eqn:FD_sink_eqn_2}
+  a\indices{^L_0} \nu\indices{^{n+1}_{N-2}}
++ b\indices{^L_0} \nu\indices{^{n+1}_{N-1}}
+=
+  a\indices{^R_0} \nu\indices{^{n  }_{N-2}}
++ b\indices{^R_0} \nu\indices{^{n  }_{N-1}}
++ d_0
+\end{equation}
+However, in general, we could allow the boundary be specified as an arbitrary constant,
+\begin{equation}
+  \nu\left(x_0\right) = \alpha
+\end{equation}
+In which case we have
+\begin{equation}
+  a\indices{^L_0} \alpha
++ b\indices{^L_0} \nu\indices{^{n+1}_{0}}
++ c\indices{^L_0} \nu\indices{^{n+1}_{1}}
+=
+  a\indices{^R_0} \alpha
++ b\indices{^R_0} \nu\indices{^{n  }_{0}}
++ c\indices{^R_0} \nu\indices{^{n  }_{1}}
++ d_0
+\end{equation}
+The first term on the LHS side here is a constant, so it must be moved over the right right hand side,
+\begin{equation}
+  b\indices{^L_0} \nu\indices{^{n+1}_{0}}
++ c\indices{^L_0} \nu\indices{^{n+1}_{1}}
+=
+  b\indices{^R_0} \nu\indices{^{n  }_{0}}
++ c\indices{^R_0} \nu\indices{^{n  }_{1}}
++ d_0
++ a\indices{^R_0} \alpha
+- a\indices{^L_0} \alpha
+\end{equation}
+If we define a $d'_0$ as
+\begin{equation}
+d'_0 = a\indices{^R_0} \alpha - a\indices{^L_0} \alpha
+\end{equation}
+then we can write the $i=0$ equation as
+\begin{equation}
+  b\indices{^L_0} \nu\indices{^{n+1}_{0}}
++ c\indices{^L_0} \nu\indices{^{n+1}_{1}}
+=
+  b\indices{^R_0} \nu\indices{^{n  }_{0}}
++ c\indices{^R_0} \nu\indices{^{n  }_{1}}
++ d_0
++ d'_0
+\end{equation}
+For the $i=N-1$ equation, we have
+\begin{equation}
+  d'_{N-1} = c\indices{^R_{N-1}} \alpha - c\indices{^L_{N-2}} \alpha
+\end{equation}
+\begin{equation}
+  a\indices{^L_{N-1}} \nu\indices{^{n+1}_{N-2}}
++ b\indices{^L_{N-1}} \nu\indices{^{n+1}_{N-1}}
+=
+  a\indices{^R_{N-1}} \nu\indices{^{n  }_{N-2}}
++ b\indices{^R_{N-1}} \nu\indices{^{n  }_{N-1}}
++ d_{N-1}
++ d'_{N-1}
+\end{equation}
+
+The other type of boundary condition that can be specified involves the
+derivative of $\nu$ (with respect to $x$) at the boundary. This is the type of
+boundary condition is required to model surfaces where the material loses energy
+to the environment through convection, radiation, and evaporation. It is also
+the boundary condition used to model an insulator.  In general, any boundary
+condition can be written as
+\begin{equation}
+  \left. \frac{\partial \nu}{\partial x} \right|_{x = boundary} = \beta(\nu)
+\end{equation}
+By finite differencing the derivative, we obtain a relationship for the non-existent element of $x$.
+\begin{equation}
+  \label{eqn:FD_BC}
+  \frac{ \nu\indices{_{i+1}} - \nu\indices{_{i-1}} }{ x\indices{_{i+1}} - x\indices{_{i-1}} } = \beta(\nu_i)
+\end{equation}
+
+Let us only consider the $i=0$ case for now. Later, the $i=N-1$ case can be derived in a very similar manner. For $i=0$, equation \ref{eqn:FD_BC} gives
+\begin{equation}
+  \nu\indices{_{-1}} = \nu\indices{_{1}} - \Delta x \beta(\nu_0)
+\end{equation}
+For the RHS of \ref{eqn:FD_eqn}, this can be incorporated directly,
+\begin{equation}
+  \label{eqn:lhs}
+  a\indices{^R_0} \nu\indices{_{-1}^{n  }}
++ b\indices{^R_0} \nu\indices{_{ 0}^{n  }}
++ c\indices{^R_0} \nu\indices{_{ 1}^{n  }}
++ d_0
+=
+  a\indices{^R_0} \left[\nu\indices{^{n}_{1}} - \Delta x \beta(\nu\indices{^{n}_{0}})\right]
++ b\indices{^R_0} \nu\indices{_{ 0}^{n  }}
++ c\indices{^R_0} \nu\indices{_{ 1}^{n  }}
++ d_0
+\end{equation}
+For the LHS however, $\beta\left(\nu\right)$ needs to be evaluated at $\nu\indices{_{0}^{n+1}}$, which isn't known. We approximate this by expanding $\beta\left(\nu\right)$ in a Taylor series, and only keeping the first two terms.
+\begin{equation}
+  \beta(\nu\indices{_{0}^{n+1}}) \approx \beta (\nu\indices{_{0}^{n}})
+                                      +  \beta'(\nu\indices{_{0}^{n}}) \left( \nu\indices{_{0}^{n+1}} - \nu\indices{_{0}^{n}} \right)
+\end{equation}
+Now the LHS of \ref{eqn:FD_eqn} can be written as
+\begin{align}
+  \label{eqn:rhs}
+  a\indices{^L_0} \nu\indices{_{-1}^{n+1}}
++ b\indices{^L_0} \nu\indices{_{0 }^{n+1}}
++ c\indices{^L_0} \nu\indices{_{ 1}^{n+1}}
+&=
+a\indices{^L_0} \left[ \nu\indices{_{1}^{n+1}}
+                    - \Delta x \left(\beta (\nu\indices{_{0}^{n}})
+                               +     \beta'(\nu\indices{_{0}^{n}}) \left( \nu\indices{_{0}^{n+1}} - \nu\indices{_{0}^{n}} \right) \right)
+               \right] \nonumber \\
+&+ b\indices{^L_0} \nu\indices{_{0  }^{n+1}}
+ + c\indices{^L_0} \nu\indices{_{  1}^{n+1}}
+\end{align}
+Note that any terms that are constant (i.e. do not contain a $\nu\indices{^{n+1}}$) must be moved over to the RHS, so after
+some rearranging,
+\begin{align}
+  \label{eqn:minLHS}
+  LHS&: 
+  \left[b\indices{^L_0} - a\indices{^L_0}\Delta x \beta'(\nu\indices{_{0}^n}) \right] \nu\indices{_0^{n+1}}
++ \left[c\indices{^L_0} + a\indices{^L_0}                                             \right] \nu\indices{_1^{n+1}} \\
+  \label{eqn:minRHS}
+  RHS&:
+  b\indices{^R_0}\nu\indices{_0^n}
++ c\indices{^R_0}\nu\indices{_1^n}
++ d_0 \nonumber \\
+&+
+\left[
+- a\indices{^L_0} \Delta x \beta'(\nu\indices{_0^n}) \nu\indices{^n_0}
++ a\indices{^R_0}                 \nu\indices{_1^n} 
+- a\indices{^R_0} \Delta x \beta (\nu\indices{_0^n})
++ a\indices{^L_0} \Delta x \beta (\nu\indices{_0^n})
+\right]
+\end{align}
+
+Comparing these to \ref{eqn:FD_sink_eqn}, we see that in fact they just contain \ref{eqn:FD_sink_eqn} plus some extra terms. Therefore, in general,
+we can \emph{assume} that we have a sink boundary condition when we create the representation for the first and last equations, and then add an arbitrary
+boundary condition on by adding on to the right terms. All the extra information we need is the boundary condition function and its derivative with
+respect to $\nu$.
+
+Let
+\begin{align}
+  b\indices{^{'L}_0} &\equiv          - a\indices{^L_0} \Delta x \beta'(\nu\indices{_0^n}) \\
+  c\indices{^{'L}_0} &\equiv \phantom{-}a\indices{^L_0} \\
+  b\indices{^{'R}_0} &\equiv          - a\indices{^L_0} \Delta x \beta'(\nu\indices{_0^n}) \\
+  c\indices{^{'R}_0} &\equiv \phantom{-}a\indices{^R_0} \\
+  d\indices{^{' }_0} &\equiv \phantom{-}a\indices{^L_0} \Delta x \beta (\nu\indices{_0^n}) - a\indices{^R_0} \Delta x \beta (\nu\indices{_0^n})
+\end{align}
+
+Then we can write the boundary equation as
+\begin{equation}
+  \left( b\indices{^L_0} + b\indices{^{'L}_0} \right) \nu\indices{^{n+1}_{0}}
++ \left( c\indices{^L_0} + c\indices{^{'L}_0} \right) \nu\indices{^{n+1}_{1}}
+=
+  \left( b\indices{^R_0} + b\indices{^{'R}_0} \right) \nu\indices{^{n  }_{0}}
++ \left( c\indices{^R_0} + c\indices{^{'R}_0} \right) \nu\indices{^{n  }_{1}}
++ d_0 + d\indices{^'_0}
+\end{equation}
+
+For the other boundary, $i = N-1$, equation \ref{eqn:FD_eqn} gives
+\begin{equation}
+  \nu\indices{_{N}} =  \nu\indices{_{N-2}}  + \Delta x \beta(\nu_0).
+\end{equation}
+Again, the boundary condition can be incorporated directly into the RHS, but a Taylor Series approximation must
+be used for the LHS. The left and right sides will look like this
+\begin{align}
+ LHS&:
+  a\indices{^L_{N-1}} \nu\indices{_{N-2}^{n+1}}
++ b\indices{^L_{N-1}} \nu\indices{_{N-1}^{n+1}} \nonumber \\
+&+
+\left[
+  c\indices{^L_{N-1}} \nu\indices{_{N-2}^{n+1}}
++ c\indices{^L_{N-1}} \Delta x \beta (\nu\indices{_{N-1}^{n}})
++ c\indices{^L_{N-1}} \Delta x \beta'(\nu\indices{_{N-1}^{n}})\left(  \nu\indices{_{N-1}^{n+1}} - \nu\indices{_{N-1}^{n}} \right)
+\right] \nonumber \\
+  RHS&:
+  a\indices{^R_{N-1}} \nu\indices{_{N-2}^{n  }}
++ b\indices{^R_{N-1}} \nu\indices{_{N-1}^{n  }}
++ d_{N-1} \nonumber \\
+&+ \left[
+  c\indices{^R_{N-1}} \nu\indices{_{N-2}^n}                  % the extra stuff from the RHS
++ c\indices{^R_{N-1}} \Delta x \beta(\nu\indices{_{N-1}^n})  % the extra stuff from the RHS
+\right] \nonumber
+\end{align}
+and then we have to move the constant terms from the LHS to the RHS
+\begin{align}
+  \label{eqn:maxLHS}
+ LHS&:
+  a\indices{^L_{N-1}} \nu\indices{_{N-2}^{n+1}}
++ b\indices{^L_{N-1}} \nu\indices{_{N-1}^{n+1}} \nonumber \\
+&+
+\left[
+  c\indices{^L_{N-1}} \nu\indices{_{N-2}^{n+1}}
++ c\indices{^L_{N-1}} \Delta x \beta'(\nu\indices{_{N-1}^{n}}) \nu\indices{_{N-1}^{n+1}}
+\right] \\
+  \label{eqn:maxRHS}
+  RHS&:
+  a\indices{^R_{N-1}} \nu\indices{_{N-2}^{n  }}
++ b\indices{^R_{N-1}} \nu\indices{_{N-1}^{n  }}
++ d_{N-1} \nonumber \\
+&+ \left[
+  c\indices{^R_{N-1}} \nu\indices{_{N-2}^n}                  % the extra stuff from the RHS
++ c\indices{^L_{N-1}} \Delta x \beta'(\nu\indices{_{N-1}^{n}}) \nu\indices{_{N-1}^{n}}
++ c\indices{^R_{N-1}} \Delta x \beta(\nu\indices{_{N-1}^n})  % the extra stuff from the RHS
+- c\indices{^L_{N-1}} \Delta x \beta (\nu\indices{_{N-1}^{n}})
+\right]
+\end{align}
+Now, defining a set of prime constants again,
+
+\begin{align}
+  a\indices{^{'L}_{N-1}} &\equiv    c\indices{^L_{N-1}} \\
+  b\indices{^{'L}_{N-1}} &\equiv    c\indices{^L_{N-1}} \Delta x \beta'(\nu\indices{_0^n}) \\
+  a\indices{^{'R}_{N-1}} &\equiv    c\indices{^R_{N-1}} \\
+  b\indices{^{'R}_{N-1}} &\equiv    c\indices{^L_{N-1}} \Delta x \beta'(\nu\indices{_0^n}) \\
+  d\indices{^{' }_{N-1}} &\equiv    c\indices{^R_{N-1}} \Delta x \beta(\nu\indices{_{N-1}^n}) - c\indices{^L_{N-1}} \Delta x \beta (\nu\indices{_{N-1}^{n}})
+\end{align}
+
+Then we can write the boundary equation as
+\begin{align}
+  \left( a\indices{^L_{N-1}} + a\indices{^{'L}_{N-1}} \right) \nu\indices{^{n+1}_{N-2}}
++ \left( b\indices{^L_{N-1}} + b\indices{^{'L}_{N-1}} \right) \nu\indices{^{n+1}_{N-1}} \nonumber \\
+=
+  \left( a\indices{^R_{N-1}} + a\indices{^{'R}_{N-1}} \right) \nu\indices{^{n  }_{N-2}}
++ \left( b\indices{^R_{N-1}} + b\indices{^{'R}_{N-1}} \right) \nu\indices{^{n  }_{N-1}}
++ d_{N-1} + d\indices{^'_{N-1}}
+\end{align}
+
+So, we know have a general, concise method for implementing any type of Nuemann boundary condition. Note that, while in general the
+method relies on an approximation involving the Taylor Series expansion of the boundary condition function, it gives the same
+equations as directly implementing a boundary condition that is linear in $\nu$. Meaning, the boundary condition used to model energy loss
+due surface convection,
+\begin{align}
+  \kappa \left.\frac{\partial \nu}{\partial x}\right|_{x=0} = h_e \left(\nu - \nu_{\infty}\right)
+\end{align}
+can be directly implemented without the use of a Taylor Series expansion, because there are no non-linear terms. However, doing
+so leads to the exact same equations as \ref{eqn:minLHS}, \ref{eqn:minRHS}, \ref{eqn:maxLHS}, and \ref{eqn:maxRHS} with
+$\beta(\nu\indices{_{i}^n}) = \frac{h_e}{\kappa} \left(\nu\indices{_i^n} - \nu_{\infty}\right)$ and 
+$\beta'(\nu\indices{_{i}^n}) = \frac{h_e}{\kappa}$. The same is true for the insulating boundary conditions.
+Therefore, there is no reason to implement linear boundary conditions separatly, this general method will give the exact same
+results.
+
+\end{document}
+
+
+
+
