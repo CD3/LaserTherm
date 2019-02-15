@@ -22,7 +22,7 @@ target_compile_definitions( ${testName} PRIVATE -DTESTING )
 target_link_libraries(${testName} Catch LaserTherm)
 target_include_directories( ${testName} PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/include" )
 set_target_properties(${testName} PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${binDir})
-set_target_properties(${testName} PROPERTIES CXX_STANDARD 11)
+set_target_properties(${testName} PROPERTIES CXX_STANDARD 17)
 
 add_test(NAME ${testName} 
          WORKING_DIRECTORY ${buildDir}

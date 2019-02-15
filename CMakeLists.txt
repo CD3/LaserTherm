@@ -21,17 +21,24 @@ configure_file( "${CMAKE_CURRENT_BINARY_DIR}/include/${PROJECT_NAME}/version.h"
                 "${CMAKE_CURRENT_BINARY_DIR}/include/${PROJECT_NAME}/version.h")
 
 # common dependencies
-# find_package( Boost REQUIRED )
-# find_package( Eigen3 3.3 REQUIRED )
+ find_package( Boost REQUIRED )
+ find_package( Eigen3 3.3 REQUIRED )
+ find_package( libField REQUIRED )
+ find_package( CUL REQUIRED )
 
 string( REGEX REPLACE "^lib" "" LIB_NAME ${PROJECT_NAME} )
 add_library( ${LIB_NAME} )
 add_library( ${PROJECT_NAME}::${LIB_NAME} ALIAS ${LIB_NAME} )
 target_sources(
-  ${LIB_NAME}
+${LIB_NAME}
   PUBLIC
-  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src/RemoveMe.cpp>
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src/LaserTherm/library.cpp>
+  INTERFACE
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src/LaserTherm/HeatSolvers/_1D/FiniteDifferenceSolver.hpp>
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src/LaserTherm/HeatSolvers/_1D/CrankNicholson.hpp>
 )
+set_target_properties( ${LIB_NAME} PROPERTIES CXX_STANDARD 17 CXX_STANDARD_REQUIRED YES )
+
 target_include_directories( ${LIB_NAME} INTERFACE
   $<BUILD_INTERFACE:${${PROJECT_NAME}_SOURCE_DIR}/src>
   $<BUILD_INTERFACE:${${PROJECT_NAME}_BINARY_DIR}/include>
@@ -39,8 +46,10 @@ target_include_directories( ${LIB_NAME} INTERFACE
 )
 target_link_libraries(${LIB_NAME}
                         INTERFACE
-                          #Boost::boost
-                          #Eigen3::Eigen
+                          Boost::boost
+                          Eigen3::Eigen
+                          libField::Field
+                          CUL::CUL
                      )
 
 if( ${CMAKE_SOURCE_DIR} STREQUAL ${CMAKE_CURRENT_SOURCE_DIR} AND BUILD_UNIT_TESTS)
