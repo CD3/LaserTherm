@@ -20,7 +20,6 @@ template<typename REAL>
 class CrankNicholson : public FiniteDifferenceSolver<REAL>
 {
   protected:
-  //public:
 
     using VectorType = Eigen::Matrix<REAL,Eigen::Dynamic,1>;
 
@@ -39,6 +38,9 @@ class CrankNicholson : public FiniteDifferenceSolver<REAL>
     using FiniteDifferenceSolver<REAL>::VHC;
     using FiniteDifferenceSolver<REAL>::k;
 
+    using FiniteDifferenceSolver<REAL>::minBC;
+    using FiniteDifferenceSolver<REAL>::maxBC;
+
     CrankNicholson(size_t N)
     :FiniteDifferenceSolver<REAL>(N),
      Asub(N),
@@ -49,6 +51,8 @@ class CrankNicholson : public FiniteDifferenceSolver<REAL>
     { }
 
     void stepForward( const REAL& dt );
+    REAL calcMaxTimeStep() const;
+
 
 
 
@@ -69,6 +73,26 @@ class CrankNicholson : public FiniteDifferenceSolver<REAL>
 
 };
 
+
+template<typename REAL>
+REAL CrankNicholson<REAL>::calcMaxTimeStep( ) const
+{
+  // C-N is unconditionally stable, but we can get oscillations if
+  // dt * (k/VHC) / dx = dt * k / (VHC * dx) > 1/2
+  //
+  // so, we shouldn't take time steps larger than
+  //
+  // dt = dx * VHZ / (2 * k)
+  REAL dt = forwDiff( k.getAxis(0), 0 ) * VHC(0) / 2 / k(0);
+  for( int i = 1; i < VHC.size(0); ++i)
+  {
+    REAL dt2 = forwDiff( k.getAxis(0), i ) * VHC(i) / 2 / k(i);
+    if( dt2 < dt )
+      dt = dt2;
+  }
+
+  return dt;
+}
 
 template<typename REAL>
 void CrankNicholson<REAL>::stepForward( const REAL& dt )
@@ -103,20 +127,19 @@ void CrankNicholson<REAL>::stepForward( const REAL& dt )
   #pragma omp parallel for 
   for( int i = 1; i < N-1; i++)
   {
-    b(i) = aR(i)     * T(i-1) 
+    b(i) = aR(i)    * T(i-1) 
          + bR(i,dt) * T(i) 
-         + cR(i)     * T(i+1) ;
+         + cR(i)    * T(i+1) ;
   }
 
   // LAST ELEMENT
-  b(N-1) = aR(N-1)     * T(N-2) 
+  b(N-1) = aR(N-1)    * T(N-2) 
          + bR(N-1,dt) * T(N-1);
 //        _    
 //       / \   
 //      / _ \  
 //     / ___ \ 
 //    /_/   \_\
-         
 
   #pragma omp parallel for 
   for( int i = 0; i < N; ++i )
@@ -142,42 +165,17 @@ void CrankNicholson<REAL>::stepForward( const REAL& dt )
   //|_| \_\_| |_|____/ 
                    
   // MIN
-  //if(minBCs != nullptr && minBCs->size() > 0 )
-  //{
-        //for( typename bcType::iterator it = minBCs->begin(); it != minBCs->end(); it++)
-        //{
-          //auto BC = it->second;
-          //if( BC->get_type() == Neumann)
-          //{
-            //b(0)   += bRp(0, BC) * sol(0)
-                   //+  cRp(0, BC) * sol(1)
-                   //+   dp(0, BC);
-          //}
-     //else if( BC->get_type() == Dirichlet)
-          //{
-            //b(0)   += dp(0, BC);
-          //}
-        //}
-  //}
+  if( minBC.type == BoundaryConditions::Type::Neumann)
+    b(0) += bRp(0)*T(0) + cRp(0)*T(1) + dp(0);
+  if( minBC.type == BoundaryConditions::Type::Dirichlet)
+    b(0) += dp(0);
 
   // MAX
-  //if(maxBCs != nullptr && maxBCs->size() > 0 )
-  //{
-      //for( typename bcType::iterator it = maxBCs->begin(); it != maxBCs->end(); it++)
-      //{
-        //auto BC = it->second;
-        //if( BC->get_type() == Neumann)
-        //{
-            //b(N-1)   += aRp(N-1, BC) * sol(N-2)
-                     //+  bRp(N-1, BC) * sol(N-1)
-                     //+   dp(N-1, BC);
-        //}
-   //else if( BC->get_type() == Dirichlet)
-        //{
-            //b(N-1)   += dp(N-1, BC);
-        //}
-      //}
-  //}
+  if( maxBC.type == BoundaryConditions::Type::Neumann)
+    b(N-1) += aRp(N-1)*T(N-2) + bRp(N-1)*T(N-1) + dp(N-1);
+  if( maxBC.type == BoundaryConditions::Type::Dirichlet)
+    b(N-1) += dp(N-1);
+  
 
 
   // _     _   _ ____  
@@ -187,32 +185,18 @@ void CrankNicholson<REAL>::stepForward( const REAL& dt )
   //|_____|_| |_|____/ 
                    
   // MIN
-  //if(minBCs != nullptr && minBCs->size() > 0 )
-  //{
-    //for( typename bcType::iterator it = minBCs->begin(); it != minBCs->end(); it++)
-    //{
-      //auto BC = it->second;
-      //if( BC->get_type() != Dirichlet)
-      //{
-        //Adiag(0)   += bLp(0, BC);
-        //Asup(0)    += cLp(0, BC);
-      //}
-    //}
-  //}
+  if( minBC.type == BoundaryConditions::Type::Neumann)
+  {
+    Adiag(0)   += bLp(0);
+    Asup(0)    += cLp(0);
+  }
 
   // MAX
-  //if(maxBCs != nullptr && maxBCs->size() > 0 )
-  //{
-    //for( typename bcType::iterator it = maxBCs->begin(); it != maxBCs->end(); it++)
-    //{
-      //auto BC = it->second;
-      //if( BC->get_type() != Dirichlet)
-      //{
-        //Asub(N-1)  += aLp(N-1, BC);
-        //Adiag(N-1) += bLp(N-1, BC);
-      //}
-    //}
-  //}
+  if( maxBC.type == BoundaryConditions::Type::Neumann)
+  {
+    Asub(N-1)  += aLp(N-1);
+    Adiag(N-1) += bLp(N-1);
+  }
 
 
 
@@ -293,16 +277,19 @@ REAL   CrankNicholson<REAL>::cL(  int _i )
 template<typename REAL>
 REAL   CrankNicholson<REAL>::aLp( int _i )
 {
+  return cL(_i);
 }
 
 template<typename REAL>
 REAL   CrankNicholson<REAL>::bLp( int _i )
 {
+  return bRp( _i );
 }
 
 template<typename REAL>
 REAL   CrankNicholson<REAL>::cLp( int _i )
 {
+  return aL(_i);
 }
 
 template<typename REAL>
@@ -375,19 +362,48 @@ REAL   CrankNicholson<REAL>::cR(  int _i )
 
 template<typename REAL>
 REAL   CrankNicholson<REAL>::aRp( int _i )
-{}
+{
+  return cR(_i);
+}
 
 template<typename REAL>
 REAL   CrankNicholson<REAL>::bRp( int _i )
-{}
+{
+  if( _i == 0  )
+    return -aL(_i) * centDiff( T.getAxis(0), _i ) * minBC.dfdT;
+  else if( _i == T.size(0) - 1)
+    return  cL(_i) * centDiff( T.getAxis(0), _i ) * maxBC.dfdT;
+
+  return REAL(0);
+}
 
 template<typename REAL>
 REAL   CrankNicholson<REAL>::cRp( int _i )
-{}
+{
+  return aR(_i);
+}
 
 template<typename REAL>
 REAL    CrankNicholson<REAL>::dp( int _i )
-{}
+{
+  if( _i == 0 )
+  {
+    if( minBC.type == BoundaryConditions::Type::Neumann)
+      return  (aL(_i) - aR(_i)) * centDiff( T.getAxis(0), _i ) * minBC.f;
+    if( minBC.type == BoundaryConditions::Type::Dirichlet )
+      return  (aR(_i) - aL(_i)) * minBC.f;
+  }
+  else if( _i == T.size(0)-1 )
+  {
+    if( maxBC.type == BoundaryConditions::Type::Neumann)
+      return  (cL(_i) - cR(_i)) * centDiff( T.getAxis(0), _i ) * maxBC.f;
+    if( maxBC.type == BoundaryConditions::Type::Dirichlet )
+      return  (cR(_i) - cL(_i)) * maxBC.f;
+
+  }
+
+  return REAL(0);
+}
 
 
 

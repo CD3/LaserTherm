@@ -9,7 +9,7 @@
 
 
 template< typename ARRAY >
-auto backDiff( ARRAY& axis_, int i_ )
+auto backDiff( const ARRAY& axis_, int i_ )
 {
   if( i_ == 0 )
     return axis_[ i_ + 1 ] - axis_[ i_     ];
@@ -18,7 +18,7 @@ auto backDiff( ARRAY& axis_, int i_ )
 }
 
 template< typename ARRAY >
-auto forwDiff( ARRAY& axis_, int i_ )
+auto forwDiff( const ARRAY& axis_, int i_ )
 {
   if(  i_ == axis_.size() - 1 )
     return axis_[ i_     ] - axis_[ i_ - 1 ];
@@ -27,7 +27,7 @@ auto forwDiff( ARRAY& axis_, int i_ )
 }
 
 template< typename ARRAY >
-auto centDiff( ARRAY& axis_, int i_ )
+auto centDiff( const ARRAY& axis_, int i_ )
 {
   return backDiff( axis_, i_ )  + forwDiff( axis_, i_ );
 }
@@ -38,7 +38,7 @@ auto centDiff( ARRAY& axis_, int i_ )
  * calculates coefficient for i_-1 term i_n central finite difference approximation of first derivative
  */
 template< typename ARRAY >
-auto  firstDeriv_centFDmCoeff( ARRAY& axis_, int i_ )
+auto  firstDeriv_centFDmCoeff( const ARRAY& axis_, int i_ )
 {
   auto dxm = backDiff( axis_, i_ );
   auto dxc = centDiff( axis_, i_ );
@@ -51,7 +51,7 @@ auto  firstDeriv_centFDmCoeff( ARRAY& axis_, int i_ )
  * calculates coefficient for i_ term i_n central finite difference approximation of first derivative
  */
 template< typename ARRAY >
-auto  firstDeriv_centFDcCoeff( ARRAY& axis_, int i_ )
+auto  firstDeriv_centFDcCoeff( const ARRAY& axis_, int i_ )
 {
   auto dxm = backDiff( axis_, i_ );
   auto dxp = forwDiff( axis_, i_ );
@@ -63,7 +63,7 @@ auto  firstDeriv_centFDcCoeff( ARRAY& axis_, int i_ )
  * calculates coefficient for i_+1 term i_n central finite difference approximation of first derivative
  */
 template< typename ARRAY >
-auto  firstDeriv_centFDpCoeff( ARRAY& axis_, int i_ )
+auto  firstDeriv_centFDpCoeff( const ARRAY& axis_, int i_ )
 {
   auto dxm = backDiff( axis_, i_ );
   auto dxc = centDiff( axis_, i_ );
@@ -78,7 +78,7 @@ auto  firstDeriv_centFDpCoeff( ARRAY& axis_, int i_ )
  * calculates coefficient for i_-1 term i_n central finite difference approximation of second derivative
  */
 template< typename ARRAY >
-auto  secondDeriv_centFDmCoeff( ARRAY& axis_, int i_ )
+auto  secondDeriv_centFDmCoeff( const ARRAY& axis_, int i_ )
 {
   auto dxm = backDiff( axis_, i_ );
   auto dxc = centDiff( axis_, i_ );
@@ -90,7 +90,7 @@ auto  secondDeriv_centFDmCoeff( ARRAY& axis_, int i_ )
  * calculates coefficient for i_ term i_n central finite difference approximation of second derivative
  */
 template< typename ARRAY >
-auto  secondDeriv_centFDcCoeff( ARRAY& axis_, int i_ )
+auto  secondDeriv_centFDcCoeff( const ARRAY& axis_, int i_ )
 {
   auto dxm = backDiff( axis_, i_ );
   auto dxp = forwDiff( axis_, i_ );
@@ -102,7 +102,7 @@ auto  secondDeriv_centFDcCoeff( ARRAY& axis_, int i_ )
  * calculates coefficient for i_+1 term i_n central finite difference approximation of second derivative
  */
 template< typename ARRAY >
-auto  secondDeriv_centFDpCoeff( ARRAY& axis_, int i_ )
+auto  secondDeriv_centFDpCoeff( const ARRAY& axis_, int i_ )
 {
   auto dxp = forwDiff( axis_, i_ );
   auto dxc = centDiff( axis_, i_ );

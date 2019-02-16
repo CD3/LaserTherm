@@ -1,6 +1,7 @@
 #include "catch.hpp"
 
 #include <iostream>
+#include <fstream>
 #include <LaserTherm/HeatSolvers/_1D/CrankNicholson.hpp>
 
 template<typename T>
@@ -54,7 +55,7 @@ TEST_CASE("Construction and Setup", "[heatsolver]")
 
 }
 
-TEST_CASE("Validate : Sink Boundaries with No Source", "[heatsolver,validation]")
+TEST_CASE("1D Cartesian Heat Solver Validation", "[heatsolver,validation]")
 {
 
   // for thermally homogeneous material of length L and sink boundary conditions, the eigenfunctions of the heat conduction operator are sin functions.
@@ -81,8 +82,8 @@ TEST_CASE("Validate : Sink Boundaries with No Source", "[heatsolver,validation]"
   double c = 4.1868;
   double k = 0.00628;
 
-  int    Nt = 10000;
-  double dt = 0.01;
+  int    Nt = 1000;
+  double dt = 0.1;
   double Tmax = Nt*dt;
 
 
@@ -90,32 +91,113 @@ TEST_CASE("Validate : Sink Boundaries with No Source", "[heatsolver,validation]"
   double alpha = pow( m * M_PI / L, 2) * k / (rho*c); // decay rate for the mode
 
 
-
-  HeatSolvers::_1D::CrankNicholson<double> HeatSolver(N);
-  HeatSolver.T.setCoordinateSystem( Uniform(xmin,xmax) );
-  HeatSolver.VHC.set( rho*c );
-  HeatSolver.k.set( k );
-
-  SECTION("Direct Field Access")
+  SECTION("Crank-Nicholson Solver")
   {
-    for(int i = 0; i < N; ++i)
+
+    HeatSolvers::_1D::CrankNicholson<double> HeatSolver(N);
+
+    SECTION("Sink Boundary Conditions")
     {
-      double x = HeatSolver.T.getCoord(i);
-      HeatSolver.T(i) = sin( m * M_PI * x / L );
+
+      SECTION("Direct Field Access")
+      {
+        HeatSolver.T.setCoordinateSystem( Uniform(xmin,xmax) );
+        HeatSolver.VHC.set( rho*c );
+
+        HeatSolver.k.set( k );
+
+        CHECK( HeatSolver.calcMaxTimeStep() == Approx(dx * rho * c / 2 / k) );
+
+        HeatSolver.T.set_f( [&](auto i, auto cs)
+        {
+          auto x = cs->getCoord(i[0]);
+          return sin( m * M_PI * x / L );
+        });
+
+        for(int i = 0; i < Nt; ++i)
+        {
+          HeatSolver.stepForward(dt);
+        }
+
+      }
+
+      SECTION("Callback Field Access")
+      {
+        HeatSolver.T.setCoordinateSystem( Uniform(xmin,xmax) );
+
+        HeatSolver.sig_askInitialTemperature.connect( [&](Field<double,1>& T)
+            {
+              size_t N = T.size(0);
+              for(int i = 0; i < N; ++i)
+              {
+                double x = HeatSolver.T.getCoord(i);
+                T(i) = sin( m * M_PI * x / L );
+              }
+            });
+
+        HeatSolver.sig_askVolumetricHeatCapacity.connect( [&](Field<double,1>& VHC)
+            {
+              VHC.set( rho*c );
+            });
+
+        HeatSolver.sig_askConductivity.connect( [&](Field<double,1>& kk)
+            {
+              kk.set( k );
+            });
+
+
+        HeatSolver.initialize();
+        for(int i = 0; i < N; ++i)
+        {
+          CHECK( HeatSolver.VHC(i) == Approx(rho*c) );
+          CHECK( HeatSolver.k(i) == Approx(k) );
+          CHECK( HeatSolver.T(i) == Approx( sin(m*M_PI*(xmin+i*dx)/L) ) );
+        }
+
+        for(int i = 0; i < Nt; ++i)
+        {
+          HeatSolver.stepForward(dt);
+        }
+
+      }
+
+      CHECK( HeatSolver.T(  N/2) == Approx( exp( - alpha * Tmax) * sin( m * M_PI * (xmin + dx*  N/2) / L )  ).epsilon(0.01));
+      CHECK( HeatSolver.T(  N/8) == Approx( exp( - alpha * Tmax) * sin( m * M_PI * (xmin + dx*  N/8) / L )  ).epsilon(0.01));
+      CHECK( HeatSolver.T(7*N/8) == Approx( exp( - alpha * Tmax) * sin( m * M_PI * (xmin + dx*7*N/8) / L )  ).epsilon(0.01));
     }
 
-    for(int i = 0; i < Nt; ++i)
+    SECTION("Insulating Boundary Conditions")
     {
-      HeatSolver.stepForward(dt);
+      HeatSolver.T.setCoordinateSystem( Uniform(xmin,xmax) );
+      HeatSolver.VHC.set( rho*c );
+      HeatSolver.k.set( k );
+      HeatSolver.minBC.type = HeatSolvers::_1D::BoundaryConditions::Type::Neumann;
+      HeatSolver.maxBC.type = HeatSolvers::_1D::BoundaryConditions::Type::Neumann;
+
+      for(int i = 0; i < N; ++i)
+      {
+        double x = HeatSolver.T.getCoord(i);
+        HeatSolver.T(i) = cos( m * M_PI * x / L );
+      }
+
+      std::ofstream out("T.txt");
+      out << HeatSolver.T;
+      for(int i = 0; i < Nt; ++i)
+      {
+        HeatSolver.stepForward(dt);
+        out << "\n" << HeatSolver.T;
+      }
+      out.close();
+
+
+      CHECK( HeatSolver.T(    0) == Approx( exp( - alpha * Tmax) * cos( m * M_PI * (xmin + dx*    0) / L )  ).epsilon(0.01));
+      CHECK( HeatSolver.T(  N/2) == Approx( exp( - alpha * Tmax) * cos( m * M_PI * (xmin + dx*  N/2) / L )  ).epsilon(0.01));
+      CHECK( HeatSolver.T(  N/8) == Approx( exp( - alpha * Tmax) * cos( m * M_PI * (xmin + dx*  N/8) / L )  ).epsilon(0.01));
+      CHECK( HeatSolver.T(7*N/8) == Approx( exp( - alpha * Tmax) * cos( m * M_PI * (xmin + dx*7*N/8) / L )  ).epsilon(0.01));
+      CHECK( HeatSolver.T(  N-1) == Approx( exp( - alpha * Tmax) * cos( m * M_PI * (xmax           ) / L )  ).epsilon(0.01));
     }
 
   }
-
-
-
-  CHECK( HeatSolver.T(  N/2) == Approx( exp( - alpha * Tmax) * sin( m * M_PI * (xmin + dx*  N/2) / L )  ).epsilon(0.01));
-  CHECK( HeatSolver.T(  N/8) == Approx( exp( - alpha * Tmax) * sin( m * M_PI * (xmin + dx*  N/8) / L )  ).epsilon(0.01));
-  CHECK( HeatSolver.T(7*N/8) == Approx( exp( - alpha * Tmax) * sin( m * M_PI * (xmin + dx*7*N/8) / L )  ).epsilon(0.01));
 
 
 
