@@ -9,9 +9,11 @@ void nop( T& a )
 {
 }
 
-TEST_CASE("Construction and Setup", "[heatsolver]")
+TEST_CASE("Heat Solver Construction and Setup", "[heatsolver]")
 {
 
+  SECTION("Crank-Nicholson")
+  {
   HeatSolvers::_1D::CrankNicholson<double> HeatSolver(11);
   HeatSolver.T.setCoordinateSystem( Uniform(-2,2) );
 
@@ -51,8 +53,98 @@ TEST_CASE("Construction and Setup", "[heatsolver]")
   CHECK( HeatSolver.A(10) == 2.0 );
   CHECK( HeatSolver.VHC(10) == 3.0 );
   CHECK( HeatSolver.k(10) == 4.0 );
+  }
 
 
+}
+
+TEST_CASE("Heat Solver Signals", "[heatsolver]")
+{
+  SECTION("Crank-Nicholson")
+  {
+    HeatSolvers::_1D::CrankNicholson<double> HeatSolver(10);
+
+    HeatSolver.sig_askSourceTerm.connect(
+        [](auto& f, const auto& t)
+        {
+          f.set(2);
+
+          if( t > 10 )
+            f.set(10);
+
+          if( t > 20 )
+            f.set(20);
+
+          if( t < 0.5 )
+            f.set(1);
+        }
+    );
+
+    HeatSolver.sig_askSourceTerm( HeatSolver.A, 11 );
+    CHECK( HeatSolver.A(0) == 10 );
+    CHECK( HeatSolver.A(1) == 10 );
+    CHECK( HeatSolver.A(8) == 10 );
+    CHECK( HeatSolver.A(9) == 10 );
+
+    HeatSolver.sig_askSourceTerm( HeatSolver.A, 21 );
+    CHECK( HeatSolver.A(0) == 20 );
+    CHECK( HeatSolver.A(1) == 20 );
+    CHECK( HeatSolver.A(8) == 20 );
+    CHECK( HeatSolver.A(9) == 20 );
+
+    HeatSolver.stepForward(0.1);
+    CHECK( HeatSolver.A(0) == 1 );
+    CHECK( HeatSolver.A(1) == 1 );
+    CHECK( HeatSolver.A(8) == 1 );
+    CHECK( HeatSolver.A(9) == 1 );
+
+    HeatSolver.stepForward(1);
+    CHECK( HeatSolver.A(0) == 2 );
+    CHECK( HeatSolver.A(1) == 2 );
+    CHECK( HeatSolver.A(8) == 2 );
+    CHECK( HeatSolver.A(9) == 2 );
+
+
+    HeatSolver.sig_askMinBoundaryCondition.connect(
+        [](auto& BC, const auto& T, const auto& t)
+        {
+          BC.type = HeatSolvers::_1D::BoundaryConditions::Type::Dirichlet;
+          BC.f = 10;
+        }
+    );
+
+    HeatSolver.sig_askMaxBoundaryCondition.connect(
+        [](auto& BC, const auto& T, const auto& t)
+        {
+          BC.type = HeatSolvers::_1D::BoundaryConditions::Type::Neumann;
+          BC.f = 20;
+          BC.dfdT = 2;
+        }
+    );
+
+    CHECK( HeatSolver.minBC.type == HeatSolvers::_1D::BoundaryConditions::Type::None );
+    CHECK( HeatSolver.maxBC.type == HeatSolvers::_1D::BoundaryConditions::Type::None );
+
+    HeatSolver.sig_askMinBoundaryCondition( HeatSolver.minBC, 0, 0 );
+
+    CHECK( HeatSolver.minBC.type == HeatSolvers::_1D::BoundaryConditions::Type::Dirichlet);
+    CHECK( HeatSolver.maxBC.type == HeatSolvers::_1D::BoundaryConditions::Type::None );
+    CHECK( HeatSolver.minBC.f == 10 );
+
+    HeatSolver.sig_askMaxBoundaryCondition( HeatSolver.maxBC, 0, 0 );
+
+    CHECK( HeatSolver.minBC.type == HeatSolvers::_1D::BoundaryConditions::Type::Dirichlet);
+    CHECK( HeatSolver.maxBC.type == HeatSolvers::_1D::BoundaryConditions::Type::Neumann);
+    CHECK( HeatSolver.minBC.f == 10 );
+    CHECK( HeatSolver.maxBC.f == 20 );
+    CHECK( HeatSolver.maxBC.dfdT == 2 );
+
+
+
+
+
+
+  }
 }
 
 TEST_CASE("1D Cartesian Heat Solver Validation", "[heatsolver,validation]")
@@ -74,8 +166,7 @@ TEST_CASE("1D Cartesian Heat Solver Validation", "[heatsolver,validation]")
   int    Nt = 1000;
   double dt = 0.1;
   double Tmax = Nt*dt;
-
-  int m = 2;
+int m = 2;
   double lambda = m * M_PI / L;
   double alpha = k * pow( lambda, 2) / (rho*c); // decay rate for the mode
   double beta = 5;

@@ -11,14 +11,40 @@ namespace HeatSolvers::_1D::BoundaryConditions {
 
 enum class Type {Dirichlet, Neumann, None};
 
+template<typename REAL>
+struct FiniteDifference
+{
+  REAL f = 0;
+  REAL dfdT = 0;
+  Type type = Type::None;
+};
+
+
 struct Sink
 {
+  template<typename BCType, typename REAL, typename SolverType>
+  void setBoundaryConditions( BCType& BC, REAL t, const SolverType& solver )
+  {
+    BC.type = Type::Dirichlet;
+    BC.f = 0;
+  }
 };
 
 struct Insulator
 {
 };
 
+struct Convective
+{
+};
+
+struct Evaporative
+{
+};
+
+struct Radiative
+{
+};
 
 
 }

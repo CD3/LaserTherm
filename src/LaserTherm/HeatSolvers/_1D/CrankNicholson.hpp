@@ -31,10 +31,13 @@ class CrankNicholson : public FiniteDifferenceSolver<REAL>
 
   public:
 
-    using FiniteDifferenceSolver<REAL>::sig_askInitialTemperature;
-    using FiniteDifferenceSolver<REAL>::sig_askVolumetricHeatCapacity;
-    using FiniteDifferenceSolver<REAL>::sig_askConductivity;
     using FiniteDifferenceSolver<REAL>::sig_askSourceTerm;
+    using FiniteDifferenceSolver<REAL>::sig_askMinBoundaryCondition;
+    using FiniteDifferenceSolver<REAL>::sig_askMaxBoundaryCondition;
+
+    using FiniteDifferenceSolver<REAL>::askSourceTerm;
+    using FiniteDifferenceSolver<REAL>::askMinBoundaryCondition;
+    using FiniteDifferenceSolver<REAL>::askMaxBoundaryCondition;
 
     using FiniteDifferenceSolver<REAL>::FiniteDifferenceSolver;
     using FiniteDifferenceSolver<REAL>::T;
@@ -160,7 +163,6 @@ void CrankNicholson<REAL>::stepForward( const REAL& dt )
 //| |_) | (_) | |_| | | | | (_| | (_| | |  | |_| | | (_| (_) | | | | (_| | | |_| | (_) | | | \__ \
 //|_.__/ \___/ \__,_|_| |_|\__,_|\__,_|_|   \__, |  \___\___/|_| |_|\__,_|_|\__|_|\___/|_| |_|___/
 //                                          |___/                                                 
-//
 
   // ____  _   _ ____  
   //|  _ \| | | / ___| 
@@ -168,6 +170,12 @@ void CrankNicholson<REAL>::stepForward( const REAL& dt )
   //|  _ <|  _  |___) |
   //|_| \_\_| |_|____/ 
                    
+  // TODO: we should actually get the BCs at 0 and dt if they are
+  // time depdentnet. all of the "left" coefficients (aL, bL, cL) should
+  // be multiplied by the BC at dt.
+  sig_askMinBoundaryCondition( minBC, T(0), 0 );
+  sig_askMaxBoundaryCondition( maxBC, T(N-1), 0 );
+
   // MIN
   if( minBC.type == BoundaryConditions::Type::Neumann)
     b(0) += bRp(0)*T(0) + cRp(0)*T(1) + dp(0);
@@ -187,6 +195,7 @@ void CrankNicholson<REAL>::stepForward( const REAL& dt )
   //| |   | |_| \___ \ 
   //| |___|  _  |___) |
   //|_____|_| |_|____/ 
+
                    
   // MIN
   if( minBC.type == BoundaryConditions::Type::Neumann)

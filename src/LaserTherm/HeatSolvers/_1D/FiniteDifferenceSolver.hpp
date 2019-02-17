@@ -18,19 +18,22 @@ template<typename REAL>
 class FiniteDifferenceSolver
 {
   public:
+    using BC = BoundaryConditions::FiniteDifference<REAL>;
 
-    boost::signals2::signal< void(Field<REAL,1>&) > sig_askInitialTemperature;
-    boost::signals2::signal< void(Field<REAL,1>&) > sig_askVolumetricHeatCapacity;
-    boost::signals2::signal< void(Field<REAL,1>&) > sig_askConductivity;
-    boost::signals2::signal< void(Field<REAL,1>&,REAL) > sig_askSourceTerm;
-    //boost::signals2::signal< void(&) > sig_askBoundaryConditions;
+    boost::signals2::signal< void(Field<REAL,1>&,const REAL&)  > sig_askSourceTerm;
+    boost::signals2::signal< void(BC&,const REAL&,const REAL&) > sig_askMinBoundaryCondition;
+    boost::signals2::signal< void(BC&,const REAL&,const REAL&) > sig_askMaxBoundaryCondition;
+
+
+    // provide functions to connect signals in case we want to add multiple signatures
+    // or change the signal/slot backend at some point.
+    template<typename F>
+    auto askSourceTerm( F&& f ){ return sig_askSourceTerm.connect(std::forward(f)); }
+    template<typename F>
+    auto askMinBoundaryCondition( F&& f ){ return sig_askMinBoundaryCondition.connect(std::forward(f)); }
+    template<typename F>
+    auto askMaxBoundaryCondition( F&& f ){ return sig_askMaxBoundaryCondition.connect(std::forward(f)); }
     
-    struct BC
-    {
-      REAL f = 0;
-      REAL dfdT = 0;
-      BoundaryConditions::Type type = BoundaryConditions::Type::None;
-    };
 
 
 
