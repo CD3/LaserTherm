@@ -3,6 +3,7 @@
 \usepackage{graphicx}
 \usepackage{cancel}
 \usepackage{siunitx}
+\usepackage{physics}
 \usepackage{amsmath}
 \usepackage{txfonts}
 \usepackage{tensor}
@@ -22,6 +23,9 @@
 This document provides a number of Heat Equation solutions that can be used to validate numerical heat solvers. 
 
 \section{Eigen Modes}
+
+\subsection{Homogeneous Heat Equation}
+
 The homogeneous heat equation can be written generally (without reference to a specific coordinate system) as:
 \begin{equation}
   \label{eq:hom_heat_eq}
@@ -29,7 +33,7 @@ The homogeneous heat equation can be written generally (without reference to a s
 \end{equation}
 For a material with uniform properties (actually, only the conductivity needs to be uniform), this can be simplified:
 \begin{equation}
-  \label{eq:simp_heat_eq}
+  \label{eq:simp_hom_heat_eq}
   \rho c \partial_t T = k \nabla^2 T.
 \end{equation}
 
@@ -46,20 +50,68 @@ written as
   \nabla^2 \phi = -\lambda^2 \phi
 \end{equation}
 
-Consider a temperature distribution which is an eigen function of the Laplace operator with eigenvalue $\lambda$.
-The time-evolution of this temperature distribution is given by equation \ref{eq:simp_heat_eq}:
+Consider a temperature distribution which is an eigen function of the Laplace operator with eigenvalue $\lambda$. We can write the temperature as a product of a time-dependent function
+and the eigenfunction $T = f(t) \phi(\vec{r})$.
+The time-evolution of this temperature distribution is given by equation \ref{eq:simp_hom_heat_eq}:
 \begin{align}
-  \rho c \partial_t \phi &= k \nabla^2 \phi = -k \lambda^2 \phi, \\
-         \partial_t \phi &= \frac{-k \lambda^2}{\rho c} \phi.
+  \label{eq:eigen_heat}
+  \rho c \partial_t f \phi &= k \nabla^2 f \phi = -k \lambda^2 f \phi, \\
+     \phi\partial_t f &= \frac{-k \lambda^2}{\rho c} \phi f, \\
+         \partial_t f &= \frac{-k \lambda^2}{\rho c} f.
 \end{align}
 This is just an ordinary first-order differential equations in time, which has
 a simple exponential solution in time. Let $\alpha = \frac{k \lambda^2}{\rho c}$, then
 \begin{equation}
-  \phi(t,\vec{r}) = e^{-\alpha t} \phi(0,\vec{r}).
+  \label{eq:homo_heat_sol}
+  T(t,\vec{r}) = f\phi = e^{-\alpha t} \phi(\vec{r}).
 \end{equation}
 
+
+\subsection{Inhomogeneous Heat Equation}
+
+If the problem includes a source term, then the Inhomogeneous heat equation is required.
+\begin{equation}
+  \label{eq:inhom_heat_eq}
+  \rho c \partial_t T = \nabla \cdot k \nabla T + A,
+\end{equation}
+which can be simplifed for unfiform media
+\begin{equation}
+  \label{eq:simp_inhom_heat_eq}
+  \rho c \partial_t T = k \nabla^2 T + A.
+\end{equation}
+Consider the special case when $A = \beta \phi$, where $\phi$ is the eigenfunction introduced
+above. Then  Equation \ref{eq:eigen_heat} will be
+\begin{align}
+  \rho c \phi \partial_t f  &= -k \lambda^2 \phi f + \beta \phi ,\\
+  \label{eq:eig_inhom_heat}
+  \partial_t f  &= -\alpha f + \frac{\beta}{\rho c}
+\end{align}
+Let $u = \alpha f - \frac{\beta}{\rho c}$.
+Then $\dd u = \alpha \dd f$ and \ref{eq:eig_inhom_heat} can
+be rewritten as
+\begin{equation}
+  \frac{1}{\alpha} \partial_t u = -u
+\end{equation}
+which is the equation for an exponential,
+\begin{align}
+  u(t) = u(0)e^{-\alpha t} = \qty(\alpha  f(0) - \frac{\beta}{\rho c})e^{-\alpha t} = \alpha f(t) - \frac{\beta}{\rho c}.
+\end{align}
+Solving for $f(t)$
+\begin{align}
+ f(t)
+ = f(0) e^{-\alpha t} - \frac{\beta}{\rho c \alpha} e^{-\alpha t} + \frac{\beta}{\rho c \alpha}
+ = f(0) e^{-\alpha t} + \qty(1 - e^{-\alpha t})\frac{\beta}{k\lambda^2}
+\end{align}
+The temperature will therefore be
+\begin{equation}
+  \label{eq:inhomo_heat_sol}
+  T(t,\vec{r}) =
+  f(0) e^{-\alpha t}\phi(\vec{r}) + \qty(1 - e^{-\alpha t})\frac{\beta}{k \lambda^2} \phi(\vec{r})
+\end{equation}
+which is the same as Equation \ref{eq:homo_heat_sol} when $\beta = 0$.
+
 \subsection{1D Cartesian Coordinates}
-In one-dimensional Cartesian coordinates, equation \ref{eq:simp_heat_eq} becomes:
+In one-dimensional Cartesian coordinates, equation \ref{eq:simp_hom_heat_eq} becomes:
 \begin{equation}
   \label{eq:1d_simp_heat_eq}
   \rho c \partial_t T = k \partial_{xx} T.

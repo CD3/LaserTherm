@@ -31,6 +31,10 @@ class CrankNicholson : public FiniteDifferenceSolver<REAL>
 
   public:
 
+    using FiniteDifferenceSolver<REAL>::sig_askInitialTemperature;
+    using FiniteDifferenceSolver<REAL>::sig_askVolumetricHeatCapacity;
+    using FiniteDifferenceSolver<REAL>::sig_askConductivity;
+    using FiniteDifferenceSolver<REAL>::sig_askSourceTerm;
 
     using FiniteDifferenceSolver<REAL>::FiniteDifferenceSolver;
     using FiniteDifferenceSolver<REAL>::T;
@@ -208,25 +212,19 @@ void CrankNicholson<REAL>::stepForward( const REAL& dt )
 //|___/\___/ \__,_|_|  \___\___|  \__\___|_|  |_| |_| |_|
                                                        
 
-  //ADD PERFUSION TERM AND SOURCE TERM
-  //if(this->sourceTermManifold != nullptr )
-    //this->sourceTermManifold->set(0.0);
-  //this->sig_updateSourceTerm( this->time, this->sourceTermManifold, &state );
+  // crank-nicholson averages the right-hand side of the heat
+  // equation. the source term we use should be the sum
+  // of current and next timetep source terms
 
-  //#pragma omp parallel for 
-  //for( int i = 0; i < N; i++ )
-  //{
-    //if( mat(i)->get_bloodFlowRate() > 0.0 )
-      //b(i) += -2.0 * sol(i) * mat(i)->get_bloodFlowRate() * mat(i)->get_specificHeat();
+  sig_askSourceTerm( A, 0 );
+  #pragma omp parallel for 
+  for( int i = 0; i < N; ++i )
+    b(i) += A(i);
 
-    //// factor of 2 comes form Crank-Nicholson method
-    //if(_sourceTerm != nullptr )
-      //b(i) += -2.0 * (*_sourceTerm)(i);
-
-    //// factor of 2 comes form Crank-Nicholson method
-    //if(this->sourceTermManifold != nullptr )
-      //b(i) += -2.0 * (*this->sourceTermManifold)(i);
-  //}
+  sig_askSourceTerm( A, dt );
+  #pragma omp parallel for 
+  for( int i = 0; i < N; ++i )
+    b(i) += A(i);
 
 
 
@@ -275,6 +273,54 @@ REAL   CrankNicholson<REAL>::cL(  int _i )
 }
 
 template<typename REAL>
+REAL   CrankNicholson<REAL>::aR(  int _i )
+{
+
+  REAL dzm,dzc,dzp;
+  REAL dkdz;
+
+  dzm = backDiff( k.getAxis(0), _i );
+  dzc = centDiff( k.getAxis(0), _i );
+  dzp = forwDiff( k.getAxis(0), _i );
+
+  dkdz = firstDeriv_centFD(k,_i);
+
+  return (2*k(_i)- dkdz*dzp) / (dzc*dzm);
+}
+
+template<typename REAL>
+REAL   CrankNicholson<REAL>::bR(  int _i, REAL dt)
+{
+  REAL dzm,dzc,dzp;
+  REAL dkdz;
+
+  dzm = backDiff( k.getAxis(0), _i );
+  dzc = centDiff( k.getAxis(0), _i );
+  dzp = forwDiff( k.getAxis(0), _i );
+
+  dkdz = firstDeriv_centFD(k,_i);
+
+  return beta(_i, dt) + (dkdz*(dzp - dzm) - 2*k(_i)) / (dzm*dzp);
+}
+
+template<typename REAL>
+REAL   CrankNicholson<REAL>::cR(  int _i )
+{
+  REAL dzm,dzc,dzp;
+  REAL dkdz;
+
+  dzm = backDiff( k.getAxis(0), _i );
+  dzc = centDiff( k.getAxis(0), _i );
+  dzp = forwDiff( k.getAxis(0), _i );
+
+  dkdz = firstDeriv_centFD(k,_i);
+
+  return (2*k(_i)+ dkdz*dzm) / (dzc*dzp);
+}
+
+
+
+template<typename REAL>
 REAL   CrankNicholson<REAL>::aLp( int _i )
 {
   return cL(_i);
@@ -292,73 +338,6 @@ REAL   CrankNicholson<REAL>::cLp( int _i )
   return aL(_i);
 }
 
-template<typename REAL>
-REAL   CrankNicholson<REAL>::aR(  int _i )
-{
-
-  REAL dzm,dzc,dzp;   // backward, center, and forward differences
-  REAL dkdz;          // derivative of kappa (thermal conductivity )
-  REAL km,kc,kp;
-
-  dzm = backDiff( k.getAxis(0), _i );
-  dzc = centDiff( k.getAxis(0), _i );
-  dzp = forwDiff( k.getAxis(0), _i );
-
-  kc = k(_i);
-  km =  _i == 0           ? kc : k(_i-1);
-  kp =  _i == k.size(0)-1 ? kc : k(_i+1);
-    
-  dkdz = firstDeriv_centFDmCoeff( k.getAxis(0), _i) * km
-       + firstDeriv_centFDcCoeff( k.getAxis(0), _i) * kc
-       + firstDeriv_centFDpCoeff( k.getAxis(0), _i) * kp;
-
- return (2*k(_i)- dkdz*dzp) / (dzc*dzm);
-}
-
-template<typename REAL>
-REAL   CrankNicholson<REAL>::bR(  int _i, REAL dt)
-{
-
-  REAL dzm,dzc,dzp;
-  REAL dkdz;
-  REAL km,kc,kp;
-
-  dzm = backDiff( k.getAxis(0), _i );
-  dzc = centDiff( k.getAxis(0), _i );
-  dzp = forwDiff( k.getAxis(0), _i );
-
-  kc = k(_i);
-  km =  _i == 0           ? kc : k(_i-1);
-  kp =  _i == k.size(0)-1 ? kc : k(_i+1);
-    
-  dkdz = firstDeriv_centFDmCoeff( k.getAxis(0), _i) * km
-       + firstDeriv_centFDcCoeff( k.getAxis(0), _i) * kc
-       + firstDeriv_centFDpCoeff( k.getAxis(0), _i) * kp;
-
- return beta(_i, dt) + (dkdz*(dzp - dzm) - 2*k(_i)) / (dzm*dzp);
-}
-
-template<typename REAL>
-REAL   CrankNicholson<REAL>::cR(  int _i )
-{
-  REAL dzm,dzc,dzp;   // backward, center, and forward differences
-  REAL dkdz;          // derivative of kappa (thermal conductivity )
-  REAL km,kc,kp;
-
-  dzm = backDiff( k.getAxis(0), _i );
-  dzc = centDiff( k.getAxis(0), _i );
-  dzp = forwDiff( k.getAxis(0), _i );
-
-  kc = k(_i);
-  km =  _i == 0           ? kc : k(_i-1);
-  kp =  _i == k.size(0)-1 ? kc : k(_i+1);
-    
-  dkdz = firstDeriv_centFDmCoeff( k.getAxis(0), _i) * km
-       + firstDeriv_centFDcCoeff( k.getAxis(0), _i) * kc
-       + firstDeriv_centFDpCoeff( k.getAxis(0), _i) * kp;
-
- return (2*k(_i)+ dkdz*dzm) / (dzc*dzp);
-}
 
 template<typename REAL>
 REAL   CrankNicholson<REAL>::aRp( int _i )

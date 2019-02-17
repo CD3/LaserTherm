@@ -22,7 +22,7 @@ class FiniteDifferenceSolver
     boost::signals2::signal< void(Field<REAL,1>&) > sig_askInitialTemperature;
     boost::signals2::signal< void(Field<REAL,1>&) > sig_askVolumetricHeatCapacity;
     boost::signals2::signal< void(Field<REAL,1>&) > sig_askConductivity;
-    boost::signals2::signal< void(Field<REAL,1>&) > sig_askSourceTerm;
+    boost::signals2::signal< void(Field<REAL,1>&,REAL) > sig_askSourceTerm;
     //boost::signals2::signal< void(&) > sig_askBoundaryConditions;
     
     struct BC

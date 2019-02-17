@@ -110,5 +110,26 @@ auto  secondDeriv_centFDpCoeff( const ARRAY& axis_, int i_ )
   return 2. / (dxc*dxp);
 }
 
+/**
+ * calculates the stretched finite difference for a function.
+ */
+template<typename FIELD>
+auto firstDeriv_centFD( const FIELD& f, int loc, int dir = 0 )
+{
+  // can use a constexp if to check dimensions here
+  // clang-format off
+  auto fm = loc == 0           ? f(loc) : f(loc-1);
+  auto fc =                               f(loc);
+  auto fp = loc == f.size(0)-1 ? f(loc) : f(loc+1);
+
+  auto dfdz = firstDeriv_centFDmCoeff( f.getAxis(0), loc) * fm
+            + firstDeriv_centFDcCoeff( f.getAxis(0), loc) * fc
+            + firstDeriv_centFDpCoeff( f.getAxis(0), loc) * fp;
+  // clang-format on
+
+  return dfdz;
+
+}
+
 
 #endif // include protector
