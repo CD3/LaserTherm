@@ -108,7 +108,7 @@ TEST_CASE("Heat Solver Signals", "[heatsolver]")
     HeatSolver.sig_askMinBoundaryCondition.connect(
         [](auto& BC, const auto& T, const auto& t)
         {
-          BC.type = HeatSolvers::_1D::BoundaryConditions::Type::Temperature;
+          BC.type = HeatSolvers::BoundaryConditions::Type::Temperature;
           BC.f = 10;
         }
     );
@@ -116,25 +116,25 @@ TEST_CASE("Heat Solver Signals", "[heatsolver]")
     HeatSolver.sig_askMaxBoundaryCondition.connect(
         [](auto& BC, const auto& T, const auto& t)
         {
-          BC.type = HeatSolvers::_1D::BoundaryConditions::Type::HeatFlux;
+          BC.type = HeatSolvers::BoundaryConditions::Type::HeatFlux;
           BC.f = 20;
           BC.dfdT = 2;
         }
     );
 
-    CHECK( HeatSolver.minBC.type == HeatSolvers::_1D::BoundaryConditions::Type::None );
-    CHECK( HeatSolver.maxBC.type == HeatSolvers::_1D::BoundaryConditions::Type::None );
+    CHECK( HeatSolver.minBC.type == HeatSolvers::BoundaryConditions::Type::None );
+    CHECK( HeatSolver.maxBC.type == HeatSolvers::BoundaryConditions::Type::None );
 
     HeatSolver.sig_askMinBoundaryCondition( HeatSolver.minBC, 0, 0 );
 
-    CHECK( HeatSolver.minBC.type == HeatSolvers::_1D::BoundaryConditions::Type::Temperature);
-    CHECK( HeatSolver.maxBC.type == HeatSolvers::_1D::BoundaryConditions::Type::None );
+    CHECK( HeatSolver.minBC.type == HeatSolvers::BoundaryConditions::Type::Temperature);
+    CHECK( HeatSolver.maxBC.type == HeatSolvers::BoundaryConditions::Type::None );
     CHECK( HeatSolver.minBC.f == 10 );
 
     HeatSolver.sig_askMaxBoundaryCondition( HeatSolver.maxBC, 0, 0 );
 
-    CHECK( HeatSolver.minBC.type == HeatSolvers::_1D::BoundaryConditions::Type::Temperature);
-    CHECK( HeatSolver.maxBC.type == HeatSolvers::_1D::BoundaryConditions::Type::HeatFlux);
+    CHECK( HeatSolver.minBC.type == HeatSolvers::BoundaryConditions::Type::Temperature);
+    CHECK( HeatSolver.maxBC.type == HeatSolvers::BoundaryConditions::Type::HeatFlux);
     CHECK( HeatSolver.minBC.f == 10 );
     CHECK( HeatSolver.maxBC.f == 20 );
     CHECK( HeatSolver.maxBC.dfdT == 2 );
@@ -209,8 +209,8 @@ int m = 2;
 
       SECTION("Insulating Boundary Conditions")
       {
-        HeatSolver.minBC.type = HeatSolvers::_1D::BoundaryConditions::Type::HeatFlux;
-        HeatSolver.maxBC.type = HeatSolvers::_1D::BoundaryConditions::Type::HeatFlux;
+        HeatSolver.minBC.type = HeatSolvers::BoundaryConditions::Type::HeatFlux;
+        HeatSolver.maxBC.type = HeatSolvers::BoundaryConditions::Type::HeatFlux;
 
         for(int i = 0; i < N; ++i)
         {
@@ -264,8 +264,8 @@ int m = 2;
 
       SECTION("Insulating Boundary Conditions")
       {
-        HeatSolver.minBC.type = HeatSolvers::_1D::BoundaryConditions::Type::HeatFlux;
-        HeatSolver.maxBC.type = HeatSolvers::_1D::BoundaryConditions::Type::HeatFlux;
+        HeatSolver.minBC.type = HeatSolvers::BoundaryConditions::Type::HeatFlux;
+        HeatSolver.maxBC.type = HeatSolvers::BoundaryConditions::Type::HeatFlux;
 
         HeatSolver.A.set_f( [&](auto i, auto cs)
         {
@@ -298,10 +298,12 @@ int m = 2;
 
       SECTION("Constant Temperature Boundaries")
       {
-        HeatSolver.maxBC.type = HeatSolvers::_1D::BoundaryConditions::Type::Temperature;
-        HeatSolver.maxBC.f = 1;
-        HeatSolver.minBC.type = HeatSolvers::_1D::BoundaryConditions::Type::Temperature;
-        HeatSolver.minBC.f = -1;
+        HeatSolvers::BoundaryConditions::ConstantTemperature<double> min(-1);
+        HeatSolvers::BoundaryConditions::ConstantTemperature<double> max(1);
+
+        min.setBoundaryCondition( HeatSolver.minBC );
+        max.setBoundaryCondition( HeatSolver.maxBC );
+
         auto sol = [&](int i){ return (2./L)*(xmin + i*dx) - 1; };
 
         // set the initial temperature distribution to something close to the solution so we
@@ -325,12 +327,12 @@ int m = 2;
       SECTION("Constant Heat Flux at Max Boundary")
       {
         double Q = 0.01;
+        HeatSolvers::BoundaryConditions::ConstantTemperature<double> min(0);
+        HeatSolvers::BoundaryConditions::ConstantHeatFlux<double> max(-Q);
 
-        HeatSolver.maxBC.type = HeatSolvers::_1D::BoundaryConditions::Type::HeatFlux;
-        HeatSolver.maxBC.f = -Q;
-        HeatSolver.maxBC.dfdT = 0;
-        HeatSolver.minBC.type = HeatSolvers::_1D::BoundaryConditions::Type::Temperature;
-        HeatSolver.minBC.f = 0;
+        min.setBoundaryCondition( HeatSolver.minBC );
+        max.setBoundaryCondition( HeatSolver.maxBC );
+
         auto sol = [&](int i){ return -(Q/k)*(xmin + i*dx); };
 
         HeatSolver.T.set_f(
@@ -352,12 +354,13 @@ int m = 2;
       SECTION("Constant Heat Flux at Min Boundary")
       {
         double Q = 0.01;
+        HeatSolvers::BoundaryConditions::ConstantHeatFlux<double> min(-Q);
+        HeatSolvers::BoundaryConditions::ConstantTemperature<double> max(0);
 
-        HeatSolver.minBC.type = HeatSolvers::_1D::BoundaryConditions::Type::HeatFlux;
-        HeatSolver.minBC.f = -Q;
-        HeatSolver.minBC.dfdT = 0;
-        HeatSolver.maxBC.type = HeatSolvers::_1D::BoundaryConditions::Type::Temperature;
-        HeatSolver.maxBC.f = 0;
+        min.setBoundaryCondition( HeatSolver.minBC );
+        max.setBoundaryCondition( HeatSolver.maxBC );
+
+
         auto sol = [&](int i){ return (Q/k)*(xmin + i*dx - L); };
 
         HeatSolver.T.set_f(
