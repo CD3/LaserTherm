@@ -22,7 +22,7 @@
 \label{sec:intro}
 This document provides a number of Heat Equation solutions that can be used to validate numerical heat solvers. 
 
-\section{Eigen Modes}
+\section{Time-Dependent Solutions}
 
 \subsection{Homogeneous Heat Equation}
 
@@ -219,6 +219,51 @@ the properties of Bessesl functions. The derivative of $J_0(\rho)$ is itself a B
   \partial_\rho J_0(\rho) = -J_1(\rho)
 \end{equation}
 So, the peaks and valleys of $J_0$ can be determined by computing the zeros of $J_1$.
+
+\section{Surface Boundary Conditions}
+
+We can model a surface by specifying a heat flux at the boundary. The simplest example is a constant heat flux, which is used to model heat loss do
+to evaporation for example. At the upper boundary, we have
+\begin{equation}
+  k \dv{T}{x} = -Q
+\end{equation}
+This simply says that the heat flux $\qty(k \dv{T}{x})$ at the bounary is equal to a constant value. The negative sign indicates that heat is \emph{lost} at the boundary.
+At the lower boundary, there is no negative sign, because the heat flux points in the opposite direction.
+\begin{equation}
+  k \dv{T}{x} = Q
+\end{equation}
+These are just examples of Neumann boundary conditions.
+
+Consider the steady-state temperature distribution with a constant heat flux. The time-indepdent heat equation is
+\begin{equation}
+  \label{eq:steady_heat_eq}
+  \div{ k \grad {T} } = 0
+\end{equation}
+which can be simplified if $k$ is uniform,
+\begin{equation}
+  \label{eq:steady_heat_eq_simp}
+  k \laplacian T = 0
+\end{equation}
+In one-dimensional Cartesian coordinates, this is just the equation for a line
+\begin{equation}
+  \label{eq:steady_heat_eq_1d_cart}
+  k \dv[2]{T}{x} = 0 \dv[2]{T}{x}
+\end{equation}
+So the temperature will be linear with $x$ between the boundaries,
+\begin{equation}
+  T(x) = m x + b
+\end{equation}
+The constants $m$ and $b$ will be determined by the boundary conditions.
+
+Let $T(0) = 0$, and $k\dv{T}{x} \right|_{x = L} = -Q$. Applying the boundary conditions gives $b = 0$ and $m = -\frac{Q}{k}$. The temperature
+distribution after long times then will be
+\begin{equation}
+  T(x) = -\frac{Q}{k} x.
+\end{equation}
+and the surface temperature at $x = L$ will be $T(L) = -\frac{QL}{k}$.
+
+
+
 \end{document}
 
 

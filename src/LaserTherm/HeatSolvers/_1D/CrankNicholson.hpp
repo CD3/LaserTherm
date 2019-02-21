@@ -45,8 +45,11 @@ class CrankNicholson : public FiniteDifferenceSolver<REAL>
     using FiniteDifferenceSolver<REAL>::VHC;
     using FiniteDifferenceSolver<REAL>::k;
 
+    using BC = BoundaryConditions::FiniteDifference<REAL>;
     using FiniteDifferenceSolver<REAL>::minBC;
     using FiniteDifferenceSolver<REAL>::maxBC;
+    BC minBC2;
+    BC maxBC2;
 
     CrankNicholson(size_t N)
     :FiniteDifferenceSolver<REAL>(N),
@@ -170,22 +173,21 @@ void CrankNicholson<REAL>::stepForward( const REAL& dt )
   //|  _ <|  _  |___) |
   //|_| \_\_| |_|____/ 
                    
-  // TODO: we should actually get the BCs at 0 and dt if they are
-  // time depdentnet. all of the "left" coefficients (aL, bL, cL) should
-  // be multiplied by the BC at dt.
   sig_askMinBoundaryCondition( minBC, T(0), 0 );
   sig_askMaxBoundaryCondition( maxBC, T(N-1), 0 );
+  sig_askMinBoundaryCondition( minBC2, T(0), dt );
+  sig_askMaxBoundaryCondition( maxBC2, T(N-1), dt );
 
   // MIN
-  if( minBC.type == BoundaryConditions::Type::Neumann)
+  if( minBC.type == BoundaryConditions::Type::HeatFlux)
     b(0) += bRp(0)*T(0) + cRp(0)*T(1) + dp(0);
-  if( minBC.type == BoundaryConditions::Type::Dirichlet)
+  if( minBC.type == BoundaryConditions::Type::Temperature)
     b(0) += dp(0);
 
   // MAX
-  if( maxBC.type == BoundaryConditions::Type::Neumann)
+  if( maxBC.type == BoundaryConditions::Type::HeatFlux)
     b(N-1) += aRp(N-1)*T(N-2) + bRp(N-1)*T(N-1) + dp(N-1);
-  if( maxBC.type == BoundaryConditions::Type::Dirichlet)
+  if( maxBC.type == BoundaryConditions::Type::Temperature)
     b(N-1) += dp(N-1);
   
 
@@ -198,14 +200,14 @@ void CrankNicholson<REAL>::stepForward( const REAL& dt )
 
                    
   // MIN
-  if( minBC.type == BoundaryConditions::Type::Neumann)
+  if( minBC.type == BoundaryConditions::Type::HeatFlux)
   {
     Adiag(0)   += bLp(0);
     Asup(0)    += cLp(0);
   }
 
   // MAX
-  if( maxBC.type == BoundaryConditions::Type::Neumann)
+  if( maxBC.type == BoundaryConditions::Type::HeatFlux)
   {
     Asub(N-1)  += aLp(N-1);
     Adiag(N-1) += bLp(N-1);
@@ -358,9 +360,9 @@ template<typename REAL>
 REAL   CrankNicholson<REAL>::bRp( int _i )
 {
   if( _i == 0  )
-    return -aL(_i) * centDiff( T.getAxis(0), _i ) * minBC.dfdT;
+    return -aL(_i) * centDiff( T.getAxis(0), _i ) * (-minBC.dfdT/k(_i));
   else if( _i == T.size(0) - 1)
-    return  cL(_i) * centDiff( T.getAxis(0), _i ) * maxBC.dfdT;
+    return  cL(_i) * centDiff( T.getAxis(0), _i ) * (-maxBC.dfdT/k(_i));
 
   return REAL(0);
 }
@@ -376,17 +378,17 @@ REAL    CrankNicholson<REAL>::dp( int _i )
 {
   if( _i == 0 )
   {
-    if( minBC.type == BoundaryConditions::Type::Neumann)
-      return  (aL(_i) - aR(_i)) * centDiff( T.getAxis(0), _i ) * minBC.f;
-    if( minBC.type == BoundaryConditions::Type::Dirichlet )
+    if( minBC.type == BoundaryConditions::Type::HeatFlux)
+      return  (aL(_i) - aR(_i)) * centDiff( T.getAxis(0), _i ) * (-minBC.f/k(_i));
+    if( minBC.type == BoundaryConditions::Type::Temperature )
       return  (aR(_i) - aL(_i)) * minBC.f;
   }
   else if( _i == T.size(0)-1 )
   {
-    if( maxBC.type == BoundaryConditions::Type::Neumann)
-      return  (cL(_i) - cR(_i)) * centDiff( T.getAxis(0), _i ) * maxBC.f;
-    if( maxBC.type == BoundaryConditions::Type::Dirichlet )
-      return  (cR(_i) - cL(_i)) * maxBC.f;
+    if( maxBC.type == BoundaryConditions::Type::HeatFlux)
+      return  (cL(_i) - cR(_i)) * centDiff( T.getAxis(0), _i ) * (-maxBC.f/k(_i));
+    if( maxBC.type == BoundaryConditions::Type::Temperature )
+      return  (cR(_i) - cL(_i)) * (maxBC.f);
 
   }
 

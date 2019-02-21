@@ -9,7 +9,7 @@
 
 namespace HeatSolvers::_1D::BoundaryConditions {
 
-enum class Type {Dirichlet, Neumann, None};
+enum class Type {Temperature, HeatFlux, None};
 
 template<typename REAL>
 struct FiniteDifference
@@ -20,22 +20,42 @@ struct FiniteDifference
 };
 
 
+template<typename REAL>
 struct Sink
 {
-  template<typename BCType, typename REAL, typename SolverType>
-  void setBoundaryConditions( BCType& BC, REAL t, const SolverType& solver )
+  template<typename BCType>
+  void setBoundaryCondition( BCType& BC, const REAL& T, const REAL& t)
   {
-    BC.type = Type::Dirichlet;
+    BC.type = Type::Temperature;
     BC.f = 0;
   }
 };
 
+template<typename REAL>
 struct Insulator
 {
+  template<typename BCType>
+  void setBoundaryCondition( BCType& BC, const REAL& T, const REAL& t)
+  {
+    BC.type = Type::HeatFlux;
+    BC.f = 0;
+    BC.dfdT = 0;
+  }
 };
 
+template<typename REAL>
 struct Convective
 {
+  REAL he;
+  REAL Tinf;
+
+  template<typename BCType>
+  void setBoundaryCondition( BCType& BC, const REAL& T, const REAL& t)
+  {
+    BC.type = Type::HeatFlux;
+    BC.f = he*(T - Tinf);
+    BC.dfdT = he;
+  }
 };
 
 struct Evaporative

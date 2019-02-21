@@ -108,7 +108,7 @@ TEST_CASE("Heat Solver Signals", "[heatsolver]")
     HeatSolver.sig_askMinBoundaryCondition.connect(
         [](auto& BC, const auto& T, const auto& t)
         {
-          BC.type = HeatSolvers::_1D::BoundaryConditions::Type::Dirichlet;
+          BC.type = HeatSolvers::_1D::BoundaryConditions::Type::Temperature;
           BC.f = 10;
         }
     );
@@ -116,7 +116,7 @@ TEST_CASE("Heat Solver Signals", "[heatsolver]")
     HeatSolver.sig_askMaxBoundaryCondition.connect(
         [](auto& BC, const auto& T, const auto& t)
         {
-          BC.type = HeatSolvers::_1D::BoundaryConditions::Type::Neumann;
+          BC.type = HeatSolvers::_1D::BoundaryConditions::Type::HeatFlux;
           BC.f = 20;
           BC.dfdT = 2;
         }
@@ -127,14 +127,14 @@ TEST_CASE("Heat Solver Signals", "[heatsolver]")
 
     HeatSolver.sig_askMinBoundaryCondition( HeatSolver.minBC, 0, 0 );
 
-    CHECK( HeatSolver.minBC.type == HeatSolvers::_1D::BoundaryConditions::Type::Dirichlet);
+    CHECK( HeatSolver.minBC.type == HeatSolvers::_1D::BoundaryConditions::Type::Temperature);
     CHECK( HeatSolver.maxBC.type == HeatSolvers::_1D::BoundaryConditions::Type::None );
     CHECK( HeatSolver.minBC.f == 10 );
 
     HeatSolver.sig_askMaxBoundaryCondition( HeatSolver.maxBC, 0, 0 );
 
-    CHECK( HeatSolver.minBC.type == HeatSolvers::_1D::BoundaryConditions::Type::Dirichlet);
-    CHECK( HeatSolver.maxBC.type == HeatSolvers::_1D::BoundaryConditions::Type::Neumann);
+    CHECK( HeatSolver.minBC.type == HeatSolvers::_1D::BoundaryConditions::Type::Temperature);
+    CHECK( HeatSolver.maxBC.type == HeatSolvers::_1D::BoundaryConditions::Type::HeatFlux);
     CHECK( HeatSolver.minBC.f == 10 );
     CHECK( HeatSolver.maxBC.f == 20 );
     CHECK( HeatSolver.maxBC.dfdT == 2 );
@@ -147,7 +147,7 @@ TEST_CASE("Heat Solver Signals", "[heatsolver]")
   }
 }
 
-TEST_CASE("1D Cartesian Heat Solver Validation", "[heatsolver,validation]")
+TEST_CASE("1D Cartesian Heat Solver Validation", "[heatsolver][validation]")
 {
   // see ./doc/writups/Validation/AnalyticalSolutions/AnalyticalSolutions.pdf for a derivation
   // of these tests
@@ -209,8 +209,8 @@ int m = 2;
 
       SECTION("Insulating Boundary Conditions")
       {
-        HeatSolver.minBC.type = HeatSolvers::_1D::BoundaryConditions::Type::Neumann;
-        HeatSolver.maxBC.type = HeatSolvers::_1D::BoundaryConditions::Type::Neumann;
+        HeatSolver.minBC.type = HeatSolvers::_1D::BoundaryConditions::Type::HeatFlux;
+        HeatSolver.maxBC.type = HeatSolvers::_1D::BoundaryConditions::Type::HeatFlux;
 
         for(int i = 0; i < N; ++i)
         {
@@ -264,8 +264,8 @@ int m = 2;
 
       SECTION("Insulating Boundary Conditions")
       {
-        HeatSolver.minBC.type = HeatSolvers::_1D::BoundaryConditions::Type::Neumann;
-        HeatSolver.maxBC.type = HeatSolvers::_1D::BoundaryConditions::Type::Neumann;
+        HeatSolver.minBC.type = HeatSolvers::_1D::BoundaryConditions::Type::HeatFlux;
+        HeatSolver.maxBC.type = HeatSolvers::_1D::BoundaryConditions::Type::HeatFlux;
 
         HeatSolver.A.set_f( [&](auto i, auto cs)
         {
@@ -289,6 +289,92 @@ int m = 2;
       }
 
 
+
+
+    }
+
+  SECTION("Boundary Conditions")
+  {
+
+      SECTION("Constant Temperature Boundaries")
+      {
+        HeatSolver.maxBC.type = HeatSolvers::_1D::BoundaryConditions::Type::Temperature;
+        HeatSolver.maxBC.f = 1;
+        HeatSolver.minBC.type = HeatSolvers::_1D::BoundaryConditions::Type::Temperature;
+        HeatSolver.minBC.f = -1;
+        auto sol = [&](int i){ return (2./L)*(xmin + i*dx) - 1; };
+
+        // set the initial temperature distribution to something close to the solution so we
+        // don't have to wait so long.
+        HeatSolver.T.set_f(
+            [&](auto i, auto cs)
+            {
+             return sol(i[0])+0.1;
+            }
+            );
+
+        for(int i = 0; i < 10000; ++i)
+          HeatSolver.stepForward( HeatSolver.calcMaxTimeStep() );
+
+        CHECK( HeatSolver.T(  N/2) == Approx( sol(  N/2) ).epsilon(0.01));
+        CHECK( HeatSolver.T(  N/4) == Approx( sol(  N/4) ).epsilon(0.01));
+        CHECK( HeatSolver.T(  N/8) == Approx( sol(  N/8) ).epsilon(0.01));
+        CHECK( HeatSolver.T(7*N/8) == Approx( sol(7*N/8) ).epsilon(0.01));
+      }
+
+      SECTION("Constant Heat Flux at Max Boundary")
+      {
+        double Q = 0.01;
+
+        HeatSolver.maxBC.type = HeatSolvers::_1D::BoundaryConditions::Type::HeatFlux;
+        HeatSolver.maxBC.f = -Q;
+        HeatSolver.maxBC.dfdT = 0;
+        HeatSolver.minBC.type = HeatSolvers::_1D::BoundaryConditions::Type::Temperature;
+        HeatSolver.minBC.f = 0;
+        auto sol = [&](int i){ return -(Q/k)*(xmin + i*dx); };
+
+        HeatSolver.T.set_f(
+            [&](auto i, auto cs)
+            {
+             return sol(i[0])+0.1;
+            }
+            );
+
+        for(int i = 0; i < 10000; ++i)
+          HeatSolver.stepForward( HeatSolver.calcMaxTimeStep() );
+
+        CHECK( HeatSolver.T(  N/2) == Approx( sol(  N/2) ).epsilon(0.01));
+        CHECK( HeatSolver.T(  N/4) == Approx( sol(  N/4) ).epsilon(0.01));
+        CHECK( HeatSolver.T(  N/8) == Approx( sol(  N/8) ).epsilon(0.05));
+        CHECK( HeatSolver.T(7*N/8) == Approx( sol(7*N/8) ).epsilon(0.01));
+      }
+
+      SECTION("Constant Heat Flux at Min Boundary")
+      {
+        double Q = 0.01;
+
+        HeatSolver.minBC.type = HeatSolvers::_1D::BoundaryConditions::Type::HeatFlux;
+        HeatSolver.minBC.f = -Q;
+        HeatSolver.minBC.dfdT = 0;
+        HeatSolver.maxBC.type = HeatSolvers::_1D::BoundaryConditions::Type::Temperature;
+        HeatSolver.maxBC.f = 0;
+        auto sol = [&](int i){ return (Q/k)*(xmin + i*dx - L); };
+
+        HeatSolver.T.set_f(
+            [&](auto i, auto cs)
+            {
+             return sol(i[0])+0.1;
+            }
+            );
+
+        for(int i = 0; i < 10000; ++i)
+          HeatSolver.stepForward( HeatSolver.calcMaxTimeStep() );
+
+        CHECK( HeatSolver.T(  N/2) == Approx( sol(  N/2) ).epsilon(0.01));
+        CHECK( HeatSolver.T(  N/4) == Approx( sol(  N/4) ).epsilon(0.01));
+        CHECK( HeatSolver.T(  N/8) == Approx( sol(  N/8) ).epsilon(0.01));
+        CHECK( HeatSolver.T(7*N/8) == Approx( sol(7*N/8) ).epsilon(0.05));
+      }
 
 
     }
