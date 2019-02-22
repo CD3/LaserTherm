@@ -8,6 +8,8 @@
 \usepackage{tensor}
 \parindent=0in
 
+\newcommand \bcf{f}
+
 
 
 \title{Notes on the Boundary Conditions in Finite-Difference Algorithms}
@@ -78,15 +80,16 @@ and the $i = N-1$ equation is similar,
 \end{equation}
 However, in general, we could allow the boundary be specified as an arbitrary constant,
 \begin{equation}
-  \nu\left(x_0\right) = \alpha
+  \label{eq:sink_bc}
+  \nu\left(x_0\right) = \bcf
 \end{equation}
 In which case we have
 \begin{equation}
-  a\indices{^L_0} \alpha
+  a\indices{^L_0} \bcf
 + b\indices{^L_0} \nu\indices{^{n+1}_{0}}
 + c\indices{^L_0} \nu\indices{^{n+1}_{1}}
 =
-  a\indices{^R_0} \alpha
+  a\indices{^R_0} \bcf
 + b\indices{^R_0} \nu\indices{^{n  }_{0}}
 + c\indices{^R_0} \nu\indices{^{n  }_{1}}
 + d_0
@@ -99,12 +102,12 @@ The first term on the LHS side here is a constant, so it must be moved over the 
   b\indices{^R_0} \nu\indices{^{n  }_{0}}
 + c\indices{^R_0} \nu\indices{^{n  }_{1}}
 + d_0
-+ a\indices{^R_0} \alpha
-- a\indices{^L_0} \alpha
++ a\indices{^R_0} \bcf
+- a\indices{^L_0} \bcf
 \end{equation}
 If we define a $d'_0$ as
 \begin{equation}
-d'_0 = a\indices{^R_0} \alpha - a\indices{^L_0} \alpha
+d'_0 = a\indices{^R_0} \bcf - a\indices{^L_0} \bcf
 \end{equation}
 then we can write the $i=0$ equation as
 \begin{equation}
@@ -118,7 +121,7 @@ then we can write the $i=0$ equation as
 \end{equation}
 For the $i=N-1$ equation, we have
 \begin{equation}
-  d'_{N-1} = c\indices{^R_{N-1}} \alpha - c\indices{^L_{N-2}} \alpha
+  d'_{N-1} = c\indices{^R_{N-1}} \bcf - c\indices{^L_{N-2}} \bcf
 \end{equation}
 \begin{equation}
   a\indices{^L_{N-1}} \nu\indices{^{n+1}_{N-2}}
@@ -137,17 +140,18 @@ to the environment through convection, radiation, and evaporation. It is also
 the boundary condition used to model an insulator.  In general, any boundary
 condition can be written as
 \begin{equation}
-  \left. \frac{\partial \nu}{\partial x} \right|_{x = boundary} = \beta(\nu)
+  \label{eq:heat_flux_bc}
+  \left. \frac{\partial \nu}{\partial x} \right|_{x = boundary} = \bcf(\nu)
 \end{equation}
 By finite differencing the derivative, we obtain a relationship for the non-existent element of $x$.
 \begin{equation}
   \label{eqn:FD_BC}
-  \frac{ \nu\indices{_{i+1}} - \nu\indices{_{i-1}} }{ x\indices{_{i+1}} - x\indices{_{i-1}} } = \beta(\nu_i)
+  \frac{ \nu\indices{_{i+1}} - \nu\indices{_{i-1}} }{ x\indices{_{i+1}} - x\indices{_{i-1}} } = \bcf(\nu_i)
 \end{equation}
 
 Let us only consider the $i=0$ case for now. Later, the $i=N-1$ case can be derived in a very similar manner. For $i=0$, equation \ref{eqn:FD_BC} gives
 \begin{equation}
-  \nu\indices{_{-1}} = \nu\indices{_{1}} - \Delta x \beta(\nu_0)
+  \nu\indices{_{-1}} = \nu\indices{_{1}} - \Delta x \bcf(\nu_0)
 \end{equation}
 For the RHS of \ref{eqn:FD_eqn}, this can be incorporated directly,
 \begin{equation}
@@ -157,15 +161,15 @@ For the RHS of \ref{eqn:FD_eqn}, this can be incorporated directly,
 + c\indices{^R_0} \nu\indices{_{ 1}^{n  }}
 + d_0
 =
-  a\indices{^R_0} \left[\nu\indices{^{n}_{1}} - \Delta x \beta(\nu\indices{^{n}_{0}})\right]
+  a\indices{^R_0} \left[\nu\indices{^{n}_{1}} - \Delta x \bcf(\nu\indices{^{n}_{0}})\right]
 + b\indices{^R_0} \nu\indices{_{ 0}^{n  }}
 + c\indices{^R_0} \nu\indices{_{ 1}^{n  }}
 + d_0
 \end{equation}
-For the LHS however, $\beta\left(\nu\right)$ needs to be evaluated at $\nu\indices{_{0}^{n+1}}$, which isn't known. We approximate this by expanding $\beta\left(\nu\right)$ in a Taylor series, and only keeping the first two terms.
+For the LHS however, $\bcf\left(\nu\right)$ needs to be evaluated at $\nu\indices{_{0}^{n+1}}$, which isn't known. We approximate this by expanding $\bcf\left(\nu\right)$ in a Taylor series, and only keeping the first two terms.
 \begin{equation}
-  \beta(\nu\indices{_{0}^{n+1}}) \approx \beta (\nu\indices{_{0}^{n}})
-                                      +  \beta'(\nu\indices{_{0}^{n}}) \left( \nu\indices{_{0}^{n+1}} - \nu\indices{_{0}^{n}} \right)
+  \bcf(\nu\indices{_{0}^{n+1}}) \approx \bcf (\nu\indices{_{0}^{n}})
+                                      +  \bcf'(\nu\indices{_{0}^{n}}) \left( \nu\indices{_{0}^{n+1}} - \nu\indices{_{0}^{n}} \right)
 \end{equation}
 Now the LHS of \ref{eqn:FD_eqn} can be written as
 \begin{align}
@@ -175,8 +179,8 @@ Now the LHS of \ref{eqn:FD_eqn} can be written as
 + c\indices{^L_0} \nu\indices{_{ 1}^{n+1}}
 &=
 a\indices{^L_0} \left[ \nu\indices{_{1}^{n+1}}
-                    - \Delta x \left(\beta (\nu\indices{_{0}^{n}})
-                               +     \beta'(\nu\indices{_{0}^{n}}) \left( \nu\indices{_{0}^{n+1}} - \nu\indices{_{0}^{n}} \right) \right)
+                    - \Delta x \left(\bcf (\nu\indices{_{0}^{n}})
+                               +     \bcf'(\nu\indices{_{0}^{n}}) \left( \nu\indices{_{0}^{n+1}} - \nu\indices{_{0}^{n}} \right) \right)
                \right] \nonumber \\
 &+ b\indices{^L_0} \nu\indices{_{0  }^{n+1}}
  + c\indices{^L_0} \nu\indices{_{  1}^{n+1}}
@@ -186,7 +190,7 @@ some rearranging,
 \begin{align}
   \label{eqn:minLHS}
   LHS&: 
-  \left[b\indices{^L_0} - a\indices{^L_0}\Delta x \beta'(\nu\indices{_{0}^n}) \right] \nu\indices{_0^{n+1}}
+  \left[b\indices{^L_0} - a\indices{^L_0}\Delta x \bcf'(\nu\indices{_{0}^n}) \right] \nu\indices{_0^{n+1}}
 + \left[c\indices{^L_0} + a\indices{^L_0}                                             \right] \nu\indices{_1^{n+1}} \\
   \label{eqn:minRHS}
   RHS&:
@@ -195,10 +199,10 @@ some rearranging,
 + d_0 \nonumber \\
 &+
 \left[
-- a\indices{^L_0} \Delta x \beta'(\nu\indices{_0^n}) \nu\indices{^n_0}
+- a\indices{^L_0} \Delta x \bcf'(\nu\indices{_0^n}) \nu\indices{^n_0}
 + a\indices{^R_0}                 \nu\indices{_1^n} 
-- a\indices{^R_0} \Delta x \beta (\nu\indices{_0^n})
-+ a\indices{^L_0} \Delta x \beta (\nu\indices{_0^n})
+- a\indices{^R_0} \Delta x \bcf (\nu\indices{_0^n})
++ a\indices{^L_0} \Delta x \bcf (\nu\indices{_0^n})
 \right]
 \end{align}
 
@@ -209,11 +213,11 @@ respect to $\nu$.
 
 Let
 \begin{align}
-  b\indices{^{'L}_0} &\equiv          - a\indices{^L_0} \Delta x \beta'(\nu\indices{_0^n}) \\
+  b\indices{^{'L}_0} &\equiv          - a\indices{^L_0} \Delta x \bcf'(\nu\indices{_0^n}) \\
   c\indices{^{'L}_0} &\equiv \phantom{-}a\indices{^L_0} \\
-  b\indices{^{'R}_0} &\equiv          - a\indices{^L_0} \Delta x \beta'(\nu\indices{_0^n}) \\
+  b\indices{^{'R}_0} &\equiv          - a\indices{^L_0} \Delta x \bcf'(\nu\indices{_0^n}) \\
   c\indices{^{'R}_0} &\equiv \phantom{-}a\indices{^R_0} \\
-  d\indices{^{' }_0} &\equiv \phantom{-}a\indices{^L_0} \Delta x \beta (\nu\indices{_0^n}) - a\indices{^R_0} \Delta x \beta (\nu\indices{_0^n})
+  d\indices{^{' }_0} &\equiv \phantom{-}a\indices{^L_0} \Delta x \bcf (\nu\indices{_0^n}) - a\indices{^R_0} \Delta x \bcf (\nu\indices{_0^n})
 \end{align}
 
 Then we can write the boundary equation as
@@ -228,7 +232,7 @@ Then we can write the boundary equation as
 
 For the other boundary, $i = N-1$, equation \ref{eqn:FD_eqn} gives
 \begin{equation}
-  \nu\indices{_{N}} =  \nu\indices{_{N-2}}  + \Delta x \beta(\nu_0).
+  \nu\indices{_{N}} =  \nu\indices{_{N-2}}  + \Delta x \bcf(\nu_0).
 \end{equation}
 Again, the boundary condition can be incorporated directly into the RHS, but a Taylor Series approximation must
 be used for the LHS. The left and right sides will look like this
@@ -239,8 +243,8 @@ be used for the LHS. The left and right sides will look like this
 &+
 \left[
   c\indices{^L_{N-1}} \nu\indices{_{N-2}^{n+1}}
-+ c\indices{^L_{N-1}} \Delta x \beta (\nu\indices{_{N-1}^{n}})
-+ c\indices{^L_{N-1}} \Delta x \beta'(\nu\indices{_{N-1}^{n}})\left(  \nu\indices{_{N-1}^{n+1}} - \nu\indices{_{N-1}^{n}} \right)
++ c\indices{^L_{N-1}} \Delta x \bcf (\nu\indices{_{N-1}^{n}})
++ c\indices{^L_{N-1}} \Delta x \bcf'(\nu\indices{_{N-1}^{n}})\left(  \nu\indices{_{N-1}^{n+1}} - \nu\indices{_{N-1}^{n}} \right)
 \right] \nonumber \\
   RHS&:
   a\indices{^R_{N-1}} \nu\indices{_{N-2}^{n  }}
@@ -248,7 +252,7 @@ be used for the LHS. The left and right sides will look like this
 + d_{N-1} \nonumber \\
 &+ \left[
   c\indices{^R_{N-1}} \nu\indices{_{N-2}^n}                  % the extra stuff from the RHS
-+ c\indices{^R_{N-1}} \Delta x \beta(\nu\indices{_{N-1}^n})  % the extra stuff from the RHS
++ c\indices{^R_{N-1}} \Delta x \bcf(\nu\indices{_{N-1}^n})  % the extra stuff from the RHS
 \right] \nonumber
 \end{align}
 and then we have to move the constant terms from the LHS to the RHS
@@ -260,7 +264,7 @@ and then we have to move the constant terms from the LHS to the RHS
 &+
 \left[
   c\indices{^L_{N-1}} \nu\indices{_{N-2}^{n+1}}
-+ c\indices{^L_{N-1}} \Delta x \beta'(\nu\indices{_{N-1}^{n}}) \nu\indices{_{N-1}^{n+1}}
++ c\indices{^L_{N-1}} \Delta x \bcf'(\nu\indices{_{N-1}^{n}}) \nu\indices{_{N-1}^{n+1}}
 \right] \\
   \label{eqn:maxRHS}
   RHS&:
@@ -269,19 +273,19 @@ and then we have to move the constant terms from the LHS to the RHS
 + d_{N-1} \nonumber \\
 &+ \left[
   c\indices{^R_{N-1}} \nu\indices{_{N-2}^n}                  % the extra stuff from the RHS
-+ c\indices{^L_{N-1}} \Delta x \beta'(\nu\indices{_{N-1}^{n}}) \nu\indices{_{N-1}^{n}}
-+ c\indices{^R_{N-1}} \Delta x \beta(\nu\indices{_{N-1}^n})  % the extra stuff from the RHS
-- c\indices{^L_{N-1}} \Delta x \beta (\nu\indices{_{N-1}^{n}})
++ c\indices{^L_{N-1}} \Delta x \bcf'(\nu\indices{_{N-1}^{n}}) \nu\indices{_{N-1}^{n}}
++ c\indices{^R_{N-1}} \Delta x \bcf(\nu\indices{_{N-1}^n})  % the extra stuff from the RHS
+- c\indices{^L_{N-1}} \Delta x \bcf (\nu\indices{_{N-1}^{n}})
 \right]
 \end{align}
 Now, defining a set of prime constants again,
 
 \begin{align}
   a\indices{^{'L}_{N-1}} &\equiv    c\indices{^L_{N-1}} \\
-  b\indices{^{'L}_{N-1}} &\equiv    c\indices{^L_{N-1}} \Delta x \beta'(\nu\indices{_0^n}) \\
+  b\indices{^{'L}_{N-1}} &\equiv    c\indices{^L_{N-1}} \Delta x \bcf'(\nu\indices{_0^n}) \\
   a\indices{^{'R}_{N-1}} &\equiv    c\indices{^R_{N-1}} \\
-  b\indices{^{'R}_{N-1}} &\equiv    c\indices{^L_{N-1}} \Delta x \beta'(\nu\indices{_0^n}) \\
-  d\indices{^{' }_{N-1}} &\equiv    c\indices{^R_{N-1}} \Delta x \beta(\nu\indices{_{N-1}^n}) - c\indices{^L_{N-1}} \Delta x \beta (\nu\indices{_{N-1}^{n}})
+  b\indices{^{'R}_{N-1}} &\equiv    c\indices{^L_{N-1}} \Delta x \bcf'(\nu\indices{_0^n}) \\
+  d\indices{^{' }_{N-1}} &\equiv    c\indices{^R_{N-1}} \Delta x \bcf(\nu\indices{_{N-1}^n}) - c\indices{^L_{N-1}} \Delta x \bcf (\nu\indices{_{N-1}^{n}})
 \end{align}
 
 Then we can write the boundary equation as
@@ -303,10 +307,54 @@ due surface convection,
 \end{align}
 can be directly implemented without the use of a Taylor Series expansion, because there are no non-linear terms. However, doing
 so leads to the exact same equations as \ref{eqn:minLHS}, \ref{eqn:minRHS}, \ref{eqn:maxLHS}, and \ref{eqn:maxRHS} with
-$\beta(\nu\indices{_{i}^n}) = \frac{h_e}{\kappa} \left(\nu\indices{_i^n} - \nu_{\infty}\right)$ and 
-$\beta'(\nu\indices{_{i}^n}) = \frac{h_e}{\kappa}$. The same is true for the insulating boundary conditions.
+$\bcf(\nu\indices{_{i}^n}) = \frac{h_e}{\kappa} \left(\nu\indices{_i^n} - \nu_{\infty}\right)$ and 
+$\bcf'(\nu\indices{_{i}^n}) = \frac{h_e}{\kappa}$. The same is true for the insulating boundary conditions.
 Therefore, there is no reason to implement linear boundary conditions separatly, this general method will give the exact same
 results.
+
+\subsection{Time-Dependent Boundary Conditions}
+
+If the boundary condition is time dependent, for example if the ambient temperature is a function of time, then
+the boundary conditions will be
+\begin{equation}
+  \label{eq:td_sink_bc}
+  \nu\left(x_0\right) = \bcf(t)
+\end{equation}
+or
+\begin{equation}
+  \label{eq:td_heat_flux_bc}
+  \left. \frac{\partial \nu}{\partial x} \right|_{x = boundary} = \bcf(\nu,t)
+\end{equation}
+, then the primed coefficients need to be updated. Any factors of $\bcf$ or $\bcf^\prime$ that start out on the left
+hand side should be evaluated at the next timestep. So, for the sink boundary condition, we have
+\begin{equation}
+  d'_0 = a\indices{^R_0} \bcf(t) - a\indices{^L_0} \bcf(t + \Delta t)
+\end{equation}
+and
+\begin{equation}
+  d'_{N-1} = c\indices{^R_{N-1}} \bcf(t) - c\indices{^L_{N-2}} \bcf(t+\Delta t)
+\end{equation}
+For the heat flux boundary conditions we have
+\begin{align}
+  b\indices{^{'L}_0} &\equiv          - a\indices{^L_0} \Delta x \bcf'(\nu\indices{_0^n},t+\Delta t) \\
+  c\indices{^{'L}_0} &\equiv \phantom{-}a\indices{^L_0} \\
+  b\indices{^{'R}_0} &\equiv          - a\indices{^L_0} \Delta x \bcf'(\nu\indices{_0^n},t+\Delta t) \\
+  c\indices{^{'R}_0} &\equiv \phantom{-}a\indices{^R_0} \\
+  d\indices{^{' }_0} &\equiv \phantom{-}a\indices{^L_0} \Delta x \bcf (\nu\indices{_0^n},t+\Delta t) - a\indices{^R_0} \Delta x \bcf (\nu\indices{_0^n},t)
+\end{align}
+and
+\begin{align}
+  a\indices{^{'L}_{N-1}} &\equiv    c\indices{^L_{N-1}} \\
+  b\indices{^{'L}_{N-1}} &\equiv    c\indices{^L_{N-1}} \Delta x \bcf'(\nu\indices{_0^n},t+\Delta t) \\
+  a\indices{^{'R}_{N-1}} &\equiv    c\indices{^R_{N-1}} \\
+  b\indices{^{'R}_{N-1}} &\equiv    c\indices{^L_{N-1}} \Delta x \bcf'(\nu\indices{_0^n},t+\Delta t) \\
+  d\indices{^{' }_{N-1}} &\equiv    c\indices{^R_{N-1}} \Delta x \bcf(\nu\indices{_{N-1}^n},t) - c\indices{^L_{N-1}} \Delta x \bcf (\nu\indices{_{N-1}^{n}},t+\Delta t)
+\end{align}
+If the boundary conditions are constant in time, these primed coefficients reduce to the same as before. So the only terms that must be evaulated
+for the current and next time time are the $d^{\prime}$'s. In fact, all of the primed coefficnets can be evaluted for the next time step \emph{except} the
+$d^{\prime}$'s.
+
+
 
 \end{document}
 

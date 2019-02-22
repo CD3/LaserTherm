@@ -26,6 +26,8 @@ configure_file( "${CMAKE_CURRENT_BINARY_DIR}/include/${PROJECT_NAME}/version.h"
  find_package( libField REQUIRED )
  find_package( CUL REQUIRED )
 
+ find_package(OpenMP)
+
 string( REGEX REPLACE "^lib" "" LIB_NAME ${PROJECT_NAME} )
 add_library( ${LIB_NAME} )
 add_library( ${PROJECT_NAME}::${LIB_NAME} ALIAS ${LIB_NAME} )
@@ -50,6 +52,7 @@ target_link_libraries(${LIB_NAME}
                           Eigen3::Eigen
                           libField::Field
                           CUL::CUL
+                          OpenMP::OpenMP_CXX # need to do a generated expression here in case openmp isn't found
                      )
 
 if( ${CMAKE_SOURCE_DIR} STREQUAL ${CMAKE_CURRENT_SOURCE_DIR} AND BUILD_UNIT_TESTS)

@@ -48,8 +48,6 @@ class CrankNicholson : public FiniteDifferenceSolver<REAL>
     using BC = BoundaryConditions::FiniteDifference<REAL>;
     using FiniteDifferenceSolver<REAL>::minBC;
     using FiniteDifferenceSolver<REAL>::maxBC;
-    BC minBC2;
-    BC maxBC2;
 
     CrankNicholson(size_t N)
     :FiniteDifferenceSolver<REAL>(N),
@@ -70,16 +68,17 @@ class CrankNicholson : public FiniteDifferenceSolver<REAL>
     REAL   aL(  int _i );
     REAL   bL(  int _i, REAL dt);
     REAL   cL(  int _i );
-    REAL   aLp( int _i ); // BoundaryConditionInterface<REAL>* _BC );
-    REAL   bLp( int _i ); // BoundaryConditionInterface<REAL>* _BC );
-    REAL   cLp( int _i ); // BoundaryConditionInterface<REAL>* _BC );
     REAL   aR(  int _i );
     REAL   bR(  int _i, REAL dt);
     REAL   cR(  int _i );
-    REAL   aRp( int _i ); // BoundaryConditionInterface<REAL>* _BC );
-    REAL   bRp( int _i ); // BoundaryConditionInterface<REAL>* _BC );
-    REAL   cRp( int _i ); // BoundaryConditionInterface<REAL>* _BC );
-    REAL    dp( int _i ); // BoundaryConditionInterface<REAL>* _BC );
+    REAL   aLp( int _i );
+    REAL   bLp( int _i );
+    REAL   cLp( int _i );
+    REAL   aRp( int _i );
+    REAL   bRp( int _i );
+    REAL   cRp( int _i );
+    REAL    dp1( int _i );
+    REAL    dp2( int _i );
 
 };
 
@@ -173,22 +172,27 @@ void CrankNicholson<REAL>::stepForward( const REAL& dt )
   //|  _ <|  _  |___) |
   //|_| \_\_| |_|____/ 
                    
+  // the dp coefficients need to be evaluated at the current
+  // time
   sig_askMinBoundaryCondition( minBC, T(0), 0 );
   sig_askMaxBoundaryCondition( maxBC, T(N-1), 0 );
-  sig_askMinBoundaryCondition( minBC2, T(0), dt );
-  sig_askMaxBoundaryCondition( maxBC2, T(N-1), dt );
+
+  b(0) += dp1(0); // MIN
+  b(N-1) += dp1(N-1); // MAX
+
+  // now we can evaluate the BC's at the next time
+  sig_askMinBoundaryCondition( minBC, T(0), dt );
+  sig_askMaxBoundaryCondition( maxBC, T(N-1), dt );
 
   // MIN
+  b(0) += dp2(0);
   if( minBC.type == BoundaryConditions::Type::HeatFlux)
-    b(0) += bRp(0)*T(0) + cRp(0)*T(1) + dp(0);
-  if( minBC.type == BoundaryConditions::Type::Temperature)
-    b(0) += dp(0);
+    b(0) += bRp(0)*T(0) + cRp(0)*T(1); //  + dp2(0)
 
   // MAX
+  b(N-1) += dp2(N-1);
   if( maxBC.type == BoundaryConditions::Type::HeatFlux)
-    b(N-1) += aRp(N-1)*T(N-2) + bRp(N-1)*T(N-1) + dp(N-1);
-  if( maxBC.type == BoundaryConditions::Type::Temperature)
-    b(N-1) += dp(N-1);
+    b(N-1) += aRp(N-1)*T(N-2) + bRp(N-1)*T(N-1); // + dp2(N-1);
   
 
 
@@ -250,9 +254,7 @@ void CrankNicholson<REAL>::stepForward( const REAL& dt )
 
   #pragma omp parallel for 
   for( int i = 0; i < N; i++ )
-  {
     T(i) = x(i);
-  }
 
   return;
 
@@ -374,21 +376,43 @@ REAL   CrankNicholson<REAL>::cRp( int _i )
 }
 
 template<typename REAL>
-REAL    CrankNicholson<REAL>::dp( int _i )
+REAL    CrankNicholson<REAL>::dp1( int _i )
 {
   if( _i == 0 )
   {
     if( minBC.type == BoundaryConditions::Type::HeatFlux)
-      return  (aL(_i) - aR(_i)) * centDiff( T.getAxis(0), _i ) * (-minBC.f/k(_i));
+      return  - aR(_i) * centDiff( T.getAxis(0), _i ) * (-minBC.f/k(_i));
     if( minBC.type == BoundaryConditions::Type::Temperature )
-      return  (aR(_i) - aL(_i)) * minBC.f;
+      return  aR(_i) * minBC.f;
   }
   else if( _i == T.size(0)-1 )
   {
     if( maxBC.type == BoundaryConditions::Type::HeatFlux)
-      return  (cL(_i) - cR(_i)) * centDiff( T.getAxis(0), _i ) * (-maxBC.f/k(_i));
+      return  - cR(_i) * centDiff( T.getAxis(0), _i ) * (-maxBC.f/k(_i));
     if( maxBC.type == BoundaryConditions::Type::Temperature )
-      return  (cR(_i) - cL(_i)) * (maxBC.f);
+      return  cR(_i) * (maxBC.f);
+
+  }
+
+  return REAL(0);
+}
+
+template<typename REAL>
+REAL    CrankNicholson<REAL>::dp2( int _i )
+{
+  if( _i == 0 )
+  {
+    if( minBC.type == BoundaryConditions::Type::HeatFlux)
+      return  aL(_i) * centDiff( T.getAxis(0), _i ) * (-minBC.f/k(_i));
+    if( minBC.type == BoundaryConditions::Type::Temperature )
+      return  - aL(_i) * minBC.f;
+  }
+  else if( _i == T.size(0)-1 )
+  {
+    if( maxBC.type == BoundaryConditions::Type::HeatFlux)
+      return  cL(_i) * centDiff( T.getAxis(0), _i ) * (-maxBC.f/k(_i));
+    if( maxBC.type == BoundaryConditions::Type::Temperature )
+      return  - cL(_i) * (maxBC.f);
 
   }
 
