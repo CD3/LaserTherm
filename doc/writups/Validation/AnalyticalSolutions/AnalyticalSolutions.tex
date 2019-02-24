@@ -266,7 +266,7 @@ The most common surface we need to model is a convective boundary. Here, the hea
 between the surface, and the ambient medium, which is at $T_\infty$.
 \begin{equation}
   \label{eq:conv_bc}
-  k \dv{T}{x} = -h_e(T_\infty - T).
+  k \dv{T}{x} = -h_e(T - T_\infty).
 \end{equation}
 Again, at the lower boundary, the negative sign is removed.
 
@@ -280,19 +280,19 @@ Then
 \begin{equation}
   \dv{T}{x} = m.
 \end{equation}
-Applying the lower boundary condition gives $b = 0$. Applying the upper boundary gives $m = -\frac{h_e}{k}\qty(T_\infty - T(L))$. We also have
+Applying the lower boundary condition gives $b = 0$. Applying the upper boundary gives $m = -\frac{h_e}{k}\qty(T(L) - T_\infty)$. We also have
 $T(L) = mL$, so
 \begin{align}
-  m &= -\frac{h_e}{k}\qty(T_\infty - T(L)), \\
+  m &= -\frac{h_e}{k}\qty(T(L) - T_\infty), \\
   T(L) &= mL,\\
-  m &= -\frac{h_e}{k}\qty(T_\infty - mL) = -\frac{h_e}{k}T_\infty + \frac{h_e}{k} mL, \\
-  m - \frac{h_e}{k} mL  &= -\frac{h_e}{k}T_\infty , \\
-  m &= \frac{ -\frac{h_e}{k}T_\infty }{1 - \frac{h_e}{k} L}.
+  m &= -\frac{h_e}{k}\qty( mL- T_\infty) = -\frac{h_e}{k}mL + \frac{h_e}{k} T_\infty, \\
+  m + \frac{h_e}{k} mL  &= \frac{h_e}{k}T_\infty , \\
+  m &= \frac{ \frac{h_e}{k}T_\infty }{1 + \frac{h_e}{k} L}.
 \end{align}
 The temperature distribution will then be
 \begin{equation}
-  T(x) = \frac{ -\frac{h_e}{k}T_\infty }{1 - \frac{h_e}{k} L} x 
-  = \frac{ -\frac{h_e}{k}T_\infty }{1 - \frac{h_e}{k} L} x .
+  T(x) = \frac{ \frac{h_e}{k}T_\infty }{1 + \frac{h_e}{k} L} x 
+  = \frac{ h_e T_\infty }{k + h_e L} x.
 \end{equation}
 
 \end{document}

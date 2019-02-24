@@ -1,6 +1,7 @@
 \documentclass[letterpaper,12pt]{article}
 
 \usepackage{graphicx}
+\usepackage{physics}
 \usepackage{cancel}
 \usepackage{units}
 \usepackage{amsmath}
@@ -54,6 +55,7 @@ modification, a second equation relating the non-existent element of $\nu$ to
 the existing elements is required. This equation is called the ``boundary
 condition''. The boundary condition used is determined by the physics.
 
+\subsection{Dirichlet Boundary Conditions}
 The simplest boundary condition to implement is the ``sink''. In this case, the
 solution is required to be zero at the boundary, so for example if the element
 $\nu\indices{_i}$ did exist, it would be zero. In this case, the terms in
@@ -132,6 +134,8 @@ For the $i=N-1$ equation, we have
 + d_{N-1}
 + d'_{N-1}
 \end{equation}
+
+\subsection{Nuemann Boundary Conditions}
 
 The other type of boundary condition that can be specified involves the
 derivative of $\nu$ (with respect to $x$) at the boundary. This is the type of
@@ -272,10 +276,10 @@ and then we have to move the constant terms from the LHS to the RHS
 + b\indices{^R_{N-1}} \nu\indices{_{N-1}^{n  }}
 + d_{N-1} \nonumber \\
 &+ \left[
-  c\indices{^R_{N-1}} \nu\indices{_{N-2}^n}                  % the extra stuff from the RHS
-+ c\indices{^L_{N-1}} \Delta x \bcf'(\nu\indices{_{N-1}^{n}}) \nu\indices{_{N-1}^{n}}
-+ c\indices{^R_{N-1}} \Delta x \bcf(\nu\indices{_{N-1}^n})  % the extra stuff from the RHS
+  c\indices{^R_{N-1}} \nu\indices{_{N-2}^n}
++ c\indices{^R_{N-1}} \Delta x \bcf(\nu\indices{_{N-1}^n})
 - c\indices{^L_{N-1}} \Delta x \bcf (\nu\indices{_{N-1}^{n}})
++ c\indices{^L_{N-1}} \Delta x \bcf'(\nu\indices{_{N-1}^{n}}) \nu\indices{_{N-1}^{n}}
 \right]
 \end{align}
 Now, defining a set of prime constants again,
@@ -350,11 +354,29 @@ and
   b\indices{^{'R}_{N-1}} &\equiv    c\indices{^L_{N-1}} \Delta x \bcf'(\nu\indices{_0^n},t+\Delta t) \\
   d\indices{^{' }_{N-1}} &\equiv    c\indices{^R_{N-1}} \Delta x \bcf(\nu\indices{_{N-1}^n},t) - c\indices{^L_{N-1}} \Delta x \bcf (\nu\indices{_{N-1}^{n}},t+\Delta t)
 \end{align}
-If the boundary conditions are constant in time, these primed coefficients reduce to the same as before. So the only terms that must be evaulated
-for the current and next time time are the $d^{\prime}$'s. In fact, all of the primed coefficnets can be evaluted for the next time step \emph{except} the
+If the boundary conditions are constant in time, these primed coefficients reduce to the same as before. So the only terms that must be evaluated
+for the current and next time time are the $d^{\prime}$'s. In fact, all of the primed coefficients can be evaluated for the next time step \emph{except} the
 $d^{\prime}$'s.
 
+\subsection{Heat Flux Boundaries}
 
+For the heat equation, the heat flux at the boundary is usually specified, rather than the temperature derivative.
+\begin{equation}
+  k\dv{\nu}{x} = f(x,t)
+\end{equation}
+If the heat flux, $k\dv{\nu}{x}$ is positive, it means that thermal energy flows to the ``left''. If it is negative, the thermal
+energy flows to the ``right''. Because of this, there is a sign difference between the upper and lower boundaries from the point of view
+of energy leaving the system or entering the system. At the lower boundary, a positive heat flux corresponds to energy leaving the system as heat,
+\begin{equation}
+  k\dv{\nu}{x} = f(x,t).
+\end{equation}
+At the upper boundary, a negative heat flux corresponds to energy leaving the system as heat,
+\begin{equation}
+  k\dv{\nu}{x} = -f(x,t).
+\end{equation}
+If we adopt the convention that a positive function corresponds to heat entering the system, regardless of which boundary it
+is applied to, then we need to account for this sign difference in the derivation of our primed coefficients above. This leads
+to all references of $f$ and $f^\prime$ being replaced with $-f$ and $-f^\prime$ for the $i = 0$ primed coefficients.
 
 \end{document}
 

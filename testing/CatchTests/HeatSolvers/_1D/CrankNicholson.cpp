@@ -379,6 +379,78 @@ int m = 2;
         CHECK( HeatSolver.T(7*N/8) == Approx( sol(7*N/8) ).epsilon(0.05));
       }
 
+      SECTION("Convective Heat Flux at Max Boundary")
+      {
+        double Tinf = 10;
+        double he = 0.01;
+        HeatSolvers::BoundaryConditions::ConstantTemperature<double> min(0);
+        HeatSolvers::BoundaryConditions::Convective<double> max(Tinf,he);
+
+
+        min.setBoundaryCondition( HeatSolver.minBC );
+        HeatSolver.sig_askMaxBoundaryCondition.connect( [&max](auto& BC, const auto& T, const auto& t){
+            max.setBoundaryCondition(BC,T,t);
+            } );
+
+
+        auto sol = [&](int i){ return (he*Tinf/(k + he*L))*(xmin + i*dx); };
+
+        HeatSolver.T.set_f(
+            [&](auto i, auto cs)
+            {
+             return sol(i[0])+0.1;
+            }
+            );
+
+        for(int i = 0; i < 10000; ++i)
+        {
+          HeatSolver.stepForward( HeatSolver.calcMaxTimeStep() );
+        }
+
+        CHECK( HeatSolver.T(  N/2) == Approx( sol(  N/2) ).epsilon(0.01));
+        CHECK( HeatSolver.T(  N/4) == Approx( sol(  N/4) ).epsilon(0.01));
+        CHECK( HeatSolver.T(  N/8) == Approx( sol(  N/8) ).epsilon(0.05));
+        CHECK( HeatSolver.T(7*N/8) == Approx( sol(7*N/8) ).epsilon(0.01));
+        CHECK( HeatSolver.T(  N-1) == Approx( sol(  N-1) ).epsilon(0.01));
+      }
+
+      SECTION("Convective Heat Flux at Min Boundary")
+      {
+        double Tinf = 10;
+        double he = 0.01;
+        HeatSolvers::BoundaryConditions::ConstantTemperature<double> max(0);
+        HeatSolvers::BoundaryConditions::Convective<double> min(Tinf,he);
+
+
+        max.setBoundaryCondition( HeatSolver.maxBC );
+        HeatSolver.sig_askMinBoundaryCondition.connect( [&min](auto& BC, const auto& T, const auto& t){
+            min.setBoundaryCondition(BC,T,t);
+            } );
+
+
+        auto sol = [&](int i){ return (-he*Tinf/(k + he*L))*(xmin + i*dx - L); };
+
+        HeatSolver.T.set_f(
+            [&](auto i, auto cs)
+            {
+             return sol(i[0])+0.1;
+            }
+            );
+
+        std::ofstream out("T.txt");
+        out << HeatSolver.T;
+        for(int i = 0; i < 10000; ++i)
+        {
+          HeatSolver.stepForward( HeatSolver.calcMaxTimeStep() );
+          out << "\n" << HeatSolver.T;
+        }
+        CHECK( HeatSolver.T(    0) == Approx( sol(    0) ).epsilon(0.01));
+        CHECK( HeatSolver.T(  N/2) == Approx( sol(  N/2) ).epsilon(0.01));
+        CHECK( HeatSolver.T(  N/4) == Approx( sol(  N/4) ).epsilon(0.01));
+        CHECK( HeatSolver.T(3*N/4) == Approx( sol(3*N/4) ).epsilon(0.01));
+        CHECK( HeatSolver.T(  N/8) == Approx( sol(  N/8) ).epsilon(0.05));
+      }
+
 
     }
 

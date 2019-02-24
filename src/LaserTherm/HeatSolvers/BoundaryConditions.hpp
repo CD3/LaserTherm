@@ -55,15 +55,19 @@ struct Insulator
 template<typename REAL>
 struct Convective
 {
-  REAL he;
   REAL Tinf;
+  REAL he;
+
+  Convective(REAL aTinf, REAL ahe)
+  :Tinf(aTinf), he(ahe)
+  {}
 
   template<typename BCType>
   void setBoundaryCondition( BCType& BC, const REAL& T, const REAL& t)
   {
     BC.type = Type::HeatFlux;
-    BC.f = he*(T - Tinf);
-    BC.dfdT = he;
+    BC.f = -he*(T - Tinf);
+    BC.dfdT = -he;
   }
 };
 

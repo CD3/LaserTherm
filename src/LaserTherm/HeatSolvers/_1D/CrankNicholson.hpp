@@ -362,9 +362,9 @@ template<typename REAL>
 REAL   CrankNicholson<REAL>::bRp( int _i )
 {
   if( _i == 0  )
-    return -aL(_i) * centDiff( T.getAxis(0), _i ) * (-minBC.dfdT/k(_i));
+    return -aL(_i) * centDiff( T.getAxis(0), _i ) * (-minBC.dfdT/k(_i)); // flip sign for min boundary
   else if( _i == T.size(0) - 1)
-    return  cL(_i) * centDiff( T.getAxis(0), _i ) * (-maxBC.dfdT/k(_i));
+    return  cL(_i) * centDiff( T.getAxis(0), _i ) * ( maxBC.dfdT/k(_i));
 
   return REAL(0);
 }
@@ -381,16 +381,16 @@ REAL    CrankNicholson<REAL>::dp1( int _i )
   if( _i == 0 )
   {
     if( minBC.type == BoundaryConditions::Type::HeatFlux)
-      return  - aR(_i) * centDiff( T.getAxis(0), _i ) * (-minBC.f/k(_i));
+      return  - aR(_i) * centDiff( T.getAxis(0), _i ) * (-minBC.f/k(_i)); // flip sign for min boundary
     if( minBC.type == BoundaryConditions::Type::Temperature )
       return  aR(_i) * minBC.f;
   }
   else if( _i == T.size(0)-1 )
   {
     if( maxBC.type == BoundaryConditions::Type::HeatFlux)
-      return  - cR(_i) * centDiff( T.getAxis(0), _i ) * (-maxBC.f/k(_i));
+      return  cR(_i) * centDiff( T.getAxis(0), _i ) * maxBC.f/k(_i);
     if( maxBC.type == BoundaryConditions::Type::Temperature )
-      return  cR(_i) * (maxBC.f);
+      return  cR(_i) * maxBC.f;
 
   }
 
@@ -403,16 +403,16 @@ REAL    CrankNicholson<REAL>::dp2( int _i )
   if( _i == 0 )
   {
     if( minBC.type == BoundaryConditions::Type::HeatFlux)
-      return  aL(_i) * centDiff( T.getAxis(0), _i ) * (-minBC.f/k(_i));
+      return  aL(_i) * centDiff( T.getAxis(0), _i ) * (-minBC.f/k(_i)); // flip sign for min boundary
     if( minBC.type == BoundaryConditions::Type::Temperature )
       return  - aL(_i) * minBC.f;
   }
   else if( _i == T.size(0)-1 )
   {
     if( maxBC.type == BoundaryConditions::Type::HeatFlux)
-      return  cL(_i) * centDiff( T.getAxis(0), _i ) * (-maxBC.f/k(_i));
+      return  - cL(_i) * centDiff( T.getAxis(0), _i ) * maxBC.f/k(_i);
     if( maxBC.type == BoundaryConditions::Type::Temperature )
-      return  - cL(_i) * (maxBC.f);
+      return  - cL(_i) * maxBC.f;
 
   }
 
