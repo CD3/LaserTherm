@@ -52,7 +52,7 @@ target_link_libraries(${LIB_NAME}
                           Eigen3::Eigen
                           libField::Field
                           CUL::CUL
-                          OpenMP::OpenMP_CXX # need to do a generated expression here in case openmp isn't found
+                          $<$<BOOL:OPENMP_FOUND>:OpenMP::OpenMP_CXX>
                      )
 
 if( ${CMAKE_SOURCE_DIR} STREQUAL ${CMAKE_CURRENT_SOURCE_DIR} AND BUILD_UNIT_TESTS)
