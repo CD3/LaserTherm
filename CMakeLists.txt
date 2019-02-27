@@ -36,8 +36,14 @@ ${LIB_NAME}
   PUBLIC
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src/LaserTherm/library.cpp>
   INTERFACE
-    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src/LaserTherm/HeatSolvers/_1D/FiniteDifferenceSolver.hpp>
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src/LaserTherm/HeatSources/_1D/BeersLaw.hpp>
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src/LaserTherm/HeatSources/_1D/FiniteDifferenceHeatSource.hpp>
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src/LaserTherm/HeatSolvers/BoundaryConditions.hpp>
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src/LaserTherm/HeatSolvers/_1D/CrankNicholson.hpp>
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src/LaserTherm/HeatSolvers/_1D/FiniteDifferenceHeatSolver.hpp>
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src/LaserTherm/HeatSolvers/_1D/Explicit.hpp>
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src/LaserTherm/Utils/FiniteDifference.hpp>
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src/LaserTherm/Utils/TriDiagonalSolver.hpp>
 )
 set_target_properties( ${LIB_NAME} PROPERTIES CXX_STANDARD 17 CXX_STANDARD_REQUIRED YES )
 

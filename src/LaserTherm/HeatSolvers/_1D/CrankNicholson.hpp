@@ -9,7 +9,7 @@
   */
 
 #include <Eigen/Dense>
-#include "./FiniteDifferenceSolver.hpp"
+#include "./FiniteDifferenceHeatSolver.hpp"
 #include "../../Utils/FiniteDifference.hpp"
 #include "../../Utils/TriDiagonalSolver.hpp"
 
@@ -17,7 +17,7 @@
 namespace HeatSolvers::_1D {
 
 template<typename REAL>
-class CrankNicholson : public FiniteDifferenceSolver<REAL>
+class CrankNicholson : public FiniteDifferenceHeatSolver<REAL>
 {
   protected:
 
@@ -31,26 +31,22 @@ class CrankNicholson : public FiniteDifferenceSolver<REAL>
 
   public:
 
-    using FiniteDifferenceSolver<REAL>::sig_askSourceTerm;
-    using FiniteDifferenceSolver<REAL>::sig_askMinBoundaryCondition;
-    using FiniteDifferenceSolver<REAL>::sig_askMaxBoundaryCondition;
+    using FiniteDifferenceHeatSolver<REAL>::sig_askSourceTerm;
+    using FiniteDifferenceHeatSolver<REAL>::sig_askMinBoundaryCondition;
+    using FiniteDifferenceHeatSolver<REAL>::sig_askMaxBoundaryCondition;
 
-    using FiniteDifferenceSolver<REAL>::askSourceTerm;
-    using FiniteDifferenceSolver<REAL>::askMinBoundaryCondition;
-    using FiniteDifferenceSolver<REAL>::askMaxBoundaryCondition;
-
-    using FiniteDifferenceSolver<REAL>::FiniteDifferenceSolver;
-    using FiniteDifferenceSolver<REAL>::T;
-    using FiniteDifferenceSolver<REAL>::A;
-    using FiniteDifferenceSolver<REAL>::VHC;
-    using FiniteDifferenceSolver<REAL>::k;
+    using FiniteDifferenceHeatSolver<REAL>::FiniteDifferenceHeatSolver;
+    using FiniteDifferenceHeatSolver<REAL>::T;
+    using FiniteDifferenceHeatSolver<REAL>::A;
+    using FiniteDifferenceHeatSolver<REAL>::VHC;
+    using FiniteDifferenceHeatSolver<REAL>::k;
 
     using BC = BoundaryConditions::FiniteDifference<REAL>;
-    using FiniteDifferenceSolver<REAL>::minBC;
-    using FiniteDifferenceSolver<REAL>::maxBC;
+    using FiniteDifferenceHeatSolver<REAL>::minBC;
+    using FiniteDifferenceHeatSolver<REAL>::maxBC;
 
     CrankNicholson(size_t N)
-    :FiniteDifferenceSolver<REAL>(N),
+    :FiniteDifferenceHeatSolver<REAL>(N),
      Asub(N),
      Adiag(N),
      Asup(N),
