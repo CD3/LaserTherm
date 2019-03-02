@@ -37,12 +37,17 @@ template <>
 struct TriDiagonalSolver<Thomas>
 {
 
-template<typename T>
-static void Solve( T& aSub,
-                   T& aDiag,
-                   T& aSup,
-                   T& b,
-                   T& x )
+template<typename T1,
+         typename T2,
+         typename T3,
+         typename T4,
+         typename T5
+        >
+static void Solve( T1& aSub,
+                   T2& aDiag,
+                   T3& aSup,
+                   T4& b,
+                   T5& x )
 {  
 
   int N = x.size();

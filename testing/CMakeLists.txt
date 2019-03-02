@@ -5,7 +5,7 @@ set( buildDir ${CMAKE_BINARY_DIR} )
 
 
 add_library(Catch INTERFACE)
-target_include_directories(Catch INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/include/catch)
+target_include_directories(Catch INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/include)
 
 # Find all sources.
 file( GLOB_RECURSE unitTest_SOURCES
