@@ -54,16 +54,8 @@ class CrankNicholson : public FiniteDifferenceHeatSolver<REAL>
      x(N),
      b(N)
     { }
+    CrankNicholson(const CrankNicholson& that) = default;
 
-    void reset(size_t N)
-    {
-      FiniteDifferenceHeatSolver<REAL>::reset(N);
-      Asub = VectorType(N);
-      Adiag = VectorType(N);
-      Asup = VectorType(N);
-      x = VectorType(N);
-      b = VectorType(N);
-    }
 
 
     void stepForward( const REAL& dt );

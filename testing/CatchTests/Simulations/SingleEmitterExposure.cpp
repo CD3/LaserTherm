@@ -27,7 +27,7 @@ TEST_CASE("Simple Simulation Test")
   config.put("simulation.grid.x.min", 0 /*cm*/);
   config.put("simulation.grid.x.max", 2 /*cm*/);
   config.put("simulation.time.end", 3 /*s*/);
-  config.put("simulation.time.dt.min", 1e-3 /*s*/);
+  config.put("simulation.time.dt.max", 1e-3 /*s*/);
   config.put("simulation.baseline_temperature", 37 /*degC*/);
 
   config.put("simulation.boundary_condition.min.type", "surface");
@@ -44,7 +44,26 @@ TEST_CASE("Simple Simulation Test")
   config.put("layers.0.thermal.specific_heat", 4.1868 /*J/g/degK*/);
   config.put("layers.0.thermal.bc.convection.transfer_rate", 1e-3 /*W/cm^s/degK*/);
 
-  sim.configure(config);
+
+  size_t xN = config.get<size_t>("simulation.grid.x.n");
+  double xmin = config.get<double>("simulation.grid.x.min");
+  double xmax = config.get<double>("simulation.grid.x.max");
+  sim.tmax = config.get<long double>("simulation.time.end");
+  sim.dt = config.get<long double>("simulation.time.dt.max");
+
+  sim.heat_solver = decltype(sim.heat_solver)( config.get<size_t>("simulation.grid.x.n")  );
+  sim.heat_solver.T.setCoordinateSystem(Uniform(config.get<double>("simulation.grid.x.min"), config.get<double>("simulation.grid.x.max")));
+
+
+
+  sim.emitter.A.reset(sim.heat_solver.T.getCoordinateSystemPtr());
+  sim.emitter.mu_a.reset(sim.heat_solver.T.getCoordinateSystemPtr());
+
+
+  sim.heat_solver.A.set(0);
+  sim.heat_solver.k.set(1);
+  sim.heat_solver.VHC.set(1);
+  sim.emitter.A.set(0);
 
   sim.heat_solver.T.set_f( [](auto ind, auto cs)
       {
@@ -52,9 +71,34 @@ TEST_CASE("Simple Simulation Test")
       return 10*exp(-x*x/5);
       });
 
+  std::ofstream T_out("Simulation-T.txt");
+  std::ofstream A_out("Simulation-A.txt");
 
-  std::ofstream out("Simulation-T.txt");
-  out << sim.heat_solver.T << "\n";
+  sim.sig_broadcastTemperatureBeforeStep.connect([&T_out](auto T, auto t)
+      {
+      static long double last_time = -1;
+      if( last_time < 0 || t - last_time > 0.5)
+      {
+        T_out << "# t = " << t << "\n";
+        T_out << T;
+        T_out << "\n";
+        last_time = t;
+      }
+      }
+      );
+  sim.sig_broadcastTemperatureBeforeStep.connect([&A_out](auto A, auto t)
+      {
+      static long double last_time = -1;
+      if( last_time < 0 || t - last_time > 1)
+      {
+        A_out << "# t = " << t << "\n";
+        A_out << A;
+        A_out << "\n";
+        last_time = t;
+      }
+      }
+      );
+
+
   sim.run();
-  out << sim.heat_solver.T << "\n";
 }
