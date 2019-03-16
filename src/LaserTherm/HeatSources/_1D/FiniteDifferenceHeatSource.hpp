@@ -24,6 +24,16 @@ class FiniteDifferenceHeatSource
     {
     }
 
+    // don't allow copy-construct or assign
+    // user needs to call `reset` if they need to rconfigure size
+    FiniteDifferenceHeatSource<REAL>(const FiniteDifferenceHeatSource<REAL>& other) = delete;
+    FiniteDifferenceHeatSource<REAL>& operator-(const FiniteDifferenceHeatSource<REAL>& other) = delete;
+
+    void reset(size_t N)
+    {
+      A.reset(N);
+    }
+
 };
 
 

@@ -10,31 +10,13 @@
 #include <boost/hana.hpp>
 #include <cmath>
 
+#include "../Utils/Mixins.hpp"
+
 namespace Waveforms {
 
 
 template<typename REAL>
-class Base
-{
-  public:
-    using real_type = REAL;
-};
-
-#define MAKE_ADD_MEMBER_MIXIN( NAME ) \
-template<typename BASE> \
-class Add##NAME : public BASE \
-{ \
-  public: \
-    using real_type = typename BASE::real_type; \
-  protected: \
-    real_type NAME; \
-  public: \
-    void set##NAME(const real_type& a){ NAME = a; } \
-    real_type get##NAME() const { return NAME; } \
-};\
-template<typename T> \
-constexpr auto has##NAME(T x) -> decltype(x.get##NAME(), std::true_type{}) {return{};} \
-constexpr auto has##NAME(...) -> std::false_type {return{};}
+using Base = MixinBase<REAL>;
 
 MAKE_ADD_MEMBER_MIXIN( ExposureDuration );
 MAKE_ADD_MEMBER_MIXIN( StartTime );
@@ -42,7 +24,6 @@ MAKE_ADD_MEMBER_MIXIN( PulseDuration );
 MAKE_ADD_MEMBER_MIXIN( PulseRepititionFrequency );
 MAKE_ADD_MEMBER_MIXIN( PulseNumber );
 
-#undef MAKE_ADD_MEMBER_MIXIN
 
 
 

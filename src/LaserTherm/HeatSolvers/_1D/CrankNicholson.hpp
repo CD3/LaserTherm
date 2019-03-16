@@ -45,6 +45,7 @@ class CrankNicholson : public FiniteDifferenceHeatSolver<REAL>
     using FiniteDifferenceHeatSolver<REAL>::minBC;
     using FiniteDifferenceHeatSolver<REAL>::maxBC;
 
+    CrankNicholson() = default;
     CrankNicholson(size_t N)
     :FiniteDifferenceHeatSolver<REAL>(N),
      Asub(N),
@@ -53,6 +54,17 @@ class CrankNicholson : public FiniteDifferenceHeatSolver<REAL>
      x(N),
      b(N)
     { }
+
+    void reset(size_t N)
+    {
+      FiniteDifferenceHeatSolver<REAL>::reset(N);
+      Asub = VectorType(N);
+      Adiag = VectorType(N);
+      Asup = VectorType(N);
+      x = VectorType(N);
+      b = VectorType(N);
+    }
+
 
     void stepForward( const REAL& dt );
     REAL calcMaxTimeStep() const;

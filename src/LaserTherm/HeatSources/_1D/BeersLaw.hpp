@@ -15,16 +15,21 @@ template<typename REAL>
 class BeersLaw : public FiniteDifferenceHeatSource<REAL>
 {
   public:
-    REAL E0;            ///< Incident irradiance
+    REAL E0 = 1;        ///< Incident irradiance
     Field<REAL,1> mu_a; ///< Absorption coefficient
     using FiniteDifferenceHeatSource<REAL>::A;
 
     BeersLaw() = default;
     BeersLaw( size_t N )
     : FiniteDifferenceHeatSource<REAL>(N),
-    mu_a(A.getCoordinateSystemPtr()),
-    E0(1.)
+    mu_a(A.getCoordinateSystemPtr())
     {}
+
+    void reset(size_t N)
+    {
+      FiniteDifferenceHeatSource<REAL>::reset(N);
+      mu_a.reset(A.getCoordinateSystemPtr());
+    }
 
     void compute();
 };

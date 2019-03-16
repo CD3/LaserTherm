@@ -17,7 +17,7 @@ using ContinuousWave =
       AddIsOnCalc<
       AddExposureDuration<
       AddStartTime<
-      Base<double> > > > > ;
+      Base<REAL> > > > > ;
 
 }
 

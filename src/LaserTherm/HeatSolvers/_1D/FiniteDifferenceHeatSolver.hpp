@@ -36,6 +36,16 @@ class FiniteDifferenceHeatSolver
       k(T.getCoordinateSystemPtr())
     {
     }
+    FiniteDifferenceHeatSolver(const FiniteDifferenceHeatSolver& other) = delete;
+    FiniteDifferenceHeatSolver& operator=(const FiniteDifferenceHeatSolver& other) = delete;
+
+    void reset(size_t N)
+    {
+      T.reset(N);
+      A.reset(T.getCoordinateSystemPtr());
+      VHC.reset(T.getCoordinateSystemPtr());
+      k.reset(T.getCoordinateSystemPtr());
+    }
 
     Field<REAL,1> T;   ///< Temperature
     Field<REAL,1> A;   ///< Source Term

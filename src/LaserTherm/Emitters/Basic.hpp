@@ -1,10 +1,11 @@
-#ifndef LaserTherm_Emitter_hpp
-#define LaserTherm_Emitter_hpp
+#ifndef LaserTherm_Emitters_Basic_hpp
+#define LaserTherm_Emitters_Basic_hpp
 
-/** @file Emitter.hpp
+
+/** @file Basic.hpp
   * @brief 
   * @author C.D. Clark III
-  * @date 02/28/19
+  * @date 03/02/19
   */
 
 /**
@@ -14,20 +15,17 @@
 
 #include <Field.hpp>
 
+#include "../Utils/TypeTraits.hpp"
+
+namespace Emitters {
+
 template<class HeatSourceType, class WaveformType>
-class Emitter : public HeatSourceType, public WaveformType
+class Basic: public HeatSourceType, public WaveformType
 {
 
-  protected:
-    template<typename T>
-    struct get_real_type {};
-
-    template<typename REAL>
-    struct get_real_type<Field<REAL,1>> { using type = REAL; };
-
   public:
-    Emitter() = default;
-    Emitter(size_t N):HeatSourceType(N) {}
+    Basic() = default;
+    Basic(size_t N):HeatSourceType(N) {}
     
     bool source_term_computed = false;
 
@@ -35,11 +33,10 @@ class Emitter : public HeatSourceType, public WaveformType
     using real_type = typename get_real_type<source_field_type>::type;
 
     void addSourceTerm( source_field_type& A, const real_type& t);
-
 };
 
 template<class HeatSourceType, class WaveformType>
-void Emitter<HeatSourceType, WaveformType>::addSourceTerm( source_field_type& A, const real_type& t)
+void Basic<HeatSourceType, WaveformType>::addSourceTerm( source_field_type& A, const real_type& t)
 {
   if( !this->isOn(t) )
     return;
@@ -57,6 +54,12 @@ void Emitter<HeatSourceType, WaveformType>::addSourceTerm( source_field_type& A,
   }
 
 }
+
+}
+
+
+
+
 
 
 
