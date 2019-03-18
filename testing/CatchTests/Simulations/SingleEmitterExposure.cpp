@@ -61,9 +61,13 @@ TEST_CASE("Simple Simulation Test")
 
 
   sim.heat_solver.A.set(0);
+  sim.emitter.A.set(0);
+
+
+
   sim.heat_solver.k.set(1);
   sim.heat_solver.VHC.set(1);
-  sim.emitter.A.set(0);
+
 
   sim.heat_solver.T.set_f( [](auto ind, auto cs)
       {
