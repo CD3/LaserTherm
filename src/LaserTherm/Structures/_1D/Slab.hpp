@@ -11,22 +11,16 @@
 
 namespace Structures::_1D
 {
-template<class MaterialType, class REAL>
+template<typename REAL>
 class Slab
 {
   public:
 
     std::optional<REAL> minSurfacePosition;
     std::optional<REAL> maxSurfacePosition;
-    std::optional<MaterialType> material;
 
-    Slab( const MaterialType mat ):material(mat){}
+
     Slab() = default;
-
-    void setMaterial(const MaterialType mat )
-    {
-      material = mat;
-    }
 
     void setMinSurfacePosition(REAL p)
     {
@@ -38,12 +32,25 @@ class Slab
       maxSurfacePosition = p;
     }
 
+    REAL getMinSurfacePosition() const
+    {
+      return minSurfacePosition.value();
+    }
+    REAL getMaxSurfacePosition() const
+    {
+      return maxSurfacePosition.value();
+    }
+    REAL getThickness() const
+    {
+      return maxSurfacePosition.value() - minSurfacePosition.value();
+    }
+
     void setThickness(REAL t)
     {
       if( minSurfacePosition )
-        maxSurfacePosition = minSurfacePosition.get() + t;
+        maxSurfacePosition = minSurfacePosition.value() + t;
       if( maxSurfacePosition )
-        minSurfacePosition = maxSurfacePosition.get() - t;
+        minSurfacePosition = maxSurfacePosition.value() - t;
     }
 
     bool isInside( REAL x )

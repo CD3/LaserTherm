@@ -11,12 +11,13 @@
 namespace Materials {
 
 template<typename REAL>
-using Basic = AddOptionalSpecificHeat<
+using Basic = AddOptionalSpecificHeatCapacity<
               AddOptionalDensity<
-              AddOptionalConductivity<
+              AddOptionalThermalConductivity<
               AddOptionalAbsorptionCoefficient<
               AddOptionalScatteringCoefficient<
-              Base<REAL> > > > > >;
+              AddOptionalAnisotropy<
+              Base<REAL> > > > > > >;
 
 }
 
