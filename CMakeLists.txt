@@ -20,11 +20,13 @@ configure_file( "${CMAKE_CURRENT_SOURCE_DIR}/src/${PROJECT_NAME}/version.h.in"
 configure_file( "${CMAKE_CURRENT_BINARY_DIR}/include/${PROJECT_NAME}/version.h"
                 "${CMAKE_CURRENT_BINARY_DIR}/include/${PROJECT_NAME}/version.h")
 
+include(macro-find_project_dependency)
 # common dependencies
  find_package( Boost REQUIRED )
  find_package( Eigen3 3.3 REQUIRED )
  find_package( libField REQUIRED )
  find_package( CUL REQUIRED )
+ find_project_dependency( UnitConvert REQUIRED SUBDIRECTORY_PATHS ${CMAKE_CURRENT_SOURCE_DIR}/externals)
 
  find_package(OpenMP)
 
@@ -58,6 +60,7 @@ target_link_libraries(${LIB_NAME}
                           Eigen3::Eigen
                           libField::Field
                           CUL::CUL
+                          UnitConvert::UnitConvert
                           $<$<BOOL:OPENMP_FOUND>:OpenMP::OpenMP_CXX>
                      )
 
