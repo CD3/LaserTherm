@@ -4,10 +4,12 @@
 #include <iostream>
 #include <sstream>
 
-#include <boost/property_tree/ptree.hpp>
-#include <boost/property_tree/ini_parser.hpp>
 #include <boost/property_tree/info_parser.hpp>
+#include <boost/property_tree/ini_parser.hpp>
+#include <boost/property_tree/ptree.hpp>
 
+#include <LaserTherm/Configuration/Builders.hpp>
+#include <LaserTherm/Configuration/Manager.hpp>
 #include <LaserTherm/Emitters/Basic.hpp>
 #include <LaserTherm/HeatSolvers/_1D/CrankNicholson.hpp>
 #include <LaserTherm/HeatSources/_1D/BeersLaw.hpp>
@@ -18,31 +20,29 @@
 #include <LaserTherm/Structures/_1D/Infinite.hpp>
 #include <LaserTherm/Structures/_1D/Slab.hpp>
 #include <LaserTherm/Waveforms/ContinuousWave.hpp>
-#include <LaserTherm/Configuration/Builders.hpp>
-#include <LaserTherm/Configuration/ptree_utils.hpp>
 
 TEST_CASE("Simple Simulation Test")
 {
   // this is basically a testing ground for building and running a simulation
-  UnitRegistry ureg;
-  ureg.addBaseUnit<Dimension::Name::Length>("cm");
-  ureg.addBaseUnit<Dimension::Name::Mass>("g");
-  ureg.addBaseUnit<Dimension::Name::Time>("s");
-  ureg.addBaseUnit<Dimension::Name::Temperature>("K");
-  ureg.addBaseUnit<Dimension::Name::Amount>("mol");
-  ureg.addBaseUnit<Dimension::Name::ElectricalCurrent>("A");
-  ureg.addBaseUnit<Dimension::Name::LuminousIntensity>("cd");
+  
+  Configuration::Manager config;
 
-  ureg.addUnit("m = 100 cm");
-  ureg.addUnit("L = 1000 cm^3");
-  ureg.addUnit("J = kg m^2 / s^2");
-  ureg.addUnit("W = J/s");
-  ureg.addUnit("cal = 4.184 J");
-  ureg.addUnit("degC = K - 273.15");
+  config.unit_registry.addBaseUnit<Dimension::Name::Length>("cm");
+  config.unit_registry.addBaseUnit<Dimension::Name::Mass>("g");
+  config.unit_registry.addBaseUnit<Dimension::Name::Time>("s");
+  config.unit_registry.addBaseUnit<Dimension::Name::Temperature>("K");
+  config.unit_registry.addBaseUnit<Dimension::Name::Amount>("mol");
+  config.unit_registry.addBaseUnit<Dimension::Name::ElectricalCurrent>("A");
+  config.unit_registry.addBaseUnit<Dimension::Name::LuminousIntensity>("cd");
 
-  boost::property_tree::ptree config;
+  config.unit_registry.addUnit("m = 100 cm");
+  config.unit_registry.addUnit("L = 1000 cm^3");
+  config.unit_registry.addUnit("J = kg m^2 / s^2");
+  config.unit_registry.addUnit("W = J/s");
+  config.unit_registry.addUnit("cal = 4.184 J");
+  config.unit_registry.addUnit("degC = K - 273.15");
 
-  std::string config_text = R"(
+  std::string       config_text = R"(
   simulation.dimensions = 1
 
   simulation.grid.x.n = 100
@@ -63,24 +63,24 @@ TEST_CASE("Simple Simulation Test")
   layers.0.material = water
 
   materials.water.thermal.density = 1 g/mL
-  materials.water.thermal.conductivity = 0.00628 W/cm^2/degK
+  materials.water.thermal.conductivity = 0.00628 W/cm/K
   materials.water.thermal.specific_heat = 4.1868 J/g/degK
   materials.water.thermal.bc.convection.transfer_rate = 1e-3 W/cm^s/K
 
   layers.1.description = absorber
-  layers.1.thermal.absorption_coefficient = 1 g/mL
+  layers.1.optical.absorption_coefficient = 1 cm^-1
+  layers.1.thermal.density = 2 g/mL
   layers.1.position = 0 cm
-  layers.1.thickness = 10e-4 cm
+  layers.1.thickness = 5 mm
   )";
   std::stringstream in(config_text);
 
-  boost::property_tree::read_ini( in, config );
-  config = unflatten_ptree(config, '.', '|');
-  convertPropertyTreeUnits( config, ureg );
-  boost::property_tree::write_info( std::cout, config );
-  
+  std::ofstream out("config.ini");
+  out << config_text;
+  out.close();
 
-
+  config.load("config.ini");
+  convertPropertyTreeUnits(config.configuration, config.unit_registry);
 
   Simulations::SingleEmitterExposure<
       Emitters::Basic<HeatSources::_1D::BeersLaw<double>,
@@ -106,14 +106,21 @@ TEST_CASE("Simple Simulation Test")
   sim.heat_solver.A.set(0);
   sim.emitter.A.set(0);
 
+  sim.emitter.setIrradiance(config.get<double>("emitters.0.irradiance"));
+  sim.emitter.setStartTime(config.get<double>("emitters.0.start"));
+  sim.emitter.setExposureDuration(
+      config.get<double>("emitters.0.exposure_duration"));
+
   using MaterialType = Materials::Basic<double>;
   std::vector<
       MaterialStructure<MaterialType, Structures::_1D::AnyStructure<double> > >
       structures;
 
-  Builders::buildStructures(structures, config);
+  Builders::build(structures, config.configuration);
+  CHECK( structures.size() == 2 );
 
   for (auto& s : structures) {
+
     // set conductivity
     sim.heat_solver.k.set_f([&s](auto x) -> std::optional<double> {
       if (s.structure.isInside(x[0]) && s.material.getThermalConductivity())
@@ -124,10 +131,10 @@ TEST_CASE("Simple Simulation Test")
     // set volumetric heat capacity
     sim.heat_solver.VHC.set_f([&s](auto x) -> std::optional<double> {
       if (s.structure.isInside(x[0])) {
-      if(s.material.getDensity() && s.material.getSpecificHeatCapacity())
-      {
-      return s.material.getDensity().value()*s.material.getSpecificHeatCapacity().value();
-      }
+        if (s.material.getDensity() && s.material.getSpecificHeatCapacity()) {
+          return s.material.getDensity().value() *
+                 s.material.getSpecificHeatCapacity().value();
+        }
       }
 
       return std::nullopt;
@@ -140,33 +147,45 @@ TEST_CASE("Simple Simulation Test")
       return std::nullopt;
     });
   }
+  CHECK( sim.heat_solver.k(0) == Approx(0.00628*1000*100*100) );
+  CHECK( sim.heat_solver.VHC(0) == Approx(4.1868*1000*100*100) );
+  CHECK( sim.emitter.mu_a(0) == Approx(1) );
 
   sim.heat_solver.T.set_f([](auto ind, auto cs) {
     auto x = cs->getCoord(ind[0]);
     return 10 * exp(-x * x / 5);
   });
 
+  sim.heat_solver.sig_askSourceTerm.connect(
+      [](auto& A, const auto& t) { A.set(0); });
+
+  sim.heat_solver.sig_askSourceTerm.connect([&sim](auto& A, const auto& t) {
+    sim.emitter.addSourceTerm(A, sim.t + t);
+  });
+
   std::ofstream T_out("Simulation-T.txt");
   std::ofstream A_out("Simulation-A.txt");
 
-  sim.sig_broadcastTemperatureBeforeStep.connect([&T_out](auto T, auto t) {
-    static long double last_time = -1;
-    if (last_time < 0 || t - last_time > 0.5) {
-      T_out << "# t = " << t << "\n";
-      T_out << T;
-      T_out << "\n";
-      last_time = t;
-    }
-  });
-  sim.sig_broadcastTemperatureBeforeStep.connect([&A_out](auto A, auto t) {
-    static long double last_time = -1;
-    if (last_time < 0 || t - last_time > 1) {
-      A_out << "# t = " << t << "\n";
-      A_out << A;
-      A_out << "\n";
-      last_time = t;
-    }
-  });
+  sim.sig_broadcastTemperatureBeforeHeatSolverStepForward.connect(
+      [&T_out](auto T, auto t) {
+        static long double last_time = -1;
+        if (last_time < 0 || t - last_time > 0.5) {
+          T_out << "# t = " << t << "\n";
+          T_out << T;
+          T_out << "\n";
+          last_time = t;
+        }
+      });
+  sim.sig_broadcastSourceTermBeforeHeatSolverStepForward.connect(
+      [&A_out](auto A, auto t) {
+        static long double last_time = -1;
+        if (last_time < 0 || t - last_time > 1) {
+          A_out << "# t = " << t << "\n";
+          A_out << A;
+          A_out << "\n";
+          last_time = t;
+        }
+      });
 
   sim.run();
 }

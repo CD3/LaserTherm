@@ -39,7 +39,7 @@ TEST_CASE("Material Map Builder")
 
 
   std::map< std::string, Materials::Basic<double> > materials;
-  Builders::buildMaterialMap(materials, config.get_child("materials"));
+  Builders::build(materials, config.get_child("materials"));
 
   CHECK( materials.size() == 2 );
 
@@ -91,7 +91,7 @@ TEST_CASE("1D Structure Set Builder")
       MaterialStructure<Materials::Basic<double>, Structures::_1D::AnyStructure<double> > >
       structures;
 
-  Builders::buildStructures(structures, config);
+  Builders::build(structures, config);
 
   Field<double,1> f(11);
   f.setCoordinateSystem(Uniform(0,1));

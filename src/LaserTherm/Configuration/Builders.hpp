@@ -22,7 +22,7 @@
 namespace Builders
 {
 template<class REAL>
-void buildMaterial(Materials::Basic<REAL>&            material,
+void build(Materials::Basic<REAL>&            material,
                    const boost::property_tree::ptree& config)
 {
   boost::optional<REAL> prop;
@@ -45,14 +45,14 @@ void buildMaterial(Materials::Basic<REAL>&            material,
 }
 
 template<class REAL>
-void buildMaterialMap(std::map<std::string, Materials::Basic<REAL>>& materials,
+void build(std::map<std::string, Materials::Basic<REAL>>& materials,
                       const boost::property_tree::ptree&             config)
 {
   using MaterialType = Materials::Basic<REAL>;
 
   for (auto it : config) {
     MaterialType mat;
-    buildMaterial(mat, it.second);
+    build(mat, it.second);
     materials[it.first] = mat;
   }
 }
@@ -62,7 +62,7 @@ void buildMaterialMap(std::map<std::string, Materials::Basic<REAL>>& materials,
  * boost property_tree.
  */
 template<class REAL>
-void buildStructures(
+void build(
     std::vector<MaterialStructure<Materials::Basic<REAL>,
                                   Structures::_1D::AnyStructure<REAL>>>&
                                        structures,
@@ -77,7 +77,7 @@ void buildStructures(
   std::map<std::string, MaterialType> materials;
   auto materials_config = config.get_child_optional("materials");
   if (materials_config) {
-    buildMaterialMap(materials, materials_config.value());
+    build(materials, materials_config.value());
   }
 
   auto layers_config = config.get_child_optional("layers");
@@ -89,7 +89,7 @@ void buildStructures(
       if (it.second.find("material") != it.second.not_found())
         mat = materials[it.second.get<std::string>("material")];
       else
-        buildMaterial(mat,it.second);
+        build(mat,it.second);
 
       auto position  = it.second.get_optional<REAL>("position");
       auto thickness = it.second.get_optional<REAL>("thickness");

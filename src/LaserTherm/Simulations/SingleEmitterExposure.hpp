@@ -34,11 +34,12 @@ class SingleEmitterExposure
   // see https://www.youtube.com/watch?v=k12BJGSc2Nc&feature=youtu.be&t=1513
   long double tmax;
   long double dt;
+  long double t;
 
   void run();
 
-  boost::signals2::signal<void(const decltype(HeatSolverType::T)&, const long double&)> sig_broadcastTemperatureBeforeStep;
-  boost::signals2::signal<void(const decltype(HeatSolverType::A)&, const long double&)> sig_broadcastSourceTermBeforeStep;
+  boost::signals2::signal<void(const decltype(HeatSolverType::T)&, const long double&)> sig_broadcastTemperatureBeforeHeatSolverStepForward;
+  boost::signals2::signal<void(const decltype(HeatSolverType::A)&, const long double&)> sig_broadcastSourceTermBeforeHeatSolverStepForward;
 };
 
 template<class EmitterType, class HeatSolverType>
@@ -46,11 +47,11 @@ void SingleEmitterExposure<EmitterType, HeatSolverType>::run()
 {
   uint64_t Nt = 1 + tmax / dt;
 
-  long double t = 0;
+  t = 0;
   for (int i = 0; i < Nt; ++i) {
     t += dt;
-    sig_broadcastTemperatureBeforeStep( heat_solver.T, t );
-    sig_broadcastSourceTermBeforeStep( heat_solver.A, t );
+    sig_broadcastTemperatureBeforeHeatSolverStepForward( heat_solver.T, t );
+    sig_broadcastSourceTermBeforeHeatSolverStepForward( heat_solver.A, t );
     heat_solver.stepForward(dt);
   }
 }

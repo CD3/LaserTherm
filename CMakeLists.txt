@@ -38,12 +38,14 @@ ${LIB_NAME}
   PUBLIC
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src/LaserTherm/library.cpp>
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src/LaserTherm/Configuration/ptree_utils.cpp>
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src/LaserTherm/Configuration/Manager.cpp>
   INTERFACE
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src/LaserTherm/MaterialStructure.hpp>
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src/LaserTherm/HeatSources/_1D/BeersLaw.hpp>
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src/LaserTherm/HeatSources/_1D/FiniteDifferenceHeatSource.hpp>
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src/LaserTherm/Configuration/Builders.hpp>
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src/LaserTherm/Configuration/io.hpp>
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src/LaserTherm/Configuration/Manager.hpp>
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src/LaserTherm/Configuration/Units.hpp>
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src/LaserTherm/Configuration/ptree_utils.hpp>
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src/LaserTherm/Simulations/SingleEmitterExposure.hpp>

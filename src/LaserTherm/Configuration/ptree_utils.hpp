@@ -78,6 +78,6 @@ bpt::ptree flatten_ptree(const bpt::ptree& tree, char delim = '.');
  *
  */
 bpt::ptree unflatten_ptree(const bpt::ptree& ftree, char odelim = '.',
-                           char idelim = '.');
+                           char idelim = 0);
 
 #endif  // include protector

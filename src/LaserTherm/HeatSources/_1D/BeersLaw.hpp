@@ -25,6 +25,9 @@ class BeersLaw : public FiniteDifferenceHeatSource<REAL>
     mu_a(A.getCoordinateSystemPtr())
     {}
 
+    void setIrradiance( REAL a_E0) { E0 = a_E0; };
+    REAL getIrradiance(          ) const { return E0; }
+
     void reset(size_t N)
     {
       FiniteDifferenceHeatSource<REAL>::reset(N);
