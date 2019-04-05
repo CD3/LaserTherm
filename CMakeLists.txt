@@ -1,14 +1,17 @@
-cmake_minimum_required( VERSION 3.11 )
+cmake_minimum_required( VERSION 3.13 )
 
-if( TARGET LaserTherm )
-  return()
-endif( TARGET LaserTherm )
+project(LaserTherm)
+
+set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${PROJECT_SOURCE_DIR}/cmake/Modules")
+include(${CMAKE_BINARY_DIR}/conan_paths.cmake OPTIONAL)
+
 
 OPTION( BUILD_UNIT_TESTS "Build unit tests for the library" ON )
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
-set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_CURRENT_SOURCE_DIR}/cmake/Modules")
+set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${PROJECT_SOURCE_DIR}/cmake/Modules")
 set(INSTALL_PATH ${INSTALL_PATH} "${CMAKE_CURRENT_SOURCE_DIR}/externals/install/")
+include(${CMAKE_BINARY_DIR}/conan_paths.cmake OPTIONAL)
 
 include(function-git_version)
 GIT_VERSION(LaserTherm)
@@ -21,11 +24,36 @@ configure_file( "${CMAKE_CURRENT_BINARY_DIR}/include/${PROJECT_NAME}/version.h"
                 "${CMAKE_CURRENT_BINARY_DIR}/include/${PROJECT_NAME}/version.h")
 
 include(macro-find_project_dependency)
-# common dependencies
- find_package( Boost REQUIRED )
+
+# dependencies
+message(STATUS "Checking for Conan-installed Boost")
+find_package( boost QUIET ) # conan version
+if( TARGET boost::boost )
+  add_library(Boost::boost INTERFACE IMPORTED )
+  target_link_libraries( Boost::boost INTERFACE boost::boost )
+  message(STATUS "Found Conan-installed Boost")
+else()
+  message(STATUS "Did not find Conan-installed Boost")
+  message(STATUS "Requiring system installed Boost")
+  set(Boost_USE_STATIC_LIBS ON)
+  find_package( Boost REQUIRED COMPONENTS filesystem log program_options ) # system version
+endif()
+
+
+message(STATUS "Checking for Conan-installed Eigen")
+find_package( eigen ) # conan version
+if( TARGET eigen::eigen )
+  add_library(Eigen3::Eigen INTERFACE IMPORTED )
+  target_link_libraries( Eigen3::Eigen INTERFACE eigen::eigen )
+  message(STATUS "Found Conan-installed Eigen")
+else()
+  message(STATUS "Did not find Conan-installed Eigen")
+  message(STATUS "Requiring system installed Eigen")
  find_package( Eigen3 3.3 REQUIRED )
+endif()
+
+
  find_package( libField REQUIRED )
- find_package( CUL REQUIRED )
  find_project_dependency( UnitConvert REQUIRED SUBDIRECTORY_PATHS ${CMAKE_CURRENT_SOURCE_DIR}/externals)
 
  find_package(OpenMP)
@@ -70,7 +98,6 @@ ${LIB_NAME}
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src/LaserTherm/Waveforms/Mixins.hpp>
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src/LaserTherm/Emitters/Basic.hpp>
 )
-set_target_properties( ${LIB_NAME} PROPERTIES CXX_STANDARD 17 CXX_STANDARD_REQUIRED YES )
 
 target_include_directories( ${LIB_NAME} INTERFACE
   $<BUILD_INTERFACE:${${PROJECT_NAME}_SOURCE_DIR}/src>
@@ -82,7 +109,6 @@ target_link_libraries(${LIB_NAME}
                           Boost::boost
                           Eigen3::Eigen
                           libField::Field
-                          CUL::CUL
                           $<$<BOOL:OPENMP_FOUND>:OpenMP::OpenMP_CXX>
                         PUBLIC
                           UnitConvert::UnitConvert
