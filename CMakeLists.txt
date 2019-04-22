@@ -28,12 +28,12 @@ include(macro-find_project_dependency)
 # dependencies
 find_package( Boost REQUIRED )
 find_package( Eigen3 3.3 REQUIRED )
+find_package( OpenMP )
 
 
- find_package( libField REQUIRED )
- find_project_dependency( UnitConvert REQUIRED SUBDIRECTORY_PATHS ${CMAKE_CURRENT_SOURCE_DIR}/externals)
+find_project_dependency( libField    REQUIRED SUBDIRECTORY_PATHS ${CMAKE_CURRENT_SOURCE_DIR}/externals)
+find_project_dependency( UnitConvert REQUIRED SUBDIRECTORY_PATHS ${CMAKE_CURRENT_SOURCE_DIR}/externals)
 
- find_package(OpenMP)
 
 string( REGEX REPLACE "^lib" "" LIB_NAME ${PROJECT_NAME} )
 add_library( ${LIB_NAME} )
