@@ -90,4 +90,13 @@ void Manager::load(const std::string& filename)
   return;
 }
 
+bool Manager::has(const path_t& path) const
+{
+  return static_cast<bool>(configuration.get_child_optional(addRoot(path)));
+}
+
+Manager::path_t Manager::addRoot(const path_t& path) const
+{
+  return root / path;
+}
 }  // namespace Configuration

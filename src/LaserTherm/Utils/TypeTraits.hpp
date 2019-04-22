@@ -7,6 +7,7 @@
   * @date 03/10/19
   */
 
+#include <Field.hpp>
 
 template<typename T>
 struct get_real_type {};

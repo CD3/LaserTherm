@@ -10,6 +10,11 @@
 #include <string>
 #include <typeinfo>
 
+#include <boost/spirit/include/qi.hpp>
+namespace spt = boost::spirit;
+namespace qi  = boost::spirit::qi;
+namespace phx = boost::phoenix;
+
 #include "ptree_utils.hpp"
 
 namespace Configuration
@@ -22,24 +27,42 @@ class Manager
 
   ptree        configuration;
   UnitRegistry unit_registry;
+  path_t root;
   // ptree        property_units;
 
   template<typename T>
-  T get(std::string key, std::string unit) const;
+  T get(const path_t& path) const;
   template<typename T>
-  T get(std::string key) const;
+  T get_quantity(const path_t& path, std::string unit) const;
+
+  bool has(const path_t& key) const;
+  path_t addRoot( const path_t& path ) const;
+
 
   void load(const std::string& filename);
-  void load(const std::istream& in);
 };
+
+
+
+
+
+
+
+/**
+ * Retrieves a property from the configuration tree. If the property is not found,
+ * a std::runtime_error with a message showing the name of the property that was requrested is thrown.
+ *
+ * @param key property name
+ */
 template<typename T>
-T Manager::get(std::string key) const
+T Manager::get(const path_t& path) const
 {
   T    value;
-  auto node = configuration.get_child_optional(key);
+  path_t apath = addRoot(path);
+  auto node = configuration.get_child_optional(apath);
   if (!node) {
-    throw std::runtime_error("A parameter named '" + key +
-                             "' was requested, but was found in the tree.\nDid "
+    throw std::runtime_error("A parameter named '" + path.dump() +
+                             "' under the node '"+root.dump()+"' was requested, but was found in the tree.\nDid "
                              "you spell it correctly?");
   }
 
@@ -48,12 +71,12 @@ T Manager::get(std::string key) const
   } catch (std::runtime_error& e) {
     std::stringstream error;
 
-    error << "There was a problem converting a parameter '" << key
+    error << "There was a problem converting a parameter '" <<path.dump() 
           << "' to the requested type.\n";
     error << "This can happen if the parameter is expected to be a numerical "
              "value, but contains non-numerical data.";
     error << "The typeid of the requested type is '" << typeid(T).name()
-          << "'. The stored value for '" << key << "' is '"
+          << "'. The stored value for '" << path.dump() << "' is '"
           << node.value().data() << "'\n";
     error << "Do you expect the value to be convertible to the type?\n";
     error << "The error thrown during the construction is show below";
@@ -67,10 +90,17 @@ T Manager::get(std::string key) const
   return value;
 }
 
+/**
+ * Retrieves a property from the configuration tree and converts it to the unit specified by unit. If the property is not found,
+ * a std::runtime_error with a message showing the name of the property that was requrested is thrown.
+ *
+ * @param key property name
+ * @param unit unit string
+ */
 template<typename T>
-T Manager::get(std::string key, std::string unit) const
+T Manager::get_quantity(const path_t& path, std::string unit) const
 {
-  auto        raw_value = get<ptree::data_type>(key);
+  auto        raw_value = get<ptree::data_type>(path);
   Quantity<T> raw_quantity;
   T           value;
   try {
@@ -82,7 +112,7 @@ T Manager::get(std::string key, std::string unit) const
              "most likely means that the string could not be parsed as a "
              "quantity\n"
              "Do you expect this parameter to be a quantity?\n";
-    error << "Parameter Name: " << key << "\n";
+    error << "Parameter Name: " << path.dump()<< "( under the node " << root.dump() << " )\n";
     error << "Parameter Value: " << raw_value << "\n";
     error << "Requested Units: " << unit << "\n";
     error << "The error thrown during the construction is show below";
@@ -102,7 +132,7 @@ T Manager::get(std::string key, std::string unit) const
            "This most likely means that the parameter not have the same "
            "dimensions as the requested units.\n"
            "Did you type the parameter units correctly?\n";
-    error << "Parameter Name: " << key << "\n";
+    error << "Parameter Name: " << path.dump()<< "( under the node " << root.dump() << " )\n";
     error << "Parameter Value: " << raw_value << "\n";
     error << "Requested Units: " << unit << "\n";
     error << "\n==========\n";
@@ -113,6 +143,16 @@ T Manager::get(std::string key, std::string unit) const
 
   return value;
 }
+
+
+
+
+
+
+
+
+
+
 }  // namespace Configuration
 
 #endif  // include protector

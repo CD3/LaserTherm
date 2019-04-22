@@ -70,15 +70,39 @@ TEST_CASE("Configuration Manager")
     CHECK_THROWS_WITH(config.get<double>("simulation.grid.x.max"),
                       Catch::StartsWith("There was a problem converting") &&
                           Catch::Contains("simulation.grid.x.max"));
-    CHECK_THROWS_WITH(config.get<double>("layers.0.material", "cm"),
+    CHECK_THROWS_WITH(config.get_quantity<double>("layers.0.material", "cm"),
                       Catch::Contains("not create a quantity"));
-    CHECK_THROWS_WITH(config.get<double>("simulation.grid.x.max", "s"),
+    CHECK_THROWS_WITH(config.get_quantity<double>("simulation.grid.x.max", "s"),
                       Catch::Contains("not convert the requested parameter") &&
                           Catch::Contains("Dimension Error"));
 
     CHECK(config.get<std::string>("simulation.dimensions") == "1");
     CHECK(config.get<int>("simulation.dimensions") == 1);
-    CHECK(config.get<double>("simulation.grid.x.max", "cm") == Approx(5));
-    CHECK(config.get<double>("simulation.grid.x.max", "m") == Approx(0.05));
+    CHECK(config.get_quantity<double>("simulation.grid.x.max", "cm") == Approx(5));
+    CHECK(config.get_quantity<double>("simulation.grid.x.max", "m") == Approx(0.05));
+
+    SECTION("With Root Node")
+    {
+      config.root = Configuration::Manager::path_t("layers.0");
+
+      CHECK_THROWS_WITH( config.get<std::string>("missing"), Catch::StartsWith("A parameter named 'missing'") );
+      CHECK( config.get<std::string>("material") == "water" );
+      CHECK( config.get_quantity<double>("thickness", "cm") == Approx(0.5) );
+    }
+
+    SECTION("Query Element Existence")
+    {
+      CHECK( config.has("simulation") );
+      CHECK( config.has("layers.0") );
+      CHECK( config.has("layers.0.material") );
+      CHECK(!config.has("missing") );
+      CHECK(!config.has("layers.0.missing") );
+
+      config.root = Configuration::Manager::path_t("layers.0");
+      CHECK(!config.has("simulation"));
+      CHECK( config.has("material"));
+
+    }
   }
+
 }

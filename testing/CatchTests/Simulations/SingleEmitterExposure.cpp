@@ -189,3 +189,75 @@ TEST_CASE("Simple Simulation Test")
 
   sim.run();
 }
+
+TEST_CASE("Simulation Builder Test")
+{
+  // this is basically a testing ground for building and running a simulation
+  
+  Configuration::Manager config;
+
+  config.unit_registry.addBaseUnit<Dimension::Name::Length>("cm");
+  config.unit_registry.addBaseUnit<Dimension::Name::Mass>("g");
+  config.unit_registry.addBaseUnit<Dimension::Name::Time>("s");
+  config.unit_registry.addBaseUnit<Dimension::Name::Temperature>("K");
+  config.unit_registry.addBaseUnit<Dimension::Name::Amount>("mol");
+  config.unit_registry.addBaseUnit<Dimension::Name::ElectricalCurrent>("A");
+  config.unit_registry.addBaseUnit<Dimension::Name::LuminousIntensity>("cd");
+
+  config.unit_registry.addUnit("m = 100 cm");
+  config.unit_registry.addUnit("L = 1000 cm^3");
+  config.unit_registry.addUnit("J = kg m^2 / s^2");
+  config.unit_registry.addUnit("W = J/s");
+  config.unit_registry.addUnit("cal = 4.184 J");
+  config.unit_registry.addUnit("degC = K - 273.15");
+
+  std::string       config_text = R"(
+  simulation.dimensions = 1
+
+  simulation.grid.x.n = 100
+  simulation.grid.x.min = 0 cm
+  simulation.grid.x.max = 2 cm
+  simulation.time.end = 3 s
+  simulation.time.dt.max = 1e-3 s
+  simulation.baseline_temperature = 37 degC
+
+  simulation.boundary_condition.min.type = surface
+  simulation.boundary_condition.max.type = sink
+
+  emitters.0.irradiance = 5 W/cm^2
+  emitters.0.wavelength = 1064 nm
+  emitters.0.start = 0 s
+  emitters.0.exposure_duration = 1 s
+
+  layers.0.material = water
+
+  materials.water.thermal.density = 1 g/mL
+  materials.water.thermal.conductivity = 0.00628 W/cm/K
+  materials.water.thermal.specific_heat = 4.1868 J/g/degK
+  materials.water.thermal.bc.convection.transfer_rate = 1e-3 W/cm^s/K
+
+  layers.1.description = absorber
+  layers.1.optical.absorption_coefficient = 1 cm^-1
+  layers.1.thermal.density = 2 g/mL
+  layers.1.position = 0 cm
+  layers.1.thickness = 5 mm
+  )";
+  std::stringstream in(config_text);
+
+  std::ofstream out("config.ini");
+  out << config_text;
+  out.close();
+
+  config.load("config.ini");
+  convertPropertyTreeUnits(config.configuration, config.unit_registry);
+
+  Simulations::SingleEmitterExposure<
+      Emitters::Basic<HeatSources::_1D::BeersLaw<double>,
+                      Waveforms::ContinuousWave<double> >,
+      HeatSolvers::_1D::CrankNicholson<double> >
+      sim;
+
+  Builders::build(sim,config);
+
+
+}

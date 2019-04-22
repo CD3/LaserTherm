@@ -13,17 +13,22 @@
 
 #include <boost/property_tree/ptree.hpp>
 
+#include "../Configuration/Manager.hpp"
+#include "../Emitters/Basic.hpp"
+#include "../HeatSolvers/_1D/CrankNicholson.hpp"
 #include "../MaterialStructure.hpp"
 #include "../Materials/Basic.hpp"
+#include "../Simulations/SingleEmitterExposure.hpp"
 #include "../Structures/_1D/AnyStructure.hpp"
 #include "../Structures/_1D/Infinite.hpp"
 #include "../Structures/_1D/Slab.hpp"
+#include "../Waveforms/ContinuousWave.hpp"
 
 namespace Builders
 {
 template<class REAL>
 void build(Materials::Basic<REAL>&            material,
-                   const boost::property_tree::ptree& config)
+           const boost::property_tree::ptree& config)
 {
   boost::optional<REAL> prop;
 
@@ -46,7 +51,7 @@ void build(Materials::Basic<REAL>&            material,
 
 template<class REAL>
 void build(std::map<std::string, Materials::Basic<REAL>>& materials,
-                      const boost::property_tree::ptree&             config)
+           const boost::property_tree::ptree&             config)
 {
   using MaterialType = Materials::Basic<REAL>;
 
@@ -62,11 +67,10 @@ void build(std::map<std::string, Materials::Basic<REAL>>& materials,
  * boost property_tree.
  */
 template<class REAL>
-void build(
-    std::vector<MaterialStructure<Materials::Basic<REAL>,
-                                  Structures::_1D::AnyStructure<REAL>>>&
-                                       structures,
-    const boost::property_tree::ptree& config)
+void build(std::vector<MaterialStructure<Materials::Basic<REAL>,
+                                         Structures::_1D::AnyStructure<REAL>>>&
+                                              structures,
+           const boost::property_tree::ptree& config)
 {
   using MaterialType          = Materials::Basic<REAL>;
   using StructureType         = Structures::_1D::AnyStructure<REAL>;
@@ -89,7 +93,7 @@ void build(
       if (it.second.find("material") != it.second.not_found())
         mat = materials[it.second.get<std::string>("material")];
       else
-        build(mat,it.second);
+        build(mat, it.second);
 
       auto position  = it.second.get_optional<REAL>("position");
       auto thickness = it.second.get_optional<REAL>("thickness");
@@ -117,6 +121,35 @@ void build(
       structures.push_back(MaterialStructureType(mat, layer));
     }
   }
+}
+
+template<class EmitterType, class HeatSolverType>
+void build(Simulations::SingleEmitterExposure<EmitterType, HeatSolverType>& sim,
+           const Configuration::Manager& config)
+{
+  using real_type = typename get_real_type<HeatSolverType>::type;
+
+  sim.tmax = config.get<long double>("simulation.time.end");
+  sim.dt   = config.get<long double>("simulation.time.dt.max");
+
+  sim.heat_solver =
+      decltype(sim.heat_solver)(config.get<size_t>("simulation.grid.x.n"));
+  if (config.get<std::string>("simulation.grid.type") == "uniform") {
+    sim.heat_solver.T.setCoordinateSystem(
+        Uniform(config.get_quantity<real_type>("simulation.grid.x.min", "cm"),
+                config.get_quantity<real_type>("simulation.grid.x.max", "cm")));
+  }
+
+  sim.emitter.A.reset(sim.heat_solver.T.getCoordinateSystemPtr());
+  sim.emitter.mu_a.reset(sim.heat_solver.T.getCoordinateSystemPtr());
+
+  sim.heat_solver.A.set(0);
+  sim.emitter.A.set(0);
+
+  // sim.emitter.setIrradiance(config.get<real_type>("emitters.0.irradiance"));
+  // sim.emitter.setStartTime(config.get<real_type>("emitters.0.start"));
+  // sim.emitter.setExposureDuration(
+  // config.get<real_type>("emitters.0.exposure_duration"));
 }
 
 }  // namespace Builders
