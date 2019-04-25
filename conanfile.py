@@ -12,7 +12,7 @@ class LaserThermConan(ConanFile):
     topics = ("C++", "Laser", "Physics")
 
     generators = "cmake", "virtualenv"
-    requires = 'boost/1.69.0@conan/stable','eigen/3.3.7@conan/stable', 'libField/master@local/devel'
+    requires = 'boost/1.69.0@conan/stable','eigen/3.3.7@conan/stable', 'libField/master@local/devel', 'UnitConvert/master@local/devel'
     build_requires = 'cmake_installer/3.13.0@conan/stable', 'ninja_installer/1.9.0@bincrafters/stable'
 
     def build(self):
