@@ -1,7 +1,7 @@
 from conans import ConanFile, CMake, tools
 import os
 
-class LaserThermConan(ConanFile):
+class ConanBuild(ConanFile):
     name = "LaserTherm"
     version = "master"
     license = "MIT"
