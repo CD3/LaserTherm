@@ -91,6 +91,8 @@ target_link_libraries(${LIB_NAME}
                           UnitConvert::UnitConvert
                      )
 
+target_compile_definitions(${LIB_NAME} PUBLIC UNITCONVERT_NO_BACKWARD_COMPATIBLE_NAMESPACE)
+
 if( ${CMAKE_SOURCE_DIR} STREQUAL ${CMAKE_CURRENT_SOURCE_DIR} AND BUILD_UNIT_TESTS)
 enable_testing()
 add_subdirectory( testing )

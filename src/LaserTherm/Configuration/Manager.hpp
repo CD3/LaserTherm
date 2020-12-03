@@ -26,7 +26,7 @@ class Manager
   using path_t = ptree::path_type;
 
   ptree        configuration;
-  UnitRegistry unit_registry;
+  UnitConvert::UnitRegistry unit_registry;
   path_t root;
   // ptree        property_units;
 
@@ -101,7 +101,7 @@ template<typename T>
 T Manager::get_quantity(const path_t& path, std::string unit) const
 {
   auto        raw_value = get<ptree::data_type>(path);
-  Quantity<T> raw_quantity;
+  UnitConvert::Quantity<T> raw_quantity;
   T           value;
   try {
     raw_quantity = unit_registry.makeQuantity<T>(raw_value);

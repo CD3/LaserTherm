@@ -5,7 +5,7 @@
 
 #include <boost/optional.hpp>
 
-#include <Field.hpp>
+#include <libField/Field.hpp>
 #include <LaserTherm/Materials/Basic.hpp>
 #include <LaserTherm/MaterialStructure.hpp>
 #include <LaserTherm/Structures/_1D/Slab.hpp>

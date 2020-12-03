@@ -29,7 +29,7 @@ class SingleEmitterExposure
   HeatSolverType heat_solver;
 
   // time accumulation should be done in a minimum of double precision
-  // even if thermal solver is in float percision
+  // even if thermal solver is in float precision
   // otherwise we will accumulate significant error
   // see https://www.youtube.com/watch?v=k12BJGSc2Nc&feature=youtu.be&t=1513
   long double tmax;

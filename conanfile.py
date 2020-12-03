@@ -12,8 +12,7 @@ class ConanBuild(ConanFile):
     topics = ("C++", "Laser", "Physics")
 
     generators = "cmake", "virtualenv"
-    requires = 'boost/1.69.0@conan/stable','eigen/3.3.7@conan/stable', 'libField/master@local/devel', 'UnitConvert/master@local/devel'
-    build_requires = 'cmake_installer/3.13.0@conan/stable', 'ninja_installer/1.9.0@bincrafters/stable'
+    requires = 'boost/1.72.0','eigen/3.3.7@cd3/devel', 'libField/0.8@cd3/devel', 'UnitConvert/0.11@cd3/devel'
 
     def build(self):
 
@@ -21,7 +20,6 @@ class ConanBuild(ConanFile):
 
       # get location of the eigen cmake config file to pass to cmake
       defs = {}
-      defs["Eigen3_DIR"] = os.path.join( self.deps_cpp_info["eigen"].rootpath, "share", "eigen3", "cmake" )
       cmake.configure(defs=defs)
 
       cmake.build()

@@ -6,7 +6,7 @@
 
 #include <boost/property_tree/ptree.hpp>
 
-#include <Field.hpp>
+#include <libField/Field.hpp>
 #include <LaserTherm/MaterialStructure.hpp>
 #include <LaserTherm/Materials/Basic.hpp>
 #include <LaserTherm/Structures/_1D/AnyStructure.hpp>

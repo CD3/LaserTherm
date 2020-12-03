@@ -3,6 +3,7 @@
 #include <fstream>
 #include <iostream>
 #include <sstream>
+#include <optional>
 
 #include <boost/property_tree/info_parser.hpp>
 #include <boost/property_tree/ini_parser.hpp>
@@ -21,19 +22,19 @@
 #include <LaserTherm/Structures/_1D/Slab.hpp>
 #include <LaserTherm/Waveforms/ContinuousWave.hpp>
 
-TEST_CASE("Simple Simulation Test")
+TEST_CASE("Simple Simulation Test","[simulations]")
 {
   // this is basically a testing ground for building and running a simulation
   
   Configuration::Manager config;
 
-  config.unit_registry.addBaseUnit<Dimension::Name::Length>("cm");
-  config.unit_registry.addBaseUnit<Dimension::Name::Mass>("g");
-  config.unit_registry.addBaseUnit<Dimension::Name::Time>("s");
-  config.unit_registry.addBaseUnit<Dimension::Name::Temperature>("K");
-  config.unit_registry.addBaseUnit<Dimension::Name::Amount>("mol");
-  config.unit_registry.addBaseUnit<Dimension::Name::ElectricalCurrent>("A");
-  config.unit_registry.addBaseUnit<Dimension::Name::LuminousIntensity>("cd");
+  config.unit_registry.addBaseUnit<UnitConvert::Dimension::Name::Length>("cm");
+  config.unit_registry.addBaseUnit<UnitConvert::Dimension::Name::Mass>("g");
+  config.unit_registry.addBaseUnit<UnitConvert::Dimension::Name::Time>("s");
+  config.unit_registry.addBaseUnit<UnitConvert::Dimension::Name::Temperature>("K");
+  config.unit_registry.addBaseUnit<UnitConvert::Dimension::Name::Amount>("mol");
+  config.unit_registry.addBaseUnit<UnitConvert::Dimension::Name::ElectricalCurrent>("A");
+  config.unit_registry.addBaseUnit<UnitConvert::Dimension::Name::LuminousIntensity>("cd");
 
   config.unit_registry.addUnit("m = 100 cm");
   config.unit_registry.addUnit("L = 1000 cm^3");
@@ -69,7 +70,9 @@ TEST_CASE("Simple Simulation Test")
 
   layers.1.description = absorber
   layers.1.optical.absorption_coefficient = 1 cm^-1
+  layers.1.thermal.conductivity = 1 J/g/degK
   layers.1.thermal.density = 2 g/mL
+  layers.1.thermal.specific_heat = 3 J/g/degK
   layers.1.position = 0 cm
   layers.1.thickness = 5 mm
   )";
@@ -147,8 +150,8 @@ TEST_CASE("Simple Simulation Test")
       return std::nullopt;
     });
   }
-  CHECK( sim.heat_solver.k(0) == Approx(0.00628*1000*100*100) );
-  CHECK( sim.heat_solver.VHC(0) == Approx(4.1868*1000*100*100) );
+  CHECK( sim.heat_solver.k(0) == Approx(1*1000*100*100) );
+  CHECK( sim.heat_solver.VHC(0) == Approx(6*1000*100*100) );
   CHECK( sim.emitter.mu_a(0) == Approx(1) );
 
   sim.heat_solver.T.set_f([](auto ind, auto cs) {
@@ -196,13 +199,13 @@ TEST_CASE("Simulation Builder Test")
   
   Configuration::Manager config;
 
-  config.unit_registry.addBaseUnit<Dimension::Name::Length>("cm");
-  config.unit_registry.addBaseUnit<Dimension::Name::Mass>("g");
-  config.unit_registry.addBaseUnit<Dimension::Name::Time>("s");
-  config.unit_registry.addBaseUnit<Dimension::Name::Temperature>("K");
-  config.unit_registry.addBaseUnit<Dimension::Name::Amount>("mol");
-  config.unit_registry.addBaseUnit<Dimension::Name::ElectricalCurrent>("A");
-  config.unit_registry.addBaseUnit<Dimension::Name::LuminousIntensity>("cd");
+  config.unit_registry.addBaseUnit<UnitConvert::Dimension::Name::Length>("cm");
+  config.unit_registry.addBaseUnit<UnitConvert::Dimension::Name::Mass>("g");
+  config.unit_registry.addBaseUnit<UnitConvert::Dimension::Name::Time>("s");
+  config.unit_registry.addBaseUnit<UnitConvert::Dimension::Name::Temperature>("K");
+  config.unit_registry.addBaseUnit<UnitConvert::Dimension::Name::Amount>("mol");
+  config.unit_registry.addBaseUnit<UnitConvert::Dimension::Name::ElectricalCurrent>("A");
+  config.unit_registry.addBaseUnit<UnitConvert::Dimension::Name::LuminousIntensity>("cd");
 
   config.unit_registry.addUnit("m = 100 cm");
   config.unit_registry.addUnit("L = 1000 cm^3");
@@ -214,6 +217,7 @@ TEST_CASE("Simulation Builder Test")
   std::string       config_text = R"(
   simulation.dimensions = 1
 
+  simulation.grid.type = "uniform"
   simulation.grid.x.n = 100
   simulation.grid.x.min = 0 cm
   simulation.grid.x.max = 2 cm
@@ -238,8 +242,10 @@ TEST_CASE("Simulation Builder Test")
 
   layers.1.description = absorber
   layers.1.optical.absorption_coefficient = 1 cm^-1
+  layers.1.thermal.conductivity = 1 W/cm/K
   layers.1.thermal.density = 2 g/mL
-  layers.1.position = 0 cm
+  layers.1.thermal.specific_heat = 3 J/g/degK
+  layers.1.position = 0 mm
   layers.1.thickness = 5 mm
   )";
   std::stringstream in(config_text);

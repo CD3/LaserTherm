@@ -45,13 +45,13 @@ TEST_CASE("Configuration Manager")
     out << config_text;
     out.close();
 
-    config.unit_registry.addBaseUnit<Dimension::Name::Length>("cm");
-    config.unit_registry.addBaseUnit<Dimension::Name::Mass>("g");
-    config.unit_registry.addBaseUnit<Dimension::Name::Time>("s");
-    config.unit_registry.addBaseUnit<Dimension::Name::Temperature>("K");
-    config.unit_registry.addBaseUnit<Dimension::Name::Amount>("mol");
-    config.unit_registry.addBaseUnit<Dimension::Name::ElectricalCurrent>("A");
-    config.unit_registry.addBaseUnit<Dimension::Name::LuminousIntensity>("cd");
+    config.unit_registry.addBaseUnit<UnitConvert::Dimension::Name::Length>("cm");
+    config.unit_registry.addBaseUnit<UnitConvert::Dimension::Name::Mass>("g");
+    config.unit_registry.addBaseUnit<UnitConvert::Dimension::Name::Time>("s");
+    config.unit_registry.addBaseUnit<UnitConvert::Dimension::Name::Temperature>("K");
+    config.unit_registry.addBaseUnit<UnitConvert::Dimension::Name::Amount>("mol");
+    config.unit_registry.addBaseUnit<UnitConvert::Dimension::Name::ElectricalCurrent>("A");
+    config.unit_registry.addBaseUnit<UnitConvert::Dimension::Name::LuminousIntensity>("cd");
 
     config.unit_registry.addUnit("m = 100 cm");
     config.unit_registry.addUnit("L = 1000 cm^3");

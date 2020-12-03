@@ -10,12 +10,12 @@
 
 TEST_CASE("General", "[devel]")
 {
-  UnitRegistry ureg;
+  UnitConvert::UnitRegistry ureg;
 
-  ureg.addBaseUnit<Dimension::Name::Length>("cm");
-  ureg.addBaseUnit<Dimension::Name::Mass>("g");
-  ureg.addBaseUnit<Dimension::Name::Time>("s");
-  ureg.addBaseUnit<Dimension::Name::Temperature>("K");
-  ureg.addBaseUnit<Dimension::Name::Amount>("mol");
+  ureg.addBaseUnit<UnitConvert::Dimension::Name::Length>("cm");
+  ureg.addBaseUnit<UnitConvert::Dimension::Name::Mass>("g");
+  ureg.addBaseUnit<UnitConvert::Dimension::Name::Time>("s");
+  ureg.addBaseUnit<UnitConvert::Dimension::Name::Temperature>("K");
+  ureg.addBaseUnit<UnitConvert::Dimension::Name::Amount>("mol");
   
 }
