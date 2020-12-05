@@ -42,6 +42,7 @@ TEST_CASE("Simple Simulation Test","[simulations]")
   config.unit_registry.addUnit("W = J/s");
   config.unit_registry.addUnit("cal = 4.184 J");
   config.unit_registry.addUnit("degC = K - 273.15");
+  config.unit_registry.addUnit("degK = K");
 
   std::string       config_text = R"(
   simulation.dimensions = 1

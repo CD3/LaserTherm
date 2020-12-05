@@ -50,7 +50,7 @@ class Manager
 
 /**
  * Retrieves a property from the configuration tree. If the property is not found,
- * a std::runtime_error with a message showing the name of the property that was requrested is thrown.
+ * a std::runtime_error with a message showing the name of the property that was requested is thrown.
  *
  * @param key property name
  */

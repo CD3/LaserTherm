@@ -7,7 +7,7 @@
 
 #include <LaserTherm/Configuration/Manager.hpp>
 
-TEST_CASE("Configuration Manager")
+TEST_CASE("Configuration Manager", "[configuration]")
 {
   std::string config_text = R"(
   simulation.dimensions = 1
@@ -17,6 +17,7 @@ TEST_CASE("Configuration Manager")
   layers.0.position = 0
   layers.0.thickness = 5 mm
   sensors.0.type = temperature
+  simulation.grid.z.max = 10 inch
   )";
 
   Configuration::Manager config;
@@ -65,6 +66,8 @@ TEST_CASE("Configuration Manager")
     CHECK(config.configuration.get<std::string>("simulation.dimensions") ==
           "1");
 
+    SECTION("Access Errors")
+    {
     CHECK_THROWS_WITH(config.get<std::string>("missing"),
                       Catch::StartsWith("A parameter named 'missing'"));
     CHECK_THROWS_WITH(config.get<double>("simulation.grid.x.max"),
@@ -75,6 +78,9 @@ TEST_CASE("Configuration Manager")
     CHECK_THROWS_WITH(config.get_quantity<double>("simulation.grid.x.max", "s"),
                       Catch::Contains("not convert the requested parameter") &&
                           Catch::Contains("Dimension Error"));
+
+
+    }
 
     CHECK(config.get<std::string>("simulation.dimensions") == "1");
     CHECK(config.get<int>("simulation.dimensions") == 1);
