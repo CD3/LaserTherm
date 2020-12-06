@@ -5,6 +5,8 @@ project(LaserTherm)
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${PROJECT_SOURCE_DIR}/cmake/Modules")
 include(${CMAKE_BINARY_DIR}/conan_paths.cmake OPTIONAL)
 
+include(externals/Plugins.cmake)
+
 
 OPTION( BUILD_UNIT_TESTS "Build unit tests for the library" ON )
 
