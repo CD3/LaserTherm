@@ -1,4 +1,0 @@
-UnitConvert:
-  checkout: master
-  urls:
-    - https://github.com/CD3/UnitConvert
