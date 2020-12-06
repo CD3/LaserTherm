@@ -28,12 +28,20 @@ class Manager
   ptree                     configuration;
   UnitConvert::UnitRegistry unit_registry;
   path_t                    root;
-  // ptree        property_units;
+  ptree                     default_units;
 
   template<typename T>
   T get(const path_t& path) const;
   template<typename T>
   T get_quantity(const path_t& path, std::string unit) const;
+
+  void set_default_unit(const path_t& path, const std::string& unit);
+  boost::optional<std::string> get_default_unit_optional(const path_t& path) const;
+  std::string get_default_unit(const path_t& path) const;
+  std::string get_default_unit(const path_t& path, std::string def) const;
+
+
+
 
   bool   has(const path_t& key) const;
   path_t addRoot(const path_t& path) const;
@@ -57,7 +65,7 @@ T Manager::get(const path_t& path) const
   if (!node) {
     throw std::runtime_error("A parameter named '" + path.dump() +
                              "' under the node '" + root.dump() +
-                             "' was requested, but was found in the tree.\nDid "
+                             "' was requested, but was not found in the tree.\nDid "
                              "you spell it correctly?");
   }
 

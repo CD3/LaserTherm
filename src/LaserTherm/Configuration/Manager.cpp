@@ -89,4 +89,43 @@ Manager::path_t Manager::addRoot(const path_t& path) const
 {
   return root / path;
 }
+
+void Manager::set_default_unit(const path_t& path, const std::string& unit)
+{
+  default_units.put(path, unit);
+}
+
+boost::optional<std::string> Manager::get_default_unit_optional(
+    const path_t& path) const
+{
+  path_t apath = addRoot(path);
+  auto   node  = default_units.get_child_optional(apath);
+  if (node)
+    return node.value().get_value<std::string>();
+  else
+    return boost::none;
+}
+
+std::string Manager::get_default_unit(const path_t& path, std::string def) const
+{
+  auto u = this->get_default_unit_optional(path);
+  if (u) {
+    return u.get();
+  }
+  return def;
+}
+
+std::string Manager::get_default_unit(const path_t& path) const
+{
+  auto u = this->get_default_unit_optional(path);
+  if (u) {
+    return u.get();
+  }
+
+  throw std::runtime_error(
+      "The default unit for parameter '" + path.dump() +
+      "' was requested, but was not found in the tree.\nDid "
+      "you spell it correctly?");
+}
+
 }  // namespace Configuration

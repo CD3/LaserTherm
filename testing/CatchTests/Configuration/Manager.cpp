@@ -21,17 +21,14 @@ TEST_CASE("Configuration Manager", "[configuration]")
   )";
 
   Configuration::Manager config;
+  std::ofstream          out("config-test.ini");
+  out << config_text;
+  out.close();
 
   SECTION("Loading")
   {
     SECTION("from INI file")
     {
-      std::stringstream in(config_text);
-
-      std::ofstream out("config-test.ini");
-      out << config_text;
-      out.close();
-
       config.load("config-test.ini");
 
       CHECK(config.configuration.size() == 3);
@@ -40,10 +37,6 @@ TEST_CASE("Configuration Manager", "[configuration]")
 
   SECTION("Element Access")
   {
-    std::ofstream out("config-test.ini");
-    out << config_text;
-    out.close();
-
     config.unit_registry.addBaseUnit<UnitConvert::Dimension::Name::Length>(
         "cm");
     config.unit_registry.addBaseUnit<UnitConvert::Dimension::Name::Mass>("g");
@@ -113,5 +106,27 @@ TEST_CASE("Configuration Manager", "[configuration]")
       CHECK(!config.has("simulation"));
       CHECK(config.has("material"));
     }
+  }
+
+  SECTION("Unit Support")
+  {
+    config.set_default_unit("simulation.grid.x.min", "cm");
+
+    auto u = config.get_default_unit_optional("simulation.grid.x.min");
+    REQUIRE(u);
+    CHECK(u.get() == "cm");
+
+    u = config.get_default_unit_optional("simulation.grid.x.max");
+    REQUIRE(!u);
+
+    std::string us =
+        config.get_default_unit("simulation.grid.x.min", "missing");
+    CHECK(us == "cm");
+    us =
+        config.get_default_unit("simulation.grid.x.max", "missing");
+    CHECK(us == "missing");
+
+    CHECK_THROWS_WITH(config.get_default_unit("simulation.grid.x.max"),
+                      Catch::StartsWith("The default unit for parameter 'simulation.grid.x.max'"));
   }
 }
