@@ -42,9 +42,9 @@ for cmake_file in (args.cmake_files if len(args.cmake_files) > 0  else ('-',)):
           if fnmatch.fnmatch(filename, '*'+ext):
               source_files.append( os.path.join(root,filename) )
 
-  print "Detected Sources:"
+  print("Detected Sources:")
   pprint.pprint(source_files)
-  print "Directories Searched:"
+  print("Directories Searched:")
   pprint.pprint(args.source_dirs)
 
   # parse cmake file
@@ -53,10 +53,10 @@ for cmake_file in (args.cmake_files if len(args.cmake_files) > 0  else ('-',)):
 
   source_commands = parser.source_cmd_parser.searchString(cmake_text)
   if len(source_commands) > 1:
-    print "ERROR: more than one target_source command found. I don't know what to do."
+    print("ERROR: more than one target_source command found. I don't know what to do.")
     sys.exit(1)
   if len(source_commands) < 1:
-    print "ERROR: target_source command found. I don't know what to do."
+    print("ERROR: target_source command found. I don't know what to do.")
     sys.exit(1)
 
   # separate *.cpp files from everything else.
