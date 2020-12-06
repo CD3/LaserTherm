@@ -58,7 +58,8 @@ struct translator_between<std::basic_string<Ch, Traits, Alloc>, int> {
  * Converts all quantities in a property tree to values expressed
  * in the base units of a unit registry.
  */
-void convertPropertyTreeUnits(bpt::ptree& config, const UnitConvert::UnitRegistry& ureg);
+void                               convertPropertyTreeUnits(bpt::ptree&                      config,
+                                                            const UnitConvert::UnitRegistry& ureg);
 std::vector<bpt::ptree::path_type> get_paths(const bpt::ptree& tree,
                                              char              delim = '.');
 /**

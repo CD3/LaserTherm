@@ -2,10 +2,10 @@
 #define LaserTherm_Structures__1D_Slab_hpp
 
 /** @file Slab.hpp
-  * @brief 
-  * @author C.D. Clark III
-  * @date 03/12/19
-  */
+ * @brief
+ * @author C.D. Clark III
+ * @date 03/12/19
+ */
 
 #include <optional>
 
@@ -14,71 +14,47 @@ namespace Structures::_1D
 template<typename REAL>
 class Slab
 {
-  public:
+ public:
+  std::optional<REAL> minSurfacePosition;
+  std::optional<REAL> maxSurfacePosition;
 
-    std::optional<REAL> minSurfacePosition;
-    std::optional<REAL> maxSurfacePosition;
+  Slab() = default;
 
+  void setMinSurfacePosition(REAL p) { minSurfacePosition = p; }
 
-    Slab() = default;
+  void setMaxSurfacePosition(REAL p) { maxSurfacePosition = p; }
 
-    void setMinSurfacePosition(REAL p)
-    {
-      minSurfacePosition = p;
+  REAL getMinSurfacePosition() const { return minSurfacePosition.value(); }
+  REAL getMaxSurfacePosition() const { return maxSurfacePosition.value(); }
+  REAL getThickness() const
+  {
+    return maxSurfacePosition.value() - minSurfacePosition.value();
+  }
+
+  void setThickness(REAL t)
+  {
+    if (minSurfacePosition) maxSurfacePosition = minSurfacePosition.value() + t;
+    if (maxSurfacePosition) minSurfacePosition = maxSurfacePosition.value() - t;
+  }
+
+  bool isInside(REAL x)
+  {
+    bool inside = false;
+
+    if (minSurfacePosition && maxSurfacePosition) {
+      if (minSurfacePosition <= x && x <= maxSurfacePosition) inside = true;
+    }
+    if (!minSurfacePosition && maxSurfacePosition) {
+      if (x <= maxSurfacePosition) inside = true;
+    }
+    if (minSurfacePosition && !maxSurfacePosition) {
+      if (minSurfacePosition <= x) inside = true;
     }
 
-    void setMaxSurfacePosition(REAL p)
-    {
-      maxSurfacePosition = p;
-    }
-
-    REAL getMinSurfacePosition() const
-    {
-      return minSurfacePosition.value();
-    }
-    REAL getMaxSurfacePosition() const
-    {
-      return maxSurfacePosition.value();
-    }
-    REAL getThickness() const
-    {
-      return maxSurfacePosition.value() - minSurfacePosition.value();
-    }
-
-    void setThickness(REAL t)
-    {
-      if( minSurfacePosition )
-        maxSurfacePosition = minSurfacePosition.value() + t;
-      if( maxSurfacePosition )
-        minSurfacePosition = maxSurfacePosition.value() - t;
-    }
-
-    bool isInside( REAL x )
-    {
-      bool inside = false;
-
-      if( minSurfacePosition && maxSurfacePosition )
-      {
-        if( minSurfacePosition <= x && x <= maxSurfacePosition )
-          inside = true;
-      }
-      if( !minSurfacePosition && maxSurfacePosition )
-      {
-        if( x <= maxSurfacePosition )
-          inside = true;
-      }
-      if( minSurfacePosition && !maxSurfacePosition )
-      {
-        if( minSurfacePosition <= x )
-          inside = true;
-      }
-
-      return inside;
-    }
-
+    return inside;
+  }
 };
 
-}
+}  // namespace Structures::_1D
 
-
-#endif // include protector
+#endif  // include protector

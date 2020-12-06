@@ -24,7 +24,6 @@ TEST_CASE("Configuration Manager", "[configuration]")
 
   SECTION("Loading")
   {
-
     SECTION("from INI file")
     {
       std::stringstream in(config_text);
@@ -34,9 +33,8 @@ TEST_CASE("Configuration Manager", "[configuration]")
       out.close();
 
       config.load("config-test.ini");
-      
-      CHECK( config.configuration.size() == 3 );
 
+      CHECK(config.configuration.size() == 3);
     }
   }
 
@@ -46,13 +44,18 @@ TEST_CASE("Configuration Manager", "[configuration]")
     out << config_text;
     out.close();
 
-    config.unit_registry.addBaseUnit<UnitConvert::Dimension::Name::Length>("cm");
+    config.unit_registry.addBaseUnit<UnitConvert::Dimension::Name::Length>(
+        "cm");
     config.unit_registry.addBaseUnit<UnitConvert::Dimension::Name::Mass>("g");
     config.unit_registry.addBaseUnit<UnitConvert::Dimension::Name::Time>("s");
-    config.unit_registry.addBaseUnit<UnitConvert::Dimension::Name::Temperature>("K");
-    config.unit_registry.addBaseUnit<UnitConvert::Dimension::Name::Amount>("mol");
-    config.unit_registry.addBaseUnit<UnitConvert::Dimension::Name::ElectricalCurrent>("A");
-    config.unit_registry.addBaseUnit<UnitConvert::Dimension::Name::LuminousIntensity>("cd");
+    config.unit_registry.addBaseUnit<UnitConvert::Dimension::Name::Temperature>(
+        "K");
+    config.unit_registry.addBaseUnit<UnitConvert::Dimension::Name::Amount>(
+        "mol");
+    config.unit_registry
+        .addBaseUnit<UnitConvert::Dimension::Name::ElectricalCurrent>("A");
+    config.unit_registry
+        .addBaseUnit<UnitConvert::Dimension::Name::LuminousIntensity>("cd");
 
     config.unit_registry.addUnit("m = 100 cm");
     config.unit_registry.addUnit("L = 1000 cm^3");
@@ -68,47 +71,47 @@ TEST_CASE("Configuration Manager", "[configuration]")
 
     SECTION("Access Errors")
     {
-    CHECK_THROWS_WITH(config.get<std::string>("missing"),
-                      Catch::StartsWith("A parameter named 'missing'"));
-    CHECK_THROWS_WITH(config.get<double>("simulation.grid.x.max"),
-                      Catch::StartsWith("There was a problem converting") &&
-                          Catch::Contains("simulation.grid.x.max"));
-    CHECK_THROWS_WITH(config.get_quantity<double>("layers.0.material", "cm"),
-                      Catch::Contains("not create a quantity"));
-    CHECK_THROWS_WITH(config.get_quantity<double>("simulation.grid.x.max", "s"),
-                      Catch::Contains("not convert the requested parameter") &&
-                          Catch::Contains("Dimension Error"));
-
-
+      CHECK_THROWS_WITH(config.get<std::string>("missing"),
+                        Catch::StartsWith("A parameter named 'missing'"));
+      CHECK_THROWS_WITH(config.get<double>("simulation.grid.x.max"),
+                        Catch::StartsWith("There was a problem converting") &&
+                            Catch::Contains("simulation.grid.x.max"));
+      CHECK_THROWS_WITH(config.get_quantity<double>("layers.0.material", "cm"),
+                        Catch::Contains("not create a quantity"));
+      CHECK_THROWS_WITH(
+          config.get_quantity<double>("simulation.grid.x.max", "s"),
+          Catch::Contains("not convert the requested parameter") &&
+              Catch::Contains("Dimension Error"));
     }
 
     CHECK(config.get<std::string>("simulation.dimensions") == "1");
     CHECK(config.get<int>("simulation.dimensions") == 1);
-    CHECK(config.get_quantity<double>("simulation.grid.x.max", "cm") == Approx(5));
-    CHECK(config.get_quantity<double>("simulation.grid.x.max", "m") == Approx(0.05));
+    CHECK(config.get_quantity<double>("simulation.grid.x.max", "cm") ==
+          Approx(5));
+    CHECK(config.get_quantity<double>("simulation.grid.x.max", "m") ==
+          Approx(0.05));
 
     SECTION("With Root Node")
     {
       config.root = Configuration::Manager::path_t("layers.0");
 
-      CHECK_THROWS_WITH( config.get<std::string>("missing"), Catch::StartsWith("A parameter named 'missing'") );
-      CHECK( config.get<std::string>("material") == "water" );
-      CHECK( config.get_quantity<double>("thickness", "cm") == Approx(0.5) );
+      CHECK_THROWS_WITH(config.get<std::string>("missing"),
+                        Catch::StartsWith("A parameter named 'missing'"));
+      CHECK(config.get<std::string>("material") == "water");
+      CHECK(config.get_quantity<double>("thickness", "cm") == Approx(0.5));
     }
 
     SECTION("Query Element Existence")
     {
-      CHECK( config.has("simulation") );
-      CHECK( config.has("layers.0") );
-      CHECK( config.has("layers.0.material") );
-      CHECK(!config.has("missing") );
-      CHECK(!config.has("layers.0.missing") );
+      CHECK(config.has("simulation"));
+      CHECK(config.has("layers.0"));
+      CHECK(config.has("layers.0.material"));
+      CHECK(!config.has("missing"));
+      CHECK(!config.has("layers.0.missing"));
 
       config.root = Configuration::Manager::path_t("layers.0");
       CHECK(!config.has("simulation"));
-      CHECK( config.has("material"));
-
+      CHECK(config.has("material"));
     }
   }
-
 }

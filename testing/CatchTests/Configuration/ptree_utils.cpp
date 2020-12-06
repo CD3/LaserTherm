@@ -102,8 +102,10 @@ TEST_CASE("Property Tree Utils")
     auto tree    = unflatten_ptree(ftree, '|');
     CHECK(ftree.size() == 4);
     CHECK(tree.size() == 3);
-    CHECK(tree.get_child("a1.b1.c1").data() == ftree.get_child("a1|b1|c1").data());
-    CHECK(tree.get_child("a3.b1.c1").data() == ftree.get_child("a3|b1.c1").data());
+    CHECK(tree.get_child("a1.b1.c1").data() ==
+          ftree.get_child("a1|b1|c1").data());
+    CHECK(tree.get_child("a3.b1.c1").data() ==
+          ftree.get_child("a3|b1.c1").data());
   }
 
   SECTION("Custom Integer Translator")
@@ -112,11 +114,9 @@ TEST_CASE("Property Tree Utils")
     tree.put("x", "1");
     tree.put("y", "1.0");
 
-    CHECK( tree.get<double>("x") == Approx(1) );
-    CHECK( tree.get<double>("y") == Approx(1) );
-    CHECK( tree.get<int>("x") == 1 );
-    CHECK( tree.get<int>("y") == 1 );
-
-
+    CHECK(tree.get<double>("x") == Approx(1));
+    CHECK(tree.get<double>("y") == Approx(1));
+    CHECK(tree.get<int>("x") == 1);
+    CHECK(tree.get<int>("y") == 1);
   }
 }

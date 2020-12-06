@@ -2,8 +2,8 @@
 
 #include <fstream>
 #include <iostream>
-#include <sstream>
 #include <optional>
+#include <sstream>
 
 #include <boost/property_tree/info_parser.hpp>
 #include <boost/property_tree/ini_parser.hpp>
@@ -22,19 +22,22 @@
 #include <LaserTherm/Structures/_1D/Slab.hpp>
 #include <LaserTherm/Waveforms/ContinuousWave.hpp>
 
-TEST_CASE("Simple Simulation Test","[simulations]")
+TEST_CASE("Simple Simulation Test", "[simulations]")
 {
   // this is basically a testing ground for building and running a simulation
-  
+
   Configuration::Manager config;
 
   config.unit_registry.addBaseUnit<UnitConvert::Dimension::Name::Length>("cm");
   config.unit_registry.addBaseUnit<UnitConvert::Dimension::Name::Mass>("g");
   config.unit_registry.addBaseUnit<UnitConvert::Dimension::Name::Time>("s");
-  config.unit_registry.addBaseUnit<UnitConvert::Dimension::Name::Temperature>("K");
+  config.unit_registry.addBaseUnit<UnitConvert::Dimension::Name::Temperature>(
+      "K");
   config.unit_registry.addBaseUnit<UnitConvert::Dimension::Name::Amount>("mol");
-  config.unit_registry.addBaseUnit<UnitConvert::Dimension::Name::ElectricalCurrent>("A");
-  config.unit_registry.addBaseUnit<UnitConvert::Dimension::Name::LuminousIntensity>("cd");
+  config.unit_registry
+      .addBaseUnit<UnitConvert::Dimension::Name::ElectricalCurrent>("A");
+  config.unit_registry
+      .addBaseUnit<UnitConvert::Dimension::Name::LuminousIntensity>("cd");
 
   config.unit_registry.addUnit("m = 100 cm");
   config.unit_registry.addUnit("L = 1000 cm^3");
@@ -121,10 +124,9 @@ TEST_CASE("Simple Simulation Test","[simulations]")
       structures;
 
   Builders::build(structures, config.configuration);
-  CHECK( structures.size() == 2 );
+  CHECK(structures.size() == 2);
 
   for (auto& s : structures) {
-
     // set conductivity
     sim.heat_solver.k.set_f([&s](auto x) -> std::optional<double> {
       if (s.structure.isInside(x[0]) && s.material.getThermalConductivity())
@@ -151,9 +153,9 @@ TEST_CASE("Simple Simulation Test","[simulations]")
       return std::nullopt;
     });
   }
-  CHECK( sim.heat_solver.k(0) == Approx(1*1000*100*100) );
-  CHECK( sim.heat_solver.VHC(0) == Approx(6*1000*100*100) );
-  CHECK( sim.emitter.mu_a(0) == Approx(1) );
+  CHECK(sim.heat_solver.k(0) == Approx(1 * 1000 * 100 * 100));
+  CHECK(sim.heat_solver.VHC(0) == Approx(6 * 1000 * 100 * 100));
+  CHECK(sim.emitter.mu_a(0) == Approx(1));
 
   sim.heat_solver.T.set_f([](auto ind, auto cs) {
     auto x = cs->getCoord(ind[0]);
@@ -197,16 +199,19 @@ TEST_CASE("Simple Simulation Test","[simulations]")
 TEST_CASE("Simulation Builder Test")
 {
   // this is basically a testing ground for building and running a simulation
-  
+
   Configuration::Manager config;
 
   config.unit_registry.addBaseUnit<UnitConvert::Dimension::Name::Length>("cm");
   config.unit_registry.addBaseUnit<UnitConvert::Dimension::Name::Mass>("g");
   config.unit_registry.addBaseUnit<UnitConvert::Dimension::Name::Time>("s");
-  config.unit_registry.addBaseUnit<UnitConvert::Dimension::Name::Temperature>("K");
+  config.unit_registry.addBaseUnit<UnitConvert::Dimension::Name::Temperature>(
+      "K");
   config.unit_registry.addBaseUnit<UnitConvert::Dimension::Name::Amount>("mol");
-  config.unit_registry.addBaseUnit<UnitConvert::Dimension::Name::ElectricalCurrent>("A");
-  config.unit_registry.addBaseUnit<UnitConvert::Dimension::Name::LuminousIntensity>("cd");
+  config.unit_registry
+      .addBaseUnit<UnitConvert::Dimension::Name::ElectricalCurrent>("A");
+  config.unit_registry
+      .addBaseUnit<UnitConvert::Dimension::Name::LuminousIntensity>("cd");
 
   config.unit_registry.addUnit("m = 100 cm");
   config.unit_registry.addUnit("L = 1000 cm^3");
@@ -264,7 +269,5 @@ TEST_CASE("Simulation Builder Test")
       HeatSolvers::_1D::CrankNicholson<double> >
       sim;
 
-  Builders::build(sim,config);
-
-
+  Builders::build(sim, config);
 }

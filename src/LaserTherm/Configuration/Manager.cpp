@@ -17,9 +17,7 @@ void Manager::load(const std::string& filename)
   error << "Could not parse configuration file: " << filename << "\n";
   bool fail = true;
 
-
-  if(fail)
-  { // INI
+  if (fail) {  // INI
     std::ifstream in(filename);
     try {
       boost::property_tree::read_ini(in, this->configuration);
@@ -33,9 +31,7 @@ void Manager::load(const std::string& filename)
     }
   }
 
-
-  if(fail)
-  { // JSON
+  if (fail) {  // JSON
     std::ifstream in(filename);
     try {
       boost::property_tree::read_json(in, this->configuration);
@@ -49,9 +45,7 @@ void Manager::load(const std::string& filename)
     }
   }
 
-
-  if(fail)
-  { // XML
+  if (fail) {  // XML
     std::ifstream in(filename);
     try {
       boost::property_tree::read_xml(in, this->configuration);
@@ -65,9 +59,7 @@ void Manager::load(const std::string& filename)
     }
   }
 
-
-  if(fail)
-  { // INFO
+  if (fail) {  // INFO
     std::ifstream in(filename);
     try {
       boost::property_tree::read_info(in, this->configuration);
@@ -81,11 +73,9 @@ void Manager::load(const std::string& filename)
     }
   }
 
-  if(fail)
-    throw std::runtime_error(error.str());
+  if (fail) throw std::runtime_error(error.str());
 
-  this->configuration = unflatten_ptree( this->configuration );
-
+  this->configuration = unflatten_ptree(this->configuration);
 
   return;
 }

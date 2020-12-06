@@ -7,7 +7,6 @@
  * @date 03/18/19
  */
 
-
 template<class MaterialType, class StructureType>
 class MaterialStructure
 {
@@ -15,11 +14,11 @@ class MaterialStructure
   MaterialType  material;
   StructureType structure;
 
-  MaterialStructure( MaterialType m, StructureType s) : structure(s), material(m)
+  MaterialStructure(MaterialType m, StructureType s) : structure(s), material(m)
   {
   }
   MaterialStructure() = default;
 
-}; // namespace Structures::_1D
+};  // namespace Structures::_1D
 
 #endif  // include protector

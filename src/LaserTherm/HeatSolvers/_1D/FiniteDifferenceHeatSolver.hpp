@@ -34,34 +34,33 @@ class FiniteDifferenceHeatSolver
         A(T.getCoordinateSystemPtr()),
         VHC(T.getCoordinateSystemPtr()),
         k(T.getCoordinateSystemPtr())
-  { }
+  {
+  }
 
   FiniteDifferenceHeatSolver(const FiniteDifferenceHeatSolver& that)
-  :T(that.T.size()),
+      : T(that.T.size()),
         A(T.getCoordinateSystemPtr()),
         VHC(T.getCoordinateSystemPtr()),
         k(T.getCoordinateSystemPtr())
   {
-    for(int i = 0; i < this->T.size(); ++i)
-    {
-      this->T(i) = that.T(i);
-      this->A(i) = that.A(i);
+    for (int i = 0; i < this->T.size(); ++i) {
+      this->T(i)   = that.T(i);
+      this->A(i)   = that.A(i);
       this->VHC(i) = that.VHC(i);
-      this->k(i) = that.k(i);
+      this->k(i)   = that.k(i);
     }
   }
 
   FiniteDifferenceHeatSolver operator=(FiniteDifferenceHeatSolver that)
   {
     using std::swap;
-    swap(T,that.T);
-    swap(A,that.A);
-    swap(VHC,that.VHC);
-    swap(k,that.k);
+    swap(T, that.T);
+    swap(A, that.A);
+    swap(VHC, that.VHC);
+    swap(k, that.k);
 
     return *this;
   }
-
 
   Field<REAL, 1> T;    ///< Temperature
   Field<REAL, 1> A;    ///< Source Term

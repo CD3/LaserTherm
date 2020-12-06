@@ -10,9 +10,9 @@
 
 #include <Eigen/Dense>
 
-#include "../../Utils/TypeTraits.hpp"
 #include "../../Utils/FiniteDifference.hpp"
 #include "../../Utils/TriDiagonalSolver.hpp"
+#include "../../Utils/TypeTraits.hpp"
 #include "./FiniteDifferenceHeatSolver.hpp"
 
 namespace HeatSolvers::_1D

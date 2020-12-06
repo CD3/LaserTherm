@@ -11,7 +11,8 @@ namespace bpt = boost::property_tree;
  * Converts all quantities in a property tree to values expressed
  * in the base units of a unit registry.
  */
-void convertPropertyTreeUnits(bpt::ptree& config, const UnitConvert::UnitRegistry& ureg)
+void convertPropertyTreeUnits(bpt::ptree&                      config,
+                              const UnitConvert::UnitRegistry& ureg)
 {
   for (auto& it : config) {
     auto val = it.second.get_value_optional<std::string>();

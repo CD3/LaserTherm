@@ -1,3 +1,8 @@
+#include <chrono>
+#include <cstdint>
+#include <fstream>
+#include <iostream>
+
 #include <boost/accumulators/accumulators.hpp>
 #include <boost/accumulators/statistics/error_of.hpp>
 #include <boost/accumulators/statistics/error_of_mean.hpp>
@@ -7,12 +12,8 @@
 #include <boost/accumulators/statistics/stats.hpp>
 #include <boost/accumulators/statistics/sum.hpp>
 #include <boost/optional.hpp>
-#include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/json_parser.hpp>
-#include <chrono>
-#include <cstdint>
-#include <fstream>
-#include <iostream>
+#include <boost/property_tree/ptree.hpp>
 
 namespace BM
 {
@@ -48,7 +49,7 @@ struct high_resolution_timer {
   }
 
  private:
-  std::uint64_t m_start_time;
+  std::uint64_t        m_start_time;
   static std::uint64_t take_time_stamp()
   {
     // need to cast results of high_resolution_clock::now().time_since_epoch()
@@ -74,22 +75,22 @@ typedef accumulator_set<
  * A class representing a measurement which consists of a nominal value with
  * uncertainty.
  */
-template <typename T>
+template<typename T>
 class Measurement
 {
  public:
   T m_nominal;
   T m_uncertainty;
 
-  Measurement() = default;
+  Measurement()                   = default;
   Measurement(const Measurement&) = default;
   Measurement(T n, T u) : m_nominal(n), m_uncertainty(u) {}
-  T nominal() const { return m_nominal; }
-  T uncertainty() const { return m_uncertainty; }
-  T upper() const { return m_nominal + m_uncertainty; }
-  T lower() const { return m_nominal - m_uncertainty; }
+  T      nominal() const { return m_nominal; }
+  T      uncertainty() const { return m_uncertainty; }
+  T      upper() const { return m_nominal + m_uncertainty; }
+  T      lower() const { return m_nominal - m_uncertainty; }
   double relative_uncertainty() const { return m_uncertainty / m_nominal; }
-  bool operator==(const Measurement& other) const
+  bool   operator==(const Measurement& other) const
   {
     // two measurments are "consistent" if
     //
@@ -97,7 +98,7 @@ class Measurement
     // 2
     //
     T diff = abs(this->m_nominal - other.m_nominal);
-    T unc = sqrt(this->m_uncertainty * this->m_uncertainty +
+    T unc  = sqrt(this->m_uncertainty * this->m_uncertainty +
                  other.m_uncertainty * other.m_uncertainty);
 
     // don't want to inadvertently divide by zero.
@@ -131,7 +132,7 @@ class Measurement
     return (*this == other) || (*this > other);
   }
 
-  template <typename TT>
+  template<typename TT>
   friend std::ostream& operator<<(std::ostream& os, const Measurement<TT>& uq)
   {
     os << uq.nominal() << " +/- " << uq.uncertainty();
@@ -141,12 +142,12 @@ class Measurement
 
 struct Benchmark {
   high_resolution_timer m_timer;
-  timer_statistics m_accum;
-  double m_tolerance;
-  size_t m_max_iters;
-  size_t m_min_iters;
-  size_t m_burn_iters;
-  std::uint64_t m_max_runtime;  // max runtime in nanoseconds
+  timer_statistics      m_accum;
+  double                m_tolerance;
+  size_t                m_max_iters;
+  size_t                m_min_iters;
+  size_t                m_burn_iters;
+  std::uint64_t         m_max_runtime;  // max runtime in nanoseconds
 
   Benchmark()
       : m_tolerance(0.01),  // 1% error
@@ -165,7 +166,7 @@ struct Benchmark {
    * Executes a callable, returns the runtime in nanoseconds, and adds it to the
    * Benchmark statistics.
    */
-  template <typename F>
+  template<typename F>
   void record(const F& f)
   {
     m_timer.restart();
@@ -180,7 +181,7 @@ struct Benchmark {
    * variance in run times. The callable will be ran until the relative variance
    * is less than the value stored in m_tolerance.
    */
-  template <typename F>
+  template<typename F>
   void run(const F& f)
   {
     high_resolution_timer run_timer;
@@ -223,7 +224,10 @@ struct Benchmark {
   double get_average_runtime() const { return mean(m_accum); }
   double get_stddev_runtime() const { return sqrt(variance(m_accum)); }
   double get_total_runtime() const { return sum(m_accum); }
-  double get_runtime_relative_error() const { return error_of<tag::mean>(m_accum)/mean(m_accum); }
+  double get_runtime_relative_error() const
+  {
+    return error_of<tag::mean>(m_accum) / mean(m_accum);
+  }
   size_t get_iterations() const { return count(m_accum); }
 
   /**
@@ -275,15 +279,15 @@ class BenchmarkComparison
 class PerformanceBenchmark
 {
  protected:
-  std::string m_Name;
+  std::string                          m_Name;
   boost::optional<Measurement<double>> m_Baseline;
   boost::optional<Measurement<double>> m_Minimum;
 
  public:
   struct Result {
-    bool is_faster_than_baseline;
+    bool                is_faster_than_baseline;
     Measurement<double> speedup_over_baseline;
-    bool is_faster_than_minimum;
+    bool                is_faster_than_minimum;
     Measurement<double> speedup_over_minimum;
   };
 
@@ -300,15 +304,15 @@ class PerformanceBenchmark
     in.open(store);
     if (in.is_open()) {
       boost::property_tree::ptree data;
-      boost::property_tree::read_json( in, data );
+      boost::property_tree::read_json(in, data);
 
       double n, u;
-      n = data.get<double>("baseline.nominal");
-      u = data.get<double>("baseline.uncertainty");
+      n          = data.get<double>("baseline.nominal");
+      u          = data.get<double>("baseline.uncertainty");
       m_Baseline = Measurement<double>(n, u);
 
-      n = data.get<double>("minimum.nominal");
-      u = data.get<double>("minimum.uncertainty");
+      n         = data.get<double>("minimum.nominal");
+      u         = data.get<double>("minimum.uncertainty");
       m_Minimum = Measurement<double>(n, u);
     }
   }
@@ -321,11 +325,11 @@ class PerformanceBenchmark
       out.open(store);
       if (out.is_open()) {
         boost::property_tree::ptree data;
-        data.put("baseline.nominal"     , m_Baseline->nominal());
-        data.put("baseline.uncertainty" , m_Baseline->uncertainty());
-        data.put("minimum.nominal"      , m_Minimum->nominal());
-        data.put("minimum.uncertainty"  , m_Minimum->uncertainty());
-        boost::property_tree::write_json( out, data );
+        data.put("baseline.nominal", m_Baseline->nominal());
+        data.put("baseline.uncertainty", m_Baseline->uncertainty());
+        data.put("minimum.nominal", m_Minimum->nominal());
+        data.put("minimum.uncertainty", m_Minimum->uncertainty());
+        boost::property_tree::write_json(out, data);
       } else {
         std::cout << "ERROR: could not open " << store
                   << " to write benchmark data." << std::endl;
@@ -350,17 +354,17 @@ class PerformanceBenchmark
     Result res;
 
     res.is_faster_than_baseline = measurement < m_Baseline;
-    res.is_faster_than_minimum = measurement < m_Minimum;
+    res.is_faster_than_minimum  = measurement < m_Minimum;
 
     double s, dsn, dsd;
 
-    s = m_Baseline->nominal() / measurement.nominal();
+    s   = m_Baseline->nominal() / measurement.nominal();
     dsn = m_Baseline->upper() / measurement.nominal() - s;
     dsd = m_Baseline->nominal() / measurement.upper() - s;
     res.speedup_over_baseline =
         Measurement<double>(s, sqrt(dsn * dsn + dsd * dsd));
 
-    s = m_Minimum->nominal() / measurement.nominal();
+    s   = m_Minimum->nominal() / measurement.nominal();
     dsn = m_Minimum->upper() / measurement.nominal() - s;
     dsd = m_Minimum->nominal() / measurement.upper() - s;
     res.speedup_over_minimum =
@@ -373,7 +377,7 @@ class PerformanceBenchmark
     return res;
   }
 
-  bool have_baseline() { return static_cast<bool>(m_Baseline); }
+  bool                have_baseline() { return static_cast<bool>(m_Baseline); }
   Measurement<double> get_baseline()
   {
     if (m_Baseline) {
@@ -383,7 +387,7 @@ class PerformanceBenchmark
     }
   }
 
-  bool have_minimum() { return static_cast<bool>(m_Minimum); }
+  bool                have_minimum() { return static_cast<bool>(m_Minimum); }
   Measurement<double> get_minimum()
   {
     if (m_Minimum) {
