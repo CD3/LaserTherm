@@ -3,7 +3,7 @@
 #include <fstream>
 #include <iostream>
 
-#include <LaserTherm/HeatSolvers/_1D/CrankNicholson.hpp>
+#include <LaserTherm/HeatSolvers/_1D/Cartesian/CrankNicholson.hpp>
 
 template<typename T>
 void nop(T& a)
@@ -14,7 +14,7 @@ TEST_CASE("Heat Solver Construction and Setup", "[heatsolver]")
 {
   SECTION("Crank-Nicholson")
   {
-    HeatSolvers::_1D::CrankNicholson<double> HeatSolver(11);
+    HeatSolvers::_1D::Cartesian::CrankNicholson<double> HeatSolver(11);
     HeatSolver.T.setCoordinateSystem(Uniform(-2, 2));
 
     HeatSolver.T.set(1.0);
@@ -58,7 +58,7 @@ TEST_CASE("Heat Solver Signals", "[heatsolver]")
 {
   SECTION("Crank-Nicholson")
   {
-    HeatSolvers::_1D::CrankNicholson<double> HeatSolver(10);
+    HeatSolvers::_1D::Cartesian::CrankNicholson<double> HeatSolver(10);
 
     HeatSolver.sig_askSourceTerm.connect([](auto& f, const auto& t) {
       f.set(2);
@@ -155,7 +155,7 @@ TEST_CASE("1D Cartesian Heat Solver Validation", "[heatsolver][validation]")
 
   SECTION("Crank-Nicholson Solver")
   {
-    HeatSolvers::_1D::CrankNicholson<double> HeatSolver(N);
+    HeatSolvers::_1D::Cartesian::CrankNicholson<double> HeatSolver(N);
 
     HeatSolver.T.setCoordinateSystem(Uniform(xmin, xmax));
     HeatSolver.VHC.set(rho * c);

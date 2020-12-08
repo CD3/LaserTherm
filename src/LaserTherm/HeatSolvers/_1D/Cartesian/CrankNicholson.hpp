@@ -10,12 +10,12 @@
 
 #include <Eigen/Dense>
 
-#include "../../Utils/FiniteDifference.hpp"
-#include "../../Utils/TriDiagonalSolver.hpp"
-#include "../../Utils/TypeTraits.hpp"
-#include "./FiniteDifferenceHeatSolver.hpp"
+#include "../../../Utils/FiniteDifference.hpp"
+#include "../../../Utils/TriDiagonalSolver.hpp"
+#include "../../../Utils/TypeTraits.hpp"
+#include "../FiniteDifferenceHeatSolver.hpp"
 
-namespace HeatSolvers::_1D
+namespace HeatSolvers::_1D::Cartesian
 {
 template<typename REAL>
 class CrankNicholson : public FiniteDifferenceHeatSolver<REAL>
@@ -382,7 +382,7 @@ REAL CrankNicholson<REAL>::dp2(int _i)
 }  // namespace HeatSolvers::_1D
 
 template<typename REAL>
-struct get_real_type<HeatSolvers::_1D::CrankNicholson<REAL> > {
+struct get_real_type<HeatSolvers::_1D::Cartesian::CrankNicholson<REAL> > {
   using type = REAL;
 };
 

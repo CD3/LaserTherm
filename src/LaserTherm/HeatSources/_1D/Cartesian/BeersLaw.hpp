@@ -7,9 +7,9 @@
  * @date 02/24/19
  */
 
-#include "./FiniteDifferenceHeatSource.hpp"
+#include "../FiniteDifferenceHeatSource.hpp"
 
-namespace HeatSources::_1D
+namespace HeatSources::_1D::Cartesian
 {
 template<typename REAL>
 class BeersLaw : public FiniteDifferenceHeatSource<REAL>

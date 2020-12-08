@@ -3,11 +3,11 @@
 #include <fstream>
 #include <iostream>
 
-#include <LaserTherm/HeatSources/_1D/BeersLaw.hpp>
+#include <LaserTherm/HeatSources/_1D/Cartesian/BeersLaw.hpp>
 
 TEST_CASE("Beers Law Source")
 {
-  HeatSources::_1D::BeersLaw<double> HeatSource(11);
+  HeatSources::_1D::Cartesian::BeersLaw<double> HeatSource(11);
   HeatSource.A.setCoordinateSystem(Uniform(-2, 2));
   HeatSource.E0 = 10;
 

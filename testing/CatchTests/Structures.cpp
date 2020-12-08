@@ -9,14 +9,14 @@
 #include <LaserTherm/Materials/Basic.hpp>
 #include <LaserTherm/Structures/_1D/AnyStructure.hpp>
 #include <LaserTherm/Structures/_1D/Infinite.hpp>
-#include <LaserTherm/Structures/_1D/Slab.hpp>
+#include <LaserTherm/Structures/_1D/Cartesian/Slab.hpp>
 #include <libField/Field.hpp>
 
 TEST_CASE("Structures")
 {
   SECTION("Slab")
   {
-    Structures::_1D::Slab<double> slab;
+    Structures::_1D::Cartesian::Slab<double> slab;
 
     SECTION("1 surface")
     {
@@ -88,7 +88,7 @@ TEST_CASE("Structures")
   SECTION("AnyStructure")
   {
     Structures::_1D::AnyStructure<double> structure;
-    Structures::_1D::Slab<double>         slab;
+    Structures::_1D::Cartesian::Slab<double>         slab;
     slab.setMinSurfacePosition(0);
     slab.setThickness(1.5);
     structure = slab;
@@ -113,7 +113,7 @@ TEST_CASE("Structures")
 
 TEST_CASE("Material Structure")
 {
-  MaterialStructure<Materials::Basic<double>, Structures::_1D::Slab<double> >
+  MaterialStructure<Materials::Basic<double>, Structures::_1D::Cartesian::Slab<double> >
       obj;
 
   obj.structure.setMinSurfacePosition(1.0);
@@ -168,7 +168,7 @@ TEST_CASE("Collection of Material Structures")
       MaterialStructureType(mat, Structures::_1D::Infinite<double>()));
 
   mat = MaterialType();
-  Structures::_1D::Slab<double> slab;
+  Structures::_1D::Cartesian::Slab<double> slab;
   for (int i = 0; i < 3; ++i) {
     MaterialType mat;
     mat.setDensity(1.5 * (i + 1));

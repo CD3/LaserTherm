@@ -4,7 +4,7 @@
 #include <iostream>
 
 #include <Benchmark.hpp>
-#include <LaserTherm/HeatSolvers/_1D/CrankNicholson.hpp>
+#include <LaserTherm/HeatSolvers/_1D/Cartesian/CrankNicholson.hpp>
 
 TEST_CASE("CrankNicholson Heat Solver Optimizations","[.]")
 {
@@ -13,7 +13,7 @@ TEST_CASE("CrankNicholson Heat Solver Optimizations","[.]")
   BM::PerformanceBenchmark bm("reduce-copies");
   BM::Benchmark            meter;
 
-  HeatSolvers::_1D::CrankNicholson<double> HeatSolver(1000);
+  HeatSolvers::_1D::Cartesian::CrankNicholson<double> HeatSolver(1000);
   HeatSolver.T.setCoordinateSystem(Uniform(-5, 5));
   HeatSolver.VHC.set(4);
   HeatSolver.k.set(0.006);

@@ -15,13 +15,13 @@
 
 #include "../Configuration/Manager.hpp"
 #include "../Emitters/Basic.hpp"
-#include "../HeatSolvers/_1D/CrankNicholson.hpp"
+#include "../HeatSolvers/_1D/Cartesian/CrankNicholson.hpp"
 #include "../MaterialStructure.hpp"
 #include "../Materials/Basic.hpp"
 #include "../Simulations/SingleEmitterExposure.hpp"
 #include "../Structures/_1D/AnyStructure.hpp"
 #include "../Structures/_1D/Infinite.hpp"
-#include "../Structures/_1D/Slab.hpp"
+#include "../Structures/_1D/Cartesian/Slab.hpp"
 #include "../Waveforms/ContinuousWave.hpp"
 
 namespace Builders
@@ -76,7 +76,7 @@ void build(std::vector<MaterialStructure<Materials::Basic<REAL>,
   using StructureType         = Structures::_1D::AnyStructure<REAL>;
   using MaterialStructureType = MaterialStructure<MaterialType, StructureType>;
   using InfStucture           = Structures::_1D::Infinite<REAL>;
-  using LayerStucture         = Structures::_1D::Slab<REAL>;
+  using LayerStucture         = Structures::_1D::Cartesian::Slab<REAL>;
 
   std::map<std::string, MaterialType> materials;
   auto materials_config = config.get_child_optional("materials");

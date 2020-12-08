@@ -4,7 +4,7 @@
 #include <iostream>
 
 #include <LaserTherm/Emitters/Basic.hpp>
-#include <LaserTherm/HeatSources/_1D/BeersLaw.hpp>
+#include <LaserTherm/HeatSources/_1D/Cartesian/BeersLaw.hpp>
 #include <LaserTherm/Waveforms/ContinuousWave.hpp>
 #include <LaserTherm/Waveforms/RegularPulseTrain.hpp>
 #include <LaserTherm/Waveforms/SinglePulse.hpp>
@@ -14,7 +14,7 @@ TEST_CASE("Linear Absorption Emitter")
 {
   SECTION("CW Exposure")
   {
-    Emitters::Basic<HeatSources::_1D::BeersLaw<double>,
+    Emitters::Basic<HeatSources::_1D::Cartesian::BeersLaw<double>,
                     Waveforms::ContinuousWave<double> >
         emitter(11);
 
@@ -54,7 +54,7 @@ TEST_CASE("Linear Absorption Emitter")
 
   SECTION("Multi-Pulse Exposure")
   {
-    Emitters::Basic<HeatSources::_1D::BeersLaw<double>,
+    Emitters::Basic<HeatSources::_1D::Cartesian::BeersLaw<double>,
                     Waveforms::RegularPulseTrain<double> >
         emitter(11);
 

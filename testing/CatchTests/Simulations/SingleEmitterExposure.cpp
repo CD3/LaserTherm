@@ -12,14 +12,14 @@
 #include <LaserTherm/Configuration/Builders.hpp>
 #include <LaserTherm/Configuration/Manager.hpp>
 #include <LaserTherm/Emitters/Basic.hpp>
-#include <LaserTherm/HeatSolvers/_1D/CrankNicholson.hpp>
-#include <LaserTherm/HeatSources/_1D/BeersLaw.hpp>
+#include <LaserTherm/HeatSolvers/_1D/Cartesian/CrankNicholson.hpp>
+#include <LaserTherm/HeatSources/_1D/Cartesian/BeersLaw.hpp>
 #include <LaserTherm/MaterialStructure.hpp>
 #include <LaserTherm/Materials/Basic.hpp>
 #include <LaserTherm/Simulations/SingleEmitterExposure.hpp>
 #include <LaserTherm/Structures/_1D/AnyStructure.hpp>
 #include <LaserTherm/Structures/_1D/Infinite.hpp>
-#include <LaserTherm/Structures/_1D/Slab.hpp>
+#include <LaserTherm/Structures/_1D/Cartesian/Slab.hpp>
 #include <LaserTherm/Waveforms/ContinuousWave.hpp>
 
 TEST_CASE("Simple Simulation Test", "[simulations]")
@@ -90,9 +90,9 @@ TEST_CASE("Simple Simulation Test", "[simulations]")
   convertPropertyTreeUnits(config.configuration, config.unit_registry);
 
   Simulations::SingleEmitterExposure<
-      Emitters::Basic<HeatSources::_1D::BeersLaw<double>,
+      Emitters::Basic<HeatSources::_1D::Cartesian::BeersLaw<double>,
                       Waveforms::ContinuousWave<double> >,
-      HeatSolvers::_1D::CrankNicholson<double> >
+      HeatSolvers::_1D::Cartesian::CrankNicholson<double> >
       sim;
 
   size_t xN   = config.get<size_t>("simulation.grid.x.n");
@@ -264,9 +264,9 @@ TEST_CASE("Simulation Builder Test")
   convertPropertyTreeUnits(config.configuration, config.unit_registry);
 
   Simulations::SingleEmitterExposure<
-      Emitters::Basic<HeatSources::_1D::BeersLaw<double>,
+      Emitters::Basic<HeatSources::_1D::Cartesian::BeersLaw<double>,
                       Waveforms::ContinuousWave<double> >,
-      HeatSolvers::_1D::CrankNicholson<double> >
+      HeatSolvers::_1D::Cartesian::CrankNicholson<double> >
       sim;
 
   Builders::build(sim, config);

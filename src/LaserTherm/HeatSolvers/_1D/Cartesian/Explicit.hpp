@@ -9,10 +9,10 @@
 
 #include <Eigen/Dense>
 
-#include "../../Utils/FiniteDifference.hpp"
-#include "./FiniteDifferenceSolver.hpp"
+#include "../../../Utils/FiniteDifference.hpp"
+#include "../FiniteDifferenceSolver.hpp"
 
-namespace HeatSolvers::_1D
+namespace HeatSolvers::_1D::Cartesian
 {
 template<typename REAL>
 class Explcit : public FiniteDifferenceSolver<REAL>

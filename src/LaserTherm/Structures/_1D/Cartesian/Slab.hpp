@@ -1,5 +1,4 @@
-#ifndef LaserTherm_Structures__1D_Slab_hpp
-#define LaserTherm_Structures__1D_Slab_hpp
+#pragma once
 
 /** @file Slab.hpp
  * @brief
@@ -9,7 +8,7 @@
 
 #include <optional>
 
-namespace Structures::_1D
+namespace Structures::_1D::Cartesian
 {
 template<typename REAL>
 class Slab
@@ -57,4 +56,3 @@ class Slab
 
 }  // namespace Structures::_1D
 
-#endif  // include protector
