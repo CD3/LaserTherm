@@ -11,7 +11,7 @@
 
 #include "../BoundaryConditions.hpp"
 
-namespace HeatSolvers::_2D::CylindricalCoordinates
+namespace HeatSolvers::_2D::Cylindrical
 {
 template<typename REAL>
 class FiniteDifferenceHeatSolver
@@ -31,8 +31,8 @@ class FiniteDifferenceHeatSolver
 
  public:
   FiniteDifferenceHeatSolver() = default;
-  FiniteDifferenceHeatSolver(size_t N)
-      : T(N),
+  FiniteDifferenceHeatSolver(size_t Nz, size_t Nr)
+      : T(Nz,Nr),
         A(T.getCoordinateSystemPtr()),
         VHC(T.getCoordinateSystemPtr()),
         k(T.getCoordinateSystemPtr())
@@ -64,13 +64,15 @@ class FiniteDifferenceHeatSolver
     return *this;
   }
 
-  Field<REAL, 1> T;    ///< Temperature
-  Field<REAL, 1> A;    ///< Source Term
-  Field<REAL, 1> VHC;  ///< Volumetric Heat Capacity
-  Field<REAL, 1> k;    ///< Conductivity
+  Field<REAL, 2> T;    ///< Temperature
+  Field<REAL, 2> A;    ///< Source Term
+  Field<REAL, 2> VHC;  ///< Volumetric Heat Capacity
+  Field<REAL, 2> k;    ///< Conductivity
 
-  BC minBC;
-  BC maxBC;
+  BC minZBC;
+  BC maxZBC;
+  BC minRBC;
+  BC maxRBC;
 };
 
 }  // namespace HeatSolvers::_1D
