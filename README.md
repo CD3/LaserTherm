@@ -106,6 +106,14 @@ Password for 'http://fermi.fhsu.edu:81':
 ```
 You will have to enter your fermi username and password.
 
+This repository contains git "submodules", which must also be downloaded. You do this by first
+initializing, and then updating, the submodules.
+```
+$ git submoule init
+$ git submoule update
+```
+
+
 ### Building `LaserTherm`
 
 Now you can configure and build. `LaserTherm` uses CMake, so first create a `build/`
@@ -121,7 +129,7 @@ $ cd LaserTherm
 $ mkdir build
 $ cd build
 $ conan install .. --build missing
-$ source activate.sh
+$ source activate.sh  # for Linux or Mac
 $ cmake ..
 $ cmake --build .
 ```
