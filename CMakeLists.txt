@@ -89,7 +89,7 @@ target_include_directories(
 target_link_libraries(
   ${LIB_NAME}
   INTERFACE Boost::boost Eigen3::Eigen libField::Field
-            $<$<BOOL:OPENMP_FOUND>:OpenMP::OpenMP_CXX>
+    $<$<BOOL:OPENMP_CXX_FOUND>:OpenMP::OpenMP_CXX>
   PUBLIC UnitConvert::UnitConvert)
 
 target_compile_definitions(${LIB_NAME}
