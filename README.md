@@ -3,21 +3,29 @@
 ## Description
 
 `LaserTherm` is a C++ library, and collection of client applications, for running laser-tissue interaction simulations. At its
-core, `LaserTherm` is a heat solver, with models to incorporate heat due to laser exposure. It was created with the following
+core, `LaserTherm` is a collection of heat solvers, with models to incorporate heat due to laser exposure. It was created with the following
 design goals:
 
 1. Simple
 1. Modular
 1. Flexible
 
+It is currently being developed as a series of undergraduate research projects in the [Department of Physics](https://www.fhsu.edu/physics/) at [Fort Hays State University](https://www.fhsu.edu). 
+
+Authors:
+
+- Dr. CD Clark III
+- Daniel Huantes
+- Emily Cranwell
+
 ## Building and Installing
 
-If not already installed, install python3, pip3, and git. You will need administrator
+If not already installed, install python3, pip3, git, cmake, and the gnu C++ compiler. You will need administrator
 privileges, or ask your system administrator to install them for you. It is likely
 that they are already installed.
 
 ```
-$ sudo apt install python3 python3-pip git cmake
+$ sudo apt install python3 python3-pip git cmake gcc g++
 ```
 Everything else can be installed to your user account and does not require admin
 privilege.
