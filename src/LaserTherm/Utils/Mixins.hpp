@@ -1,6 +1,8 @@
 #ifndef LaserTherm_Utils_Mixins_hpp
 #define LaserTherm_Utils_Mixins_hpp
 
+#include <optional>
+
 /** @file Mixins.hpp
  * @brief
  * @author C.D. Clark III
