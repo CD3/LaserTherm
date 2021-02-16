@@ -19,7 +19,109 @@
 	\author{Emily Cranwell and Daniel Huantes}
 	\date{\today} 
 	\maketitle
-	\section{The whole thing}
-		Is too long to type
-	\section{Sorry}
+		\section{Introduction}
+		
+		\section{The Problem}
+		
+		\section{Derivation}
+		
+		\begin{equation}
+		\begin{aligned}
+		\rho c \frac{d\mathrm{T}}{dt} &= \vec\nabla \cdot \kappa \vec\nabla \mathrm{T} + A \\
+		\end{aligned}
+		\end{equation}
+		
+		\begin{equation}
+		\begin{aligned}
+		\rho c \frac{d\mathrm{T}}{dt} &= \vec\nabla \cdot \kappa \left [  \frac{\partial\mathrm{T}}{\partial r}\hat r  + \frac{\partial\mathrm{T}}{\partial z}\hat z \right ] \\
+		\end{aligned}
+		\end{equation}
+		
+		\begin{equation}
+		\begin{aligned}
+		\rho c \frac{d\mathrm{T}}{dt} &= \vec\nabla \cdot \left [  \frac{\partial\mathrm{T}}{\partial r}\kappa(r, z) \hat r  + \frac{\partial\mathrm{T}}{\partial z}\kappa(r, z) \hat z \right ] \\
+		\end{aligned}
+		\end{equation}
+		
+		\begin{equation}
+		\begin{aligned}
+		\rho c \frac{d\mathrm{T}}{dt} &= \frac{1}{r}\frac{\partial}{\partial r}  \left [ r \frac{\partial\mathrm{T}}{\partial r}\kappa(r, z) \right ]  + \frac{\partial}{\partial z} \left [ \frac{\partial\mathrm{T}}{\partial z}\kappa(r, z)  \right ] \\
+		\end{aligned}
+		\end{equation}
+		
+		\begin{equation}
+		\begin{aligned}
+		\rho c \frac{d\mathrm{T}}{dt} &= \frac{1}{r} \left [ \frac{\partial\mathrm{T}}{\partial r}\kappa(r, z) + r\frac{\partial^2\mathrm{T}}{\partial r^2}\kappa(r, z)  + r\frac{\partial\mathrm{T}}{\partial r} \frac{\partial\mathrm{\kappa}}{\partial r} \right ] + \frac{\partial^2\mathrm{T}}{\partial z^2}\kappa(r, z) + \frac{\partial\mathrm{T}}{\partial z}\frac{\partial\mathrm{\kappa}}{\partial z} \\
+		\end{aligned}
+		\end{equation}
+		
+		\begin{equation}
+		\begin{aligned}
+		\rho c \frac{d\mathrm{T}}{dt} &= \frac{1}{r} \frac{\partial\mathrm{T}}{\partial r}\kappa(r, z) + \frac{\partial^2\mathrm{T}}{\partial r^2}\kappa(r, z)  + \frac{\partial\mathrm{T}}{\partial r} \frac{\partial\mathrm{\kappa}}{\partial r}  + \frac{\partial^2\mathrm{T}}{\partial z^2}\kappa(r, z) + \frac{\partial\mathrm{T}}{\partial z}\frac{\partial\mathrm{\kappa}}{\partial z} \\
+		\end{aligned}
+		\end{equation}
+		
+		\begin{equation}
+		\begin{aligned}
+		\rho c \frac{d\mathrm{T}}{dt} &= \frac{1}{r} \left [\frac{\mathrm{T}^{n}_{r + 1, z} - \mathrm{T}^{n}_{r - 1, z}}{2\Delta r}  \right ]\kappa^{n}_{r, z} + \left [\frac{\mathrm{T}^{n}_{r + 1, z}  - 2 \mathrm{T}^{n}_{r, z} +  \mathrm{T}^{n}_{r - 1, z}}{(\Delta r)^2} \right ]  \kappa^{n}_{r, z} + (\frac{\mathrm{T}^{n}_{r + 1, z} - \mathrm{T}^{n}_{r - 1, z}}{2\Delta r}) (\frac{\kappa^{n}_{r + 1, z} - \kappa^{n}_{r - 1, z}}{2\Delta r}) \\
+		&+ \left [\frac{\mathrm{T}^{n}_{r, z + 1}  - 2 \mathrm{T}^{n}_{r, z} +  \mathrm{T}^{n}_{r, z -1}}{(\Delta z)^2} \right ]\kappa^n_{r, z} + (\frac{\mathrm{T}^{n}_{r, z + 1} - \mathrm{T}^{n}_{r, z - 1}}{2\Delta z})(\frac{\kappa^{n}_{r, z + 1} - \kappa^{n}_{r,z - 1}}{2\Delta z}) \\
+		\end{aligned}
+		\end{equation}
+		
+		\begin{equation}
+		\begin{aligned}
+		% line break
+		\rho c \frac{d\mathrm{T}}{dt} &= \frac{1}{r} \left [\frac{\mathrm{T}^{n}_{r + 1, z} - \mathrm{T}^{n}_{r - 1, z}}{2\Delta r}  \right ]\kappa^{n}_{r, z} + \left [\frac{\mathrm{T}^{n}_{r + 1, z}  - 2 \mathrm{T}^{n}_{r, z} +  \mathrm{T}^{n}_{r - 1, z}}{(\Delta r)^2} \right ]  \kappa^{n}_{r, z} + (\frac{\mathrm{T}^{n}_{r + 1, z} - \mathrm{T}^{n}_{r - 1, z}}{2\Delta r}) (\frac{\Delta \kappa}{\Delta r})^n_{r, z} \\
+		&+ \left [\frac{\mathrm{T}^{n}_{r, z + 1}  - 2 \mathrm{T}^{n}_{r, z} +  \mathrm{T}^{n}_{r, z -1}}{(\Delta z)^2} \right ]\kappa^n_{r, z} + (\frac{\mathrm{T}^{n}_{r, z + 1} - \mathrm{T}^{n}_{r, z - 1}}{2\Delta r})(\frac{\Delta \kappa}{\Delta z})^n_{r, z} \\
+		\end{aligned}
+		\end{equation}
+		
+		\begin{equation}
+		\begin{aligned}
+		% line break
+		\rho c \frac{\mathrm{T}^{n+1}_{r, z} - \mathrm{T}^{n}_{r, z}}{\Delta t} &= \frac{1}{r} \left [\frac{\mathrm{T}^{n}_{r + 1, z} - \mathrm{T}^{n}_{r - 1, z}}{2\Delta r}  \right ]\kappa^{n}_{r, z} + \left [\frac{\mathrm{T}^{n}_{r + 1, z}  - 2 \mathrm{T}^{n}_{r, z} +  \mathrm{T}^{n}_{r - 1, z}}{(\Delta r)^2} \right ]  \kappa^{n}_{r, z}  \\
+		&+ (\frac{\mathrm{T}^{n}_{r + 1, z} - \mathrm{T}^{n}_{r - 1, z}}{2\Delta r}) (\frac{\Delta \kappa}{\Delta r})^n_{r, z}  + \left [\frac{\mathrm{T}^{n}_{r, z + 1}  - 2 \mathrm{T}^{n}_{r, z} +  \mathrm{T}^{n}_{r, z -1}}{(\Delta z)^2} \right ]\kappa^n_{r, z} + (\frac{\mathrm{T}^{n}_{r, z + 1} - \mathrm{T}^{n}_{r, z - 1}}{2\Delta r})(\frac{\Delta \kappa}{\Delta z})^n_{r, z} \\
+		\end{aligned}
+		\end{equation}
+		
+		\begin{equation}
+		\begin{aligned}
+		% line break
+		\mathrm{T}^{n+1}_{r, z} - \mathrm{T}^{n}_{r, z} &= \frac{\Delta t}{\rho c}(\mathrm{T}^{n}_{r, z} \left [\frac{-2\kappa^n_{r, z}}{(\Delta r)^2} -\frac{2\kappa^n_{r, z}}{(\Delta z)^2}  \right ] + \mathrm{T}^{n}_{r + 1, z} \left [\frac{\kappa^n_{r, z}}{2r\Delta r} + \frac{\kappa^n_{r, z}}{(\Delta r)^2} + \frac{1}{2\Delta r}(\frac{\Delta\kappa}{\Delta r})^n_{r, z} \right ] \\
+		&+ \mathrm{T}^{n}_{r - 1, z} \left [\frac{-\kappa^n_{r, z}}{2r\Delta r} + \frac{\kappa^n_{r, z}}{(\Delta r)^2} - \frac{1}{2\Delta r}(\frac{\Delta\kappa}{\Delta r})^n_{r, z} \right ] + \mathrm{T}^{n}_{r, z - 1} \left [\frac{\kappa^n_{r, z}}{(\Delta z)^2} - \frac{1}{2\Delta z}(\frac{\Delta\kappa}{\Delta z})^n_{r, z}  \right ] \\
+		&+ \mathrm{T}^{n}_{r, z + 1} \left [ \frac{\kappa^n_{r, z}}{(\Delta z)^2} + \frac{1}{2\Delta z}(\frac{\Delta\kappa}{\Delta z})^n_{r, z} \right ]) \\
+		\end{aligned}
+		\end{equation}
+		
+		
+		\begin{equation}
+		\begin{aligned}
+		A &= \left [\frac{-2\kappa^n_{r, z}}{(\Delta r)^2} -\frac{2\kappa^n_{r, z}}{(\Delta z)^2}  \right ] \\
+		\end{aligned}
+		\end{equation}
+		
+		\begin{equation}
+		\begin{aligned}
+		B &= \left [\frac{\kappa^n_{r, z}}{2r\Delta r} + \frac{\kappa^n_{r, z}}{(\Delta r)^2} + \frac{1}{2\Delta r}(\frac{\Delta\kappa}{\Delta r})^n_{r, z} \right ] \\
+		\end{aligned}
+		\end{equation}
+		
+		\begin{equation}
+		\begin{aligned}
+		C &= \left [\frac{-\kappa^n_{r, z}}{2r\Delta r} + \frac{\kappa^n_{r, z}}{(\Delta r)^2} - \frac{1}{2\Delta r}(\frac{\Delta\kappa}{\Delta r})^n_{r, z} \right ] \\
+		\end{aligned}
+		\end{equation}
+		
+		\begin{equation}
+		\begin{aligned}
+		D &= \left [\frac{\kappa^n_{r, z}}{(\Delta z)^2} - \frac{1}{2\Delta z}(\frac{\Delta\kappa}{\Delta z})^n_{r, z}  \right ] \\
+		\end{aligned}
+		\end{equation}
+		
+		\begin{equation}
+		\begin{aligned}
+		E &= \left [ \frac{\kappa^n_{r, z}}{(\Delta z)^2} + \frac{1}{2\Delta z}(\frac{\Delta\kappa}{\Delta z})^n_{r, z} \right ] \\
+		\end{aligned}
+		\end{equation}
+		
 \end{document}
