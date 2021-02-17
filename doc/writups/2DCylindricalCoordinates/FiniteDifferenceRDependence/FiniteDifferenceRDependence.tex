@@ -123,5 +123,33 @@
 		E &= \left [ \frac{\kappa^n_{r, z}}{(\Delta z)^2} + \frac{1}{2\Delta z}(\frac{\Delta\kappa}{\Delta z})^n_{r, z} \right ] \\
 		\end{aligned}
 		\end{equation}
-		
+
+    \subsection{Case for $r=0$}
+      \begin{equation}
+        \begin{aligned}
+          \rho c \frac{d\mathrm{T}}{dt} &= \frac{1}{r} \frac{\partial\mathrm{T}}{\partial r}\kappa(r, z) + \frac{\partial^2\mathrm{T}}{\partial r^2}\kappa(r, z)  + \frac{\partial\mathrm{T}}{\partial r} \frac{\partial\mathrm{\kappa}}{\partial r}  + \frac{\partial^2\mathrm{T}}{\partial z^2}\kappa(r, z) + \frac{\partial\mathrm{T}}{\partial z}\frac{\partial\mathrm{\kappa}}{\partial z} \\
+        \end{aligned}
+      \end{equation}	
+
+      \begin{equation}
+        \begin{aligned}
+          \lim_{r\rightarrow 0} \left [ \frac{\frac{\partial\mathrm{T}}{\partial r}\kappa(r, z)}{r} \right ] &= \frac{0}{0} \\
+          \lim_{r\rightarrow 0} \left [ \frac{\frac{\partial\mathrm{T}}{\partial r}\kappa(r, z)}{r} \right ] &\overset{\textcircled{L}}= \lim_{r\rightarrow 0} \left [ \frac{\frac{\partial}{\partial r} \left [\frac{\partial\mathrm{T}}{\partial r}\kappa(r, z)  \right ]}{\frac{\partial}{\partial r}\left [ r \right ]} \right ] \\
+          &= \lim_{r\rightarrow 0} \left [ \frac{\partial^2\mathrm{T}}{\partial r^2}\kappa(r, z)  + \frac{\partial\mathrm{T}}{\partial r}\frac{\partial\kappa(r, z)}{\partial r}\right ] \\
+        \end{aligned}
+      \end{equation}
+
+      \begin{equation}
+        \begin{aligned}
+          \frac{\partial^2\mathrm{T}}{\partial r^2}\kappa(r, z) &= \left [\frac{\mathrm{T}^{n}_{r + 1, z}  - 2 \mathrm{T}^{n}_{r, z} +  \mathrm{T}^{n}_{r - 1, z}}{(\Delta r)^2} \right ] \kappa^n_{r, z} \\
+           &= \left [\frac{\mathrm{T}^{n}_{r + 1, z}  - 2 \mathrm{T}^{n}_{r, z} +  \mathrm{T}^{n}_{r - 1, z}}{(\Delta r)^2} \right ] \kappa^n_{r, z} \\
+        \end{aligned}
+      \end{equation}
+
+      \begin{equation}
+        \begin{aligned}
+          \frac{\partial\mathrm{T}}{\partial r}\frac{\partial\kappa(r, z)}{\partial r} &= \left [\frac{\mathrm{T}^{n}_{r + 1, z} - \mathrm{T}^{n}_{r - 1, z}}{2\Delta r}  \right ](\frac{\Delta\kappa}{\Delta r})^n_{r, z} \\
+           &= \left [\frac{\mathrm{T}^{n}_{r + 1, z} - \mathrm{T}^{n}_{r - 1, z}}{2\Delta r}  \right ](\frac{\Delta\kappa}{\Delta r})^n_{r, z} \\
+        \end{aligned}
+      \end{equation}
 \end{document}
