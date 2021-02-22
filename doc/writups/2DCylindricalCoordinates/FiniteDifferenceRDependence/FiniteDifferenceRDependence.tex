@@ -30,7 +30,7 @@
 		\rho c \frac{d\mathrm{T}}{dt} &= \vec\nabla \cdot \kappa \vec\nabla \mathrm{T} + A \\
 		\end{aligned}
 		\end{equation}
-		We ignore the source term, $A$ for now and proceed by expanding the gradient, considering no phi dependence, so $\frac{\partial\mathrm{T}}{\partial\phi}=0$
+		We ignore the source term, $A$ for now and proceed by expanding the gradient, considering no phi dependence, so $\frac{\partial\mathrm{T}}{\partial\phi}=0$. Using the cylindrical gradient gives
 		\begin{equation}
 		\begin{aligned}
 		\rho c \frac{d\mathrm{T}}{dt} &= \vec\nabla \cdot \kappa \left [  \frac{\partial\mathrm{T}}{\partial r}\hat r  + \frac{\partial\mathrm{T}}{\partial z}\hat z \right ] \\
@@ -42,32 +42,33 @@
 		\rho c \frac{d\mathrm{T}}{dt} &= \vec\nabla \cdot \left [  \frac{\partial\mathrm{T}}{\partial r}\kappa(r, z) \hat r  + \frac{\partial\mathrm{T}}{\partial z}\kappa(r, z) \hat z \right ] \\
 		\end{aligned}
 		\end{equation}
-		
+		Expanding the divergence (again in cylindrical coordinates)
 		\begin{equation}
 		\begin{aligned}
 		\rho c \frac{d\mathrm{T}}{dt} &= \frac{1}{r}\frac{\partial}{\partial r}  \left [ r \frac{\partial\mathrm{T}}{\partial r}\kappa(r, z) \right ]  + \frac{\partial}{\partial z} \left [ \frac{\partial\mathrm{T}}{\partial z}\kappa(r, z)  \right ] \\
 		\end{aligned}
 		\end{equation}
-		
+		We use the product rule to expand each of these derivatives, giving
 		\begin{equation}
 		\begin{aligned}
 		\rho c \frac{d\mathrm{T}}{dt} &= \frac{1}{r} \left [ \frac{\partial\mathrm{T}}{\partial r}\kappa(r, z) + r\frac{\partial^2\mathrm{T}}{\partial r^2}\kappa(r, z)  + r\frac{\partial\mathrm{T}}{\partial r} \frac{\partial\mathrm{\kappa}}{\partial r} \right ] + \frac{\partial^2\mathrm{T}}{\partial z^2}\kappa(r, z) + \frac{\partial\mathrm{T}}{\partial z}\frac{\partial\mathrm{\kappa}}{\partial z} \\
 		\end{aligned}
 		\end{equation}
-		
+	  distributing out the $\frac{1}{r}$ gives our final purely analytical term, which we pause on before continuing
 		\begin{equation}
 		\begin{aligned}
 		\rho c \frac{d\mathrm{T}}{dt} &= \frac{1}{r} \frac{\partial\mathrm{T}}{\partial r}\kappa(r, z) + \frac{\partial^2\mathrm{T}}{\partial r^2}\kappa(r, z)  + \frac{\partial\mathrm{T}}{\partial r} \frac{\partial\mathrm{\kappa}}{\partial r}  + \frac{\partial^2\mathrm{T}}{\partial z^2}\kappa(r, z) + \frac{\partial\mathrm{T}}{\partial z}\frac{\partial\mathrm{\kappa}}{\partial z} \\
 		\end{aligned}
 		\end{equation}
-		
+    \subsection{Finite Difference Expansion of Derivatives}
+	  For all spacial derivatives we expanded using a central difference method, as aside from at boundaries this information is available to us. We aim to reduce this to an easily calculable form in order to implement into our code. Our time derivative is a forward difference, so we can solve for the temperature at the next 'time step'
 		\begin{equation}
 		\begin{aligned}
 		\rho c \frac{d\mathrm{T}}{dt} &= \frac{1}{r} \left [\frac{\mathrm{T}^{n}_{r + 1, z} - \mathrm{T}^{n}_{r - 1, z}}{2\Delta r}  \right ]\kappa^{n}_{r, z} + \left [\frac{\mathrm{T}^{n}_{r + 1, z}  - 2 \mathrm{T}^{n}_{r, z} +  \mathrm{T}^{n}_{r - 1, z}}{(\Delta r)^2} \right ]  \kappa^{n}_{r, z} + (\frac{\mathrm{T}^{n}_{r + 1, z} - \mathrm{T}^{n}_{r - 1, z}}{2\Delta r}) (\frac{\kappa^{n}_{r + 1, z} - \kappa^{n}_{r - 1, z}}{2\Delta r}) \\
 		&+ \left [\frac{\mathrm{T}^{n}_{r, z + 1}  - 2 \mathrm{T}^{n}_{r, z} +  \mathrm{T}^{n}_{r, z -1}}{(\Delta z)^2} \right ]\kappa^n_{r, z} + (\frac{\mathrm{T}^{n}_{r, z + 1} - \mathrm{T}^{n}_{r, z - 1}}{2\Delta z})(\frac{\kappa^{n}_{r, z + 1} - \kappa^{n}_{r,z - 1}}{2\Delta z}) \\
 		\end{aligned}
 		\end{equation}
-		
+		From here on we designate the first central difference derivative of $\kappa$ to be $(\frac{\Delta \kappa}{\Delta z})^n_{r, z}$, since we can calculate it seperately before the bulk of the rest of calculations 
 		\begin{equation}
 		\begin{aligned}
 		% line break
@@ -75,7 +76,7 @@
 		&+ \left [\frac{\mathrm{T}^{n}_{r, z + 1}  - 2 \mathrm{T}^{n}_{r, z} +  \mathrm{T}^{n}_{r, z -1}}{(\Delta z)^2} \right ]\kappa^n_{r, z} + (\frac{\mathrm{T}^{n}_{r, z + 1} - \mathrm{T}^{n}_{r, z - 1}}{2\Delta r})(\frac{\Delta \kappa}{\Delta z})^n_{r, z} \\
 		\end{aligned}
 		\end{equation}
-		
+		Now we expand the time derivative to a forward difference, since it is the physical parameters at the current $\mathrm{T}^n_{r, z}$ that causes the temperature change to $\mathrm{T}^{n + 1}_{r, z}$
 		\begin{equation}
 		\begin{aligned}
 		% line break
@@ -83,7 +84,7 @@
 		&+ (\frac{\mathrm{T}^{n}_{r + 1, z} - \mathrm{T}^{n}_{r - 1, z}}{2\Delta r}) (\frac{\Delta \kappa}{\Delta r})^n_{r, z}  + \left [\frac{\mathrm{T}^{n}_{r, z + 1}  - 2 \mathrm{T}^{n}_{r, z} +  \mathrm{T}^{n}_{r, z -1}}{(\Delta z)^2} \right ]\kappa^n_{r, z} + (\frac{\mathrm{T}^{n}_{r, z + 1} - \mathrm{T}^{n}_{r, z - 1}}{2\Delta r})(\frac{\Delta \kappa}{\Delta z})^n_{r, z} \\
 		\end{aligned}
 		\end{equation}
-		
+	  We regroup terms to be calculable as coefficient to our various $\mathrm{T}$ values	
 		\begin{equation}
 		\begin{aligned}
 		% line break
@@ -93,7 +94,8 @@
 		\end{aligned}
 		\end{equation}
 		
-		
+    We create the following calculable variables to simplifly our equations
+
 		\begin{equation}
 		\begin{aligned}
 		A^n_{r, z} &= \left [\frac{-2\kappa^n_{r, z}}{(\Delta r)^2} -\frac{2\kappa^n_{r, z}}{(\Delta z)^2}  \right ] \\
