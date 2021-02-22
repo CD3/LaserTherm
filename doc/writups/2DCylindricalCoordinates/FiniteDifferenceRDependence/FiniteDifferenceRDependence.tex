@@ -20,23 +20,23 @@
 	\date{\today} 
 	\maketitle
 		\section{Introduction}
-		
+		  Solving the heat equation in cylindrical coordinates is of great interest to applications where heat energy is deposited normal to a surface via a laser exposure. With Dr. Clark's work in solving the heat equation with thermal conductivity, $\kappa$ as a function of $z$ allowed for better simulating the weakly homogenous media of tissue. The following derivation aims to take this work a step further, solving with $\kappa = \kappa(r, z)$, in order to extend our weak homogeny to the radial direction, especially valuable in situations with irregularities such as a hair follicle in the center of the beam path.
 		\section{The Problem}
-		
+		  The problem is first expanding the differential equation to reflect the radial dependence of thermal conductivity. We implement a finite difference method in order to substitute our derivatives for the values of $\mathrm{T}$ and $\kappa$ that are easily implemented in a computational setting. In the derivation, our result is discontinuous at $r = 0$ and so we utilize L'Hospital's rule and create a solution valid for the case where $r\rightarrow0$.
 		\section{Derivation}
-		
+		We begin with the heat transfer equation
 		\begin{equation}
 		\begin{aligned}
 		\rho c \frac{d\mathrm{T}}{dt} &= \vec\nabla \cdot \kappa \vec\nabla \mathrm{T} + A \\
 		\end{aligned}
 		\end{equation}
-		
+		We ignore the source term, $A$ for now and proceed by expanding the gradient, considering no phi dependence, so $\frac{\partial\mathrm{T}}{\partial\phi}=0$
 		\begin{equation}
 		\begin{aligned}
 		\rho c \frac{d\mathrm{T}}{dt} &= \vec\nabla \cdot \kappa \left [  \frac{\partial\mathrm{T}}{\partial r}\hat r  + \frac{\partial\mathrm{T}}{\partial z}\hat z \right ] \\
 		\end{aligned}
 		\end{equation}
-		
+		We rewrite $\kappa$ to state it's radial and $z$ dependence
 		\begin{equation}
 		\begin{aligned}
 		\rho c \frac{d\mathrm{T}}{dt} &= \vec\nabla \cdot \left [  \frac{\partial\mathrm{T}}{\partial r}\kappa(r, z) \hat r  + \frac{\partial\mathrm{T}}{\partial z}\kappa(r, z) \hat z \right ] \\
@@ -96,31 +96,31 @@
 		
 		\begin{equation}
 		\begin{aligned}
-		A &= \left [\frac{-2\kappa^n_{r, z}}{(\Delta r)^2} -\frac{2\kappa^n_{r, z}}{(\Delta z)^2}  \right ] \\
+		A^n_{r, z} &= \left [\frac{-2\kappa^n_{r, z}}{(\Delta r)^2} -\frac{2\kappa^n_{r, z}}{(\Delta z)^2}  \right ] \\
 		\end{aligned}
 		\end{equation}
 		
 		\begin{equation}
 		\begin{aligned}
-		B &= \left [\frac{\kappa^n_{r, z}}{2r\Delta r} + \frac{\kappa^n_{r, z}}{(\Delta r)^2} + \frac{1}{2\Delta r}(\frac{\Delta\kappa}{\Delta r})^n_{r, z} \right ] \\
+		B^n_{r, z} &= \left [\frac{\kappa^n_{r, z}}{2r\Delta r} + \frac{\kappa^n_{r, z}}{(\Delta r)^2} + \frac{1}{2\Delta r}(\frac{\Delta\kappa}{\Delta r})^n_{r, z} \right ] \\
 		\end{aligned}
 		\end{equation}
 		
 		\begin{equation}
 		\begin{aligned}
-		C &= \left [\frac{-\kappa^n_{r, z}}{2r\Delta r} + \frac{\kappa^n_{r, z}}{(\Delta r)^2} - \frac{1}{2\Delta r}(\frac{\Delta\kappa}{\Delta r})^n_{r, z} \right ] \\
+		C^n_{r, z} &= \left [\frac{-\kappa^n_{r, z}}{2r\Delta r} + \frac{\kappa^n_{r, z}}{(\Delta r)^2} - \frac{1}{2\Delta r}(\frac{\Delta\kappa}{\Delta r})^n_{r, z} \right ] \\
 		\end{aligned}
 		\end{equation}
 		
 		\begin{equation}
 		\begin{aligned}
-		D &= \left [\frac{\kappa^n_{r, z}}{(\Delta z)^2} - \frac{1}{2\Delta z}(\frac{\Delta\kappa}{\Delta z})^n_{r, z}  \right ] \\
+		D^n_{r, z} &= \left [\frac{\kappa^n_{r, z}}{(\Delta z)^2} - \frac{1}{2\Delta z}(\frac{\Delta\kappa}{\Delta z})^n_{r, z}  \right ] \\
 		\end{aligned}
 		\end{equation}
 		
 		\begin{equation}
 		\begin{aligned}
-		E &= \left [ \frac{\kappa^n_{r, z}}{(\Delta z)^2} + \frac{1}{2\Delta z}(\frac{\Delta\kappa}{\Delta z})^n_{r, z} \right ] \\
+		E^n_{r, z} &= \left [ \frac{\kappa^n_{r, z}}{(\Delta z)^2} + \frac{1}{2\Delta z}(\frac{\Delta\kappa}{\Delta z})^n_{r, z} \right ] \\
 		\end{aligned}
 		\end{equation}
 
@@ -141,15 +141,48 @@
 
       \begin{equation}
         \begin{aligned}
+          \lim_{r\rightarrow 0} \left [ \frac{\partial\mathrm{T}}{\partial r}\frac{\partial\kappa(r, z)}{\partial r} \right ] &= \lim_{r\rightarrow 0} \left [ \frac{\partial\mathrm{T}}{\partial r}\right ] \lim_{r\rightarrow 0}\left [  \frac{\partial\kappa(r, z)}{\partial r} \right ] = 0 \\
+        \end{aligned}
+      \end{equation}
+      
+      since we have symmetry across the origin
+      
+      \begin{equation}
+        \begin{aligned}
           \frac{\partial^2\mathrm{T}}{\partial r^2}\kappa(r, z) &= \left [\frac{\mathrm{T}^{n}_{r + 1, z}  - 2 \mathrm{T}^{n}_{r, z} +  \mathrm{T}^{n}_{r - 1, z}}{(\Delta r)^2} \right ] \kappa^n_{r, z} \\
-           &= \left [\frac{\mathrm{T}^{n}_{r + 1, z}  - 2 \mathrm{T}^{n}_{r, z} +  \mathrm{T}^{n}_{r - 1, z}}{(\Delta r)^2} \right ] \kappa^n_{r, z} \\
+           &= \frac{\mathrm{T}^n_{r + 1, z}\kappa^n_{r, z}}{(\Delta r)^2} - \frac{2 \mathrm{T}^n_{r, z}\kappa^n_{r,z}}{(\Delta r)^2} + \frac{\mathrm{T}^n_{r - 1, z}\kappa^n_{r,z}}{(\Delta r)^2}\\
         \end{aligned}
       \end{equation}
 
-      \begin{equation}
-        \begin{aligned}
-          \frac{\partial\mathrm{T}}{\partial r}\frac{\partial\kappa(r, z)}{\partial r} &= \left [\frac{\mathrm{T}^{n}_{r + 1, z} - \mathrm{T}^{n}_{r - 1, z}}{2\Delta r}  \right ](\frac{\Delta\kappa}{\Delta r})^n_{r, z} \\
-           &= \left [\frac{\mathrm{T}^{n}_{r + 1, z} - \mathrm{T}^{n}_{r - 1, z}}{2\Delta r}  \right ](\frac{\Delta\kappa}{\Delta r})^n_{r, z} \\
-        \end{aligned}
-      \end{equation}
+		\begin{equation}
+      \begin{aligned}
+        A^n_{r=0, z} &= \left [\frac{-4\kappa^n_{0, z}}{(\Delta r)^2} -\frac{2\kappa^n_{0, z}}{(\Delta z)^2}  \right ] \\
+      \end{aligned}
+		\end{equation}
+		
+		\begin{equation}
+      \begin{aligned}
+        B^n_{r=0, z} &= \left [2\frac{\kappa^n_{0, z}}{(\Delta r)^2} + \frac{1}{2\Delta r}(\frac{\Delta\kappa}{\Delta r})^n_{0, z} \right ] \\
+      \end{aligned}
+		\end{equation}
+		
+		\begin{equation}
+      \begin{aligned}
+        C^n_{r=0, z} &= \left [-2\frac{\kappa^n_{0, z}}{(\Delta r)^2} - \frac{1}{2\Delta r}(\frac{\Delta\kappa}{\Delta r})^n_{0, z} \right ] \\
+      \end{aligned}
+		\end{equation}
+
+	 % these bad boys don't change	
+		\begin{equation}
+      \begin{aligned}
+        D^n_{r=0, z} &= \left [\frac{\kappa^n_{0, z}}{(\Delta z)^2} - \frac{1}{2\Delta z}(\frac{\Delta\kappa}{\Delta z})^n_{0, z}  \right ] \\
+      \end{aligned}
+		\end{equation}
+		
+		\begin{equation}
+      \begin{aligned}
+        E^n_{r=0, z} &= \left [ \frac{\kappa^n_{0, z}}{(\Delta z)^2} + \frac{1}{2\Delta z}(\frac{\Delta\kappa}{\Delta z})^n_{0, z} \right ] \\
+      \end{aligned}
+		\end{equation}
+
 \end{document}
