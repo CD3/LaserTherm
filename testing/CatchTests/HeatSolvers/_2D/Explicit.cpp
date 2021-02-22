@@ -8,7 +8,8 @@
 TEST_CASE("Explicit 2D Cylindrical Heat Solver")
 {
 
-/*     HeatSolvers::_2D::Cylindrical::Explicit<double> HeatSolver(10,20); */
+     //HeatSolvers::_2D::Cylindrical::Explicit<double> HeatSolver(10,20);
+    Explicit<double> HeatSolver(10,20);
 /*     HeatSolver.T.setCoordinateSystem(Uniform(0, 2),Uniform(0,4)); */
 
 /*     HeatSolver.T.set(1.0); */
