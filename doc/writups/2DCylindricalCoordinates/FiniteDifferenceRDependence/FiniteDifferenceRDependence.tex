@@ -55,7 +55,7 @@
 		\end{aligned}
 		\end{equation}
 	  distributing out the $\frac{1}{r}$ gives our final purely analytical term, which we pause on before continuing
-		\begin{equation}
+		\begin{equation} \label{eq:6}
 		\begin{aligned}
 		\rho c \frac{d\mathrm{T}}{dt} &= \frac{1}{r} \frac{\partial\mathrm{T}}{\partial r}\kappa(r, z) + \frac{\partial^2\mathrm{T}}{\partial r^2}\kappa(r, z)  + \frac{\partial\mathrm{T}}{\partial r} \frac{\partial\mathrm{\kappa}}{\partial r}  + \frac{\partial^2\mathrm{T}}{\partial z^2}\kappa(r, z) + \frac{\partial\mathrm{T}}{\partial z}\frac{\partial\mathrm{\kappa}}{\partial z} \\
 		\end{aligned}
@@ -127,12 +127,14 @@
 		\end{equation}
 
     \subsection{Case for $r=0$}
+      Looking back at Eq.\ref{eq:6}, we can see it is discontinuous at $r=0$. In order to remedy this, we take the limit as $r\rightarrow0$ of Eq.\ref{eq:6}, where we can focus on the first term
       \begin{equation}
         \begin{aligned}
           \rho c \frac{d\mathrm{T}}{dt} &= \frac{1}{r} \frac{\partial\mathrm{T}}{\partial r}\kappa(r, z) + \frac{\partial^2\mathrm{T}}{\partial r^2}\kappa(r, z)  + \frac{\partial\mathrm{T}}{\partial r} \frac{\partial\mathrm{\kappa}}{\partial r}  + \frac{\partial^2\mathrm{T}}{\partial z^2}\kappa(r, z) + \frac{\partial\mathrm{T}}{\partial z}\frac{\partial\mathrm{\kappa}}{\partial z} \\
         \end{aligned}
       \end{equation}	
 
+      The limit results in an indeterminate form, which we can preform L'Hospital's rule on in order to obtain a meaningful value of our limit
       \begin{equation}
         \begin{aligned}
           \lim_{r\rightarrow 0} \left [ \frac{\frac{\partial\mathrm{T}}{\partial r}\kappa(r, z)}{r} \right ] &= \frac{0}{0} \\
@@ -140,22 +142,21 @@
           &= \lim_{r\rightarrow 0} \left [ \frac{\partial^2\mathrm{T}}{\partial r^2}\kappa(r, z)  + \frac{\partial\mathrm{T}}{\partial r}\frac{\partial\kappa(r, z)}{\partial r}\right ] \\
         \end{aligned}
       \end{equation}
-
+      Inspecting the second term, we can see that since we have symmetry about the origin due to out lack of phi dependence. $\frac{\partial T}{\partial r}\rightarrow0$ due to this symmetry as $r\rightarrow 0$
       \begin{equation}
         \begin{aligned}
           \lim_{r\rightarrow 0} \left [ \frac{\partial\mathrm{T}}{\partial r}\frac{\partial\kappa(r, z)}{\partial r} \right ] &= \lim_{r\rightarrow 0} \left [ \frac{\partial\mathrm{T}}{\partial r}\right ] \lim_{r\rightarrow 0}\left [  \frac{\partial\kappa(r, z)}{\partial r} \right ] = 0 \\
         \end{aligned}
       \end{equation}
       
-      since we have symmetry across the origin
-      
+      Our remaining term is continuous at $r=0$ so for the limit we can simply evaluate it at the limiting value.
       \begin{equation}
         \begin{aligned}
-          \frac{\partial^2\mathrm{T}}{\partial r^2}\kappa(r, z) &= \left [\frac{\mathrm{T}^{n}_{r + 1, z}  - 2 \mathrm{T}^{n}_{r, z} +  \mathrm{T}^{n}_{r - 1, z}}{(\Delta r)^2} \right ] \kappa^n_{r, z} \\
-           &= \frac{\mathrm{T}^n_{r + 1, z}\kappa^n_{r, z}}{(\Delta r)^2} - \frac{2 \mathrm{T}^n_{r, z}\kappa^n_{r,z}}{(\Delta r)^2} + \frac{\mathrm{T}^n_{r - 1, z}\kappa^n_{r,z}}{(\Delta r)^2}\\
+          \frac{\partial^2\mathrm{T}}{\partial r^2}\kappa(r, z)\rvert_{r=0} &= \left [\frac{\mathrm{T}^{n}_{1, z}  - 2 \mathrm{T}^{n}_{0, z} +  \mathrm{T}^{n}_{-1, z}}{(\Delta r)^2} \right ] \kappa^n_{0, z} \\
+           &= \frac{\mathrm{T}^n_{1, z}\kappa^n_{0, z}}{(\Delta r)^2} - \frac{2 \mathrm{T}^n_{0, z}\kappa^n_{0,z}}{(\Delta r)^2} + \frac{\mathrm{T}^n_{- 1, z}\kappa^n_{0,z}}{(\Delta r)^2}\\
         \end{aligned}
       \end{equation}
-
+    By removing the original contribution of our first term of Eq. \ref{eq:6} from the coefficients it contributed to, and adding the contributions from the limiting value of the first term we have just calculated for, we are able to generate a new set of coefficients, corresponding to the same $\mathrm{T}$ terms from before
 		\begin{equation}
       \begin{aligned}
         A^n_{r=0, z} &= \left [\frac{-4\kappa^n_{0, z}}{(\Delta r)^2} -\frac{2\kappa^n_{0, z}}{(\Delta z)^2}  \right ] \\
@@ -164,13 +165,13 @@
 		
 		\begin{equation}
       \begin{aligned}
-        B^n_{r=0, z} &= \left [2\frac{\kappa^n_{0, z}}{(\Delta r)^2} + \frac{1}{2\Delta r}(\frac{\Delta\kappa}{\Delta r})^n_{0, z} \right ] \\
+        B^n_{r=0, z} &= \left [\frac{2\kappa^n_{0, z}}{(\Delta r)^2} + \frac{1}{2\Delta r}(\frac{\Delta\kappa}{\Delta r})^n_{0, z} \right ] \\
       \end{aligned}
 		\end{equation}
 		
 		\begin{equation}
       \begin{aligned}
-        C^n_{r=0, z} &= \left [-2\frac{\kappa^n_{0, z}}{(\Delta r)^2} - \frac{1}{2\Delta r}(\frac{\Delta\kappa}{\Delta r})^n_{0, z} \right ] \\
+        C^n_{r=0, z} &= \left [\frac{2\kappa^n_{0, z}}{(\Delta r)^2} - \frac{1}{2\Delta r}(\frac{\Delta\kappa}{\Delta r})^n_{0, z} \right ] \\
       \end{aligned}
 		\end{equation}
 
