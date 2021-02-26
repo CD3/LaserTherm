@@ -19,8 +19,40 @@ class Explicit{
     void stepForward(N delta_t){
       // junk goes here wow i spelled everythign right
     }
-    void A_n(int i, int j){
+    // Calculate Coefficent for T^n_(r, z)
+    N A_n(int i, int j){
 
+    }
+    N A_nBC(int i, int j){
+      // Some reference to Boundary Conditions set elsewhere
+    }
+    // Calculate Coefficent for T^n_(r+1, z)
+    N B_n(int i, int j){
+
+    }
+    N B_nBC(int i, int j){
+      // Some reference to Boundary Conditions set elsewhere
+    }
+    // Calculate Coefficent for T^n_(r-1, z)
+    N C_n(int i, int j){
+
+    }
+    N C_nBC(int i, int j){
+      // Some reference to Boundary Conditions set elsewhere
+    }
+    // Calculate Coefficent for T^n_(r, z-1)
+    N D_n(int i, int j){
+
+    }
+    N D_nBC(int i, int j){
+      // Some reference to Boundary Conditions set elsewhere
+    }
+    // Calculate Coefficent for T^n_(r, z+1)
+    N E_n(int i, int j){
+
+    }
+    N E_nBC(int i, int j){
+      // Some reference to Boundary Conditions set elsewhere
     }
     // member variables
     int rj;
