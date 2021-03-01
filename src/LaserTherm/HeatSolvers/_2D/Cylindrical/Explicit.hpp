@@ -1,4 +1,7 @@
 #include <libField/Field.hpp>
+#include "LaserTherm/HeatSolvers/BoundaryConditions.hpp"
+
+namespace BC = HeatSolvers::BoundaryConditions;
 
 template <class N>
 class Explicit{
@@ -34,10 +37,11 @@ class Explicit{
     // --------------------- PROTECTED METHODS ---------------------
     // Calculate Coefficent for T^n_(r, z)
     N A_n(int i, int j){
-
+      
     }
     N A_nBC(int i, int j){
       // Some reference to Boundary Conditions set elsewhere
+      // double fprime = BC::FiniteDifference<double>::f;
     }
     // Calculate Coefficent for T^n_(r+1, z)
     N B_n(int i, int j){
@@ -50,7 +54,8 @@ class Explicit{
     N C_n(int i, int j){
 
     }
-    N C_nBC(int i, int j){ // Some reference to Boundary Conditions set elsewhere
+    N C_nBC(int i, int j){ 
+    // Some reference to Boundary Conditions set elsewhere
     }
     // Calculate Coefficent for T^n_(r, z-1)
     N D_n(int i, int j){
