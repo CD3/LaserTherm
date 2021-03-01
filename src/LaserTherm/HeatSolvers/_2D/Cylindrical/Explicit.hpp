@@ -3,7 +3,7 @@
 template <class N>
 class Explicit{
   public:
-    // constructors
+    // -------------------- PUBLIC CONSTRUCTORS --------------------
     Explicit(int _rj, int _zi){
       this->rj = _rj;
       this->zi = _zi;
@@ -15,10 +15,23 @@ class Explicit{
     Explicit(){
       // Default constructor to be safe
     }
-    // methods
+    // ---------------------- PUBLIC METHODS -----------------------
     void stepForward(N delta_t){
       // junk goes here wow i spelled everythign right
     }
+    // ----------------- PUBLIC MEMBER VARIABLES -------------------
+    Field<N, 2> T;
+    Field<N, 2> A;
+    Field<N, 2> VHC;
+    Field<N, 2> k;
+    
+  /* Protected namespace is allowed to be
+   * accessed by classes that inhereit using
+   * public or protected keywords, but not by
+   * outside or unrelated classes */
+  protected:
+    // ---------------- PROTECTED MEMBER VARIABLES  ----------------
+    // --------------------- PROTECTED METHODS ---------------------
     // Calculate Coefficent for T^n_(r, z)
     N A_n(int i, int j){
 
@@ -37,8 +50,7 @@ class Explicit{
     N C_n(int i, int j){
 
     }
-    N C_nBC(int i, int j){
-      // Some reference to Boundary Conditions set elsewhere
+    N C_nBC(int i, int j){ // Some reference to Boundary Conditions set elsewhere
     }
     // Calculate Coefficent for T^n_(r, z-1)
     N D_n(int i, int j){
@@ -54,13 +66,11 @@ class Explicit{
     N E_nBC(int i, int j){
       // Some reference to Boundary Conditions set elsewhere
     }
-    // member variables
+    
+
+  private:
+    // ---------------------- PUBLIC METHODS -----------------------
+    // ----------------- PRIVATE MEMBER VARIABLES  -----------------
     int rj;
     int zi;
-    Field<N, 2> T;
-    Field<N, 2> A;
-    Field<N, 2> VHC;
-    Field<N, 2> k;
-  protected:
-  private:
 };
