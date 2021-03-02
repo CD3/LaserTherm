@@ -104,21 +104,44 @@ class Explicit{
     }
     // Calculate Coefficent for T^n_(r-1, z)
     N C_n(int i, int j){
-      return (N) 0;
+      //return (N) 0;
+      N dr = k.getCoord(i, j + 1)[1] - k.getCoord(i, j)[1];
+      N dz = k.getCoord(i + 1, j)[0] - k.getCoord(i, j)[0];
+      // -kappa / 2r * dr
+      N T1 = - k[i][j] / 2 * (2 * k.getCoord(i, j)[1] * dr); //Ask Dan about indexing here to make sure***
+      // kappa / dr**2
+      N T2 = k[i][j] / pow(dr, 2);
+      // dk_dr / 2 dr
+      N T3 = - dk_dr(i, j) / (2 * dr); //why parenthesis? ***
+      return T1 + T2 + T3;
     }
     N C_nBC(int i, int j){
     // Some reference to Boundary Conditions set elsewhere
     }
     // Calculate Coefficent for T^n_(r, z-1)
     N D_n(int i, int j){
-      return (N) 0;
+      //return (N) 0;
+      N dr = k.getCoord(i, j + 1)[1] - k.getCoord(i, j)[1];
+      N dz = k.getCoord(i + 1, j)[0] - k.getCoord(i, j)[0];
+      // kappa / dz**2
+      N T1 = k[i][j] / pow(dz, 2);
+      // - dz_dr / 2 dz
+      N T2 = - dk_dz(i, j) / (2 * dz);
+      return T1 + T2;
     }
     N D_nBC(int i, int j){
       // Some reference to Boundary Conditions set elsewhere
     }
     // Calculate Coefficent for T^n_(r, z+1)
     N E_n(int i, int j){
-      return (N) 0;
+      //return (N) 0;
+      N dr = k.getCoord(i, j + 1)[1] - k.getCoord(i, j)[1];
+      N dz = k.getCoord(i + 1, j)[0] - k.getCoord(i, j)[0];
+      // kappa / dz**2
+      N T1 = k[i][j] / pow(dz, 2);
+      // - dz_dr / 2 dz
+      N T2 = dk_dz(i, j) / (2 * dz);
+      return T1 + T2;
     }
     N E_nBC(int i, int j){
       // Some reference to Boundary Conditions set elsewhere
