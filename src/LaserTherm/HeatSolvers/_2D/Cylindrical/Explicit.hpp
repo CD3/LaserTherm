@@ -7,13 +7,13 @@ template <class N>
 class Explicit{
   public:
     // -------------------- PUBLIC CONSTRUCTORS --------------------
-    Explicit(int _rj, int _zi){
-      this->rj = _rj;
-      this->zi = _zi;
-      T.reset(zi, rj);
-      A.reset(zi, rj);
-      VHC.reset(zi, rj);
-      k.reset(zi, rj);
+    Explicit(int _rN, int _zN){
+      this->rN = _rN;
+      this->zN = _zN;
+      T.reset(zN, rN);
+      A.reset(zN, rN);
+      VHC.reset(zN, rN);
+      k.reset(zN, rN);
     }
     Explicit(){
       // Default constructor to be safe
@@ -22,29 +22,28 @@ class Explicit{
     // delta_t is a step forward in time in seconds
     void stepForward(N delta_t){
       N beta;
-      Field<N, 2> T_prime(zi, rj);
-      for(N t = 0.0; t < delta_t; t+=dt){
-        for(int i = 0; i < zi; i++){
-          for(int j = 0; j < rj; j++){
-            beta = delta_t / VHC[i][j];
-            // probably make this a function? vvv
-            T_prime[i][j] = T[i][j] + beta
-            * (T[i][j] * A_n(i , j)
-            + T[i][j+1] * B_n(i , j)
-            + T[i][j-1] * C_n(i , j)
-            + T[i-1][j] * D_n(i , j)
-            + T[i+1][j] * E_n(i , j));
-          }
+      Field<N, 2> T_prime(zN, rN);
+      for(int i = 0; i < zN; i++){
+        for(int j = 0; j < rN; j++){
+          beta = delta_t / VHC[i][j];
+          // probably make this a function? vvv
+          // Sink boundary conditions (if we go from 1 to )
+          // Make Tprime the increase amount and just add it
+          T_prime[i][j] = beta
+          * (T[i][j] * A_n(i , j)
+          + T[i][j+1] * B_n(i , j)
+          + T[i][j-1] * C_n(i , j)
+          + T[i-1][j] * D_n(i , j)
+          + T[i+1][j] * E_n(i , j));
         }
-        T.set(1.0);
-        T *= T_prime;
       }
+      T += T_prime;
     }
     int get_rdims(){
-      return this->rj;
+      return this->rN;
     }
     int get_zdims(){
-      return this->zi;
+      return this->zN;
     }
     // ----------------- PUBLIC MEMBER VARIABLES -------------------
     Field<N, 2> T;
@@ -151,6 +150,6 @@ class Explicit{
   private:
     // ---------------------- PUBLIC METHODS -----------------------
     // ----------------- PRIVATE MEMBER VARIABLES  -----------------
-    int rj;
-    int zi;
+    int rN;
+    int zN;
 };
