@@ -23,8 +23,8 @@ class Explicit{
     void stepForward(N delta_t){
       N beta;
       Field<N, 2> T_prime(zN, rN);
-      for(int i = 0; i < zN; i++){
-        for(int j = 0; j < rN; j++){
+      for(int i = 1; i < zN - 1; i++){
+        for(int j = 1; j < rN - 1; j++){
           beta = delta_t / VHC[i][j];
           // probably make this a function? vvv
           // Sink boundary conditions (if we go from 1 to )

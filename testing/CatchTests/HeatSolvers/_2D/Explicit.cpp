@@ -19,7 +19,21 @@ TEST_CASE("Explicit 2D Cylindrical Heat Solver")
     HeatSolver.VHC.set(3.0);
     HeatSolver.k.set(4.0);
 
+    {
+      ofstream output;
+      output.open("Tbefore.txt");
+      output << HeatSolver.T;
+      output.close();
+    }
     
-    HeatSolver.stepForward(1);
-
+    for(int i = 0; i < 10; i++){
+      HeatSolver.stepForward(1);
+    }
+    
+    {
+      ofstream output;
+      output.open("Tafter.txt");
+      output << HeatSolver.T;
+      output.close();
+    }
 }
