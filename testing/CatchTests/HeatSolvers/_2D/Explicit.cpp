@@ -12,6 +12,9 @@ TEST_CASE("Explicit 2D Cylindrical Heat Solver")
      //HeatSolvers::_2D::Cylindrical::Explicit<double> HeatSolver(10,20);
     Explicit<double> HeatSolver(10,20);
     HeatSolver.T.setCoordinateSystem(Uniform(0, 2),Uniform(0,4));
+    HeatSolver.A.setCoordinateSystem(Uniform(0, 2),Uniform(0,4));
+    HeatSolver.VHC.setCoordinateSystem(Uniform(0, 2),Uniform(0,4));
+    HeatSolver.k.setCoordinateSystem(Uniform(0, 2),Uniform(0,4));
 //      Herbie.destination.address.directions("tomanek");
 
     HeatSolver.T.set(1.0);
@@ -26,9 +29,7 @@ TEST_CASE("Explicit 2D Cylindrical Heat Solver")
       output.close();
     }
     
-    for(int i = 0; i < 10; i++){
-      HeatSolver.stepForward(1);
-    }
+    HeatSolver.stepForward(1);
     
     {
       ofstream output;
