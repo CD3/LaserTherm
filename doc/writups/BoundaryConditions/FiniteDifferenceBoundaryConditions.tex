@@ -1,3 +1,4 @@
+% arara: pdflatex
 \documentclass[letterpaper,12pt]{article}
 
 \usepackage{graphicx}
@@ -21,7 +22,39 @@
 \maketitle
 
 
-\section{Implicit Algorithms}
+\section{Finite Difference Algorithms}
+
+\subsection{Explicit Algorithms}
+
+The simplest method for solving a differential equation using the finite-difference approximation is the explicit method.
+The solution at the next time step is computed directly from the solution at the current time step, and can be written as
+\begin{equation}
+   \nu^{n+1} = \mathbb{P} \nu^n + d
+\end{equation}
+where $\mathbb{P}$ is the propagator, a matrix that propagates the solution forward in time, and $d$ is a source term. This matrix equation represents a system of equations,
+and can be written out in long form:
+\begin{equation}
+  \label{eqn:FD_eqn_explicit}
+\nu\indices{^{n+1}_{i  }}
+=
+  a\indices{_i} \nu\indices{^{n  }_{i-1}}
++ b\indices{_i} \nu\indices{^{n  }_{i  }}
++ c\indices{_i} \nu\indices{^{n  }_{i+1}}
++ d\indices{_i}
+\end{equation}
+
+There are two "boundaries" that have to be considered here. When $i = 0$,
+equation \ref{eqn:FD_eqn_explicit} refers to $\nu\indices{_{-1}}$, which does not exist. At $i =
+N-1$, $\nu\indices{_N}$ is referred to, which also does not exist. These two
+equation, $i = 0$ and $i = N-1$, have to be replaced with equations that do not
+refer to the non-existent elements of $\nu$. Actually, these two equation are
+just modified to only refer to actual elements of $\nu$.  To write the
+modification, a second equation relating the non-existent element of $\nu$ to
+the existing elements is required. This equation is called the ``boundary
+condition''. The boundary condition used is determined by the physics.
+
+
+\subsection{Implicit Algorithms}
 Any implicit finite difference algorithm is based on getting a matrix equation of the form
 \begin{equation}
 \mathbb{A} \nu = b
@@ -45,58 +78,88 @@ This matrix equation represents a system of equation. One equation in this syste
 + c\indices{^R_i} \nu\indices{^{n  }_{i+1}}
 + d_i
 \end{equation}
-There are two "boundaries" that have to be considered here. When $i = 0$,
-\ref{eqn:FD_eqn}, refers to $\nu\indices{_{-1}}$, which does not exist. At $i =
-N-1$, $\nu\indices{_N}$ is referred to, which also does not exist. These two
-equation, $i = 0$ and $i = N-1$, have to be replaced with equations that do not
-refer to the non-existent elements of $\nu$. Actually, these two equation are
-just modified to only refer to actual elements of $\nu$.  To write the
-modification, a second equation relating the non-existent element of $\nu$ to
-the existing elements is required. This equation is called the ``boundary
-condition''. The boundary condition used is determined by the physics.
+Just as with the explit method, there are two boundary conditions that must be handled here.
 
 \subsection{Dirichlet Boundary Conditions}
 The simplest boundary condition to implement is the ``sink''. In this case, the
 solution is required to be zero at the boundary, so for example if the element
 $\nu\indices{_i}$ did exist, it would be zero. In this case, the terms in
-\ref{eqn:FD_eqn} referring to $\nu\indices{_{-1}}$ and  $\nu\indices{_{N}}$ can
-just be ignored. The $i=0$ equation is then
-\begin{equation}
-  \label{eqn:FD_sink_eqn}
-  b\indices{^L_0} \nu\indices{^{n+1}_{0}}
-+ c\indices{^L_0} \nu\indices{^{n+1}_{1}}
+\ref{eqn:FD_eqn_explicit} and \ref{eqn:FD_eqn} referring to $\nu\indices{_{-1}}$ and  $\nu\indices{_{N}}$ can
+just be ignored.
+
+\subsubsection{Explicit Method}
+
+For the explicit method, the $i=0$ dfference equation becomes
+\begin{align}
+  \label{eqn:FD_explicit_sink_eqn}
+  &
+\nu\indices{^{n+1}_{0  }}
 =
-  b\indices{^R_0} \nu\indices{^{n  }_{0}}
-+ c\indices{^R_0} \nu\indices{^{n  }_{1}}
-+ d_0
-\end{equation}
-and the $i = N-1$ equation is similar,
-\begin{equation}
-  \label{eqn:FD_sink_eqn_2}
-  a\indices{^L_0} \nu\indices{^{n+1}_{N-2}}
-+ b\indices{^L_0} \nu\indices{^{n+1}_{N-1}}
+  b\indices{_0} \nu\indices{^{n  }_{0}}
++ c\indices{_0} \nu\indices{^{n  }_{1}}
++ d\indices{_0}
+\end{align}
+The $i = N-1$ equation is similar,
+\begin{align}
+  &
+  \label{eqn:FD_explicit_sink_eqn_2}
+\nu\indices{^{n+1}_{N-1}}
 =
-  a\indices{^R_0} \nu\indices{^{n  }_{N-2}}
-+ b\indices{^R_0} \nu\indices{^{n  }_{N-1}}
-+ d_0
-\end{equation}
+  a\indices{_{N-1}} \nu\indices{^{n  }_{N-2}}
++ b\indices{_{N-1}} \nu\indices{^{n  }_{N-1}}
++ d\indices{_{N-1}}
+\end{align}
 However, in general, we could allow the boundary be specified as an arbitrary constant,
 \begin{equation}
   \label{eq:sink_bc}
   \nu\left(x_0\right) = \bcf
 \end{equation}
 In which case we have
-\begin{equation}
+\begin{align}
+\nu\indices{^{n+1}_{0  }}
+& 
+=
+  a\indices{_0} f
++ b\indices{_0} \nu\indices{^{n  }_{0}}
++ c\indices{_0} \nu\indices{^{n  }_{1}}
++ d\indices{_0} \\
+\nu\indices{^{n+1}_{N-1}}
+&
+=
+  a\indices{_{N-1}} \nu\indices{^{n  }_{N-2}}
++ b\indices{_{N-1}} \nu\indices{^{n  }_{N-1}}
++ c\bcf
++ d\indices{_{N-1}}
+\end{align}
+
+
+
+\subsubsection{Implicit Methods}
+
+The difference equations for the implicit methods are
+\begin{align}
   a\indices{^L_0} \bcf
 + b\indices{^L_0} \nu\indices{^{n+1}_{0}}
 + c\indices{^L_0} \nu\indices{^{n+1}_{1}}
+&
 =
   a\indices{^R_0} \bcf
 + b\indices{^R_0} \nu\indices{^{n  }_{0}}
 + c\indices{^R_0} \nu\indices{^{n  }_{1}}
 + d_0
-\end{equation}
-The first term on the LHS side here is a constant, so it must be moved over the right right hand side,
+\\
+  a\indices{^L_0} \nu\indices{^{n+1}_{N-2}}
++ b\indices{^L_0} \nu\indices{^{n+1}_{N-1}}
++ c\indices{^L_0} \bcf
+&
+=
+  a\indices{^R_0} \nu\indices{^{n  }_{N-2}}
++ b\indices{^R_0} \nu\indices{^{n  }_{N-1}}
++ c\indices{^R_0} \bcf
++ d_0
+\end{align}
+Since we are solving a system of equation, any terms that are constant (don't include $\nu\indices{_{i}}$) must be moved to the RHS of the equation.
+The first term on the LHS side of the $i=0$ equation is constant, so it must be moved over to the RHS,
 \begin{equation}
   b\indices{^L_0} \nu\indices{^{n+1}_{0}}
 + c\indices{^L_0} \nu\indices{^{n+1}_{1}}
@@ -121,19 +184,22 @@ then we can write the $i=0$ equation as
 + d_0
 + d'_0
 \end{equation}
-For the $i=N-1$ equation, we have
-\begin{equation}
-  d'_{N-1} = c\indices{^R_{N-1}} \bcf - c\indices{^L_{N-2}} \bcf
-\end{equation}
-\begin{equation}
+Similarly, for the $i=N-1$ equation, we have
+\begin{align}
+  d'_{N-1} &= c\indices{^R_{N-1}} \bcf - c\indices{^L_{N-2}} \bcf
+ \\
   a\indices{^L_{N-1}} \nu\indices{^{n+1}_{N-2}}
 + b\indices{^L_{N-1}} \nu\indices{^{n+1}_{N-1}}
+  &
 =
   a\indices{^R_{N-1}} \nu\indices{^{n  }_{N-2}}
 + b\indices{^R_{N-1}} \nu\indices{^{n  }_{N-1}}
 + d_{N-1}
 + d'_{N-1}
-\end{equation}
+\end{align}
+
+
+
 
 \subsection{Nuemann Boundary Conditions}
 
@@ -147,17 +213,59 @@ condition can be written as
   \label{eq:heat_flux_bc}
   \left. \frac{\partial \nu}{\partial x} \right|_{x = boundary} = \bcf(\nu)
 \end{equation}
+i.e., the derivative of the solution at the boundary is some function of the solution at the boundary.
 By finite differencing the derivative, we obtain a relationship for the non-existent element of $x$.
 \begin{equation}
   \label{eqn:FD_BC}
   \frac{ \nu\indices{_{i+1}} - \nu\indices{_{i-1}} }{ x\indices{_{i+1}} - x\indices{_{i-1}} } = \bcf(\nu_i)
 \end{equation}
+So we will have
+\begin{align}
+  \nu\indices{_{-1}} &= \nu\indices{_{1}} - \Delta x \bcf(\nu_0) \\
+  \nu\indices{_{N}} &= \nu\indices{_{N-2}} + \Delta x \bcf(\nu_{N-1})
+\end{align}
 
-Let us only consider the $i=0$ case for now. Later, the $i=N-1$ case can be derived in a very similar manner. For $i=0$, equation \ref{eqn:FD_BC} gives
-\begin{equation}
-  \nu\indices{_{-1}} = \nu\indices{_{1}} - \Delta x \bcf(\nu_0)
-\end{equation}
-For the RHS of \ref{eqn:FD_eqn}, this can be incorporated directly,
+\subsubsection{Explicit Method}
+
+For the explicit method, implementing the Nuemann boundary condition is straight forward, we can just substitute for $\nu_{-1}$ and $\nu_{N}$:
+\begin{align}
+\nu\indices{^{n+1}_{0}}
+&
+=
+a\indices{_0} \left( \nu\indices{_{1}^{n}} - \Delta x\bcf(\nu\indices{_{0}^{n}}) \right)
++ b\indices{_0} \nu\indices{^{n  }_{0}}
++ c\indices{_0} \nu\indices{^{n  }_{1}}
++ d\indices{_0} \\
+\nu\indices{^{n+1}_{N-1}}
+&
+=
+a\indices{_{N-1}} \nu\indices{^{n}_{N-2}}
++ b\indices{_{N-1}} \nu\indices{^{n  }_{N-1}}
++ c\indices{_{N-1}} \left( \nu\indices{^{n}_{N-2}} + \Delta x\bcf(\nu\indices{_{N-1}^{n}}) \right)
++ d\indices{_{N-1}} \\
+\end{align}
+which we rearange to group like terms
+\begin{align}
+\nu\indices{^{n+1}_{0}}
+&
+=
+  b\indices{_0} \nu\indices{^{n  }_{0}}
++ \left( a\indices{_0} + c\indices{_0} \right) \nu\indices{^{n  }_{1}}
++ d\indices{_0}
+- a\indices{_0} \Delta x\bcf(\nu\indices{_{0}^{n}}) \\
+\nu\indices{^{n+1}_{N-1}}
+&
+=
+\left(a\indices{_{N-1}} + c\indices{_{N-1}} \right) \nu\indices{^{n}_{N-2}}
++ b\indices{_{N-1}} \nu\indices{^{n  }_{N-1}}
++ c\indices{_{N-1}} \Delta x\bcf(\nu\indices{_{N-1}^{n}})
++ d\indices{_{N-1}}
+\end{align}
+
+
+\subsubsection{Explicit Method}
+For the implicit method, it is quite a bit more complicated.
+On the RHS of \ref{eqn:FD_eqn}, we can just substitue for $\nu_{-1}$ as with the explicit method.
 \begin{equation}
   \label{eqn:lhs}
   a\indices{^R_0} \nu\indices{_{-1}^{n  }}
