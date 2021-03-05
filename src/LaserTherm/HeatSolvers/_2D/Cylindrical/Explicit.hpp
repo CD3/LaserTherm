@@ -60,7 +60,7 @@ class Explicit{
     N dk_dr(int i, int j){
       N numer = (k[i][j + 1] - k[i][j - 1]);
       // is this an ok way to do 2\Delta r?
-      N denom = k.getCoord(i, j)[1] - k.getCoord(i, j - 1)[1];
+      N denom = k.getCoord(i, j + 1)[1] - k.getCoord(i, j - 1)[1];
       return numer / denom;
     }
     // Finite Difference deriv for kappa wrt z
@@ -107,11 +107,11 @@ class Explicit{
       N dr = k.getCoord(i, j + 1)[1] - k.getCoord(i, j)[1];
       N dz = k.getCoord(i + 1, j)[0] - k.getCoord(i, j)[0];
       // -kappa / 2r * dr
-      N T1 = - k[i][j] / (2 * k.getCoord(i, j)[1] * dr); //Ask Dan about indexing here to make sure***
+      N T1 = - k[i][j] / (2 * k.getCoord(i, j)[1] * dr);
       // kappa / dr**2
       N T2 = k[i][j] / pow(dr, 2);
       // dk_dr / 2 dr
-      N T3 = - dk_dr(i, j) / (2 * dr); //why parenthesis? ***
+      N T3 = - dk_dr(i, j) / (2 * dr); 
       return T1 + T2 + T3;
     }
     N C_nBC(int i, int j){
