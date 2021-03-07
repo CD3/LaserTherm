@@ -1,3 +1,4 @@
+% arara: pdflatex
 \documentclass[letterpaper,12pt]{article}
 
 \usepackage{graphicx}
@@ -7,6 +8,7 @@
 \usepackage{amsmath}
 \usepackage{txfonts}
 \usepackage{tensor}
+\usepackage{hyperref}
 \parindent=0in
 
 
@@ -50,7 +52,7 @@ written as
   \nabla^2 \phi = -\lambda^2 \phi
 \end{equation}
 
-Consider a temperature distribution which is an eigen function of the Laplace operator with eigenvalue $\lambda$. We can write the temperature as a product of a time-dependent function
+Consider a temperature distribution which is an eigen function of the Laplace operator with eigenvalue $-\lambda^2$ (this is just a convinient way to write the eigenvalue). We can write the temperature as a product of a time-dependent function
 and the eigenfunction $T = f(t) \phi(\vec{r})$.
 The time-evolution of this temperature distribution is given by equation \ref{eq:simp_hom_heat_eq}:
 \begin{align}
@@ -74,7 +76,7 @@ If the problem includes a source term, then the Inhomogeneous heat equation is r
   \label{eq:inhom_heat_eq}
   \rho c \partial_t T = \nabla \cdot k \nabla T + A,
 \end{equation}
-which can be simplifed for unfiform media
+which can be simplifed for uniform media
 \begin{equation}
   \label{eq:simp_inhom_heat_eq}
   \rho c \partial_t T = k \nabla^2 T + A.
@@ -173,15 +175,16 @@ cosine functions. Equation \ref{eq:r_eigen_eq} can be rewritten as
  \partial_{rr} \phi_r + \frac{1}{r} \partial_r \phi_r = -\lambda_r^2 \phi_r.
 \end{equation}
 Multiplying by $r^2$ and substituting $\rho  = \lambda_r r$ shows that this is just Bessel's differential equation with $\alpha = 0$,
+(note that $\partial_r = \frac{\partial \rho}{\partial r} \partial_\rho = \lambda_r \partial_\rho$)
 \begin{align}
  r^2\partial_{rr} \phi_r + r \partial_r \phi_r = -r^2 \lambda_r^2 \phi_r \\
- \frac{\rho^2}{\lambda^2} \partial_{\rho\rho} \phi_r + \frac{\rho}{\lambda} \partial_\rho \phi_r = -\rho^2 \phi_r \\
- \frac{\rho^2}{\lambda^2} \partial_{ r   r  } \phi_r + \frac{\rho}{\lambda} \partial_r    \phi_r + \rho^2 \phi_r = 0 \\
+ \frac{\rho^2}{\lambda_r^2} \partial_{ r   r  } \phi_r + \frac{\rho}{\lambda_r} \partial_r    \phi_r = -\rho^2 \phi_r \\
+ \frac{\rho^2}{\lambda_r^2} \partial_{ r   r  } \phi_r + \frac{\rho}{\lambda_r} \partial_r    \phi_r + \rho^2 \phi_r = 0 \\
        \rho^2             \partial_{\rho\rho} \phi_r +       \rho           \partial_\rho \phi_r + \rho^2 \phi_r = 0
 \end{align}
 The solutions are Bessel functions, we require the temperature to be finite at $r=0$, so they are of the first kind,
 \begin{equation}
- \phi_r(r \propto J_0(\rho) = J_0(\lambda_r r).
+  \phi_r(r) \propto J_0(\rho) = J_0(\lambda_r r).
 \end{equation}
 Again, the eigenvalues are determined by the boundary conditions.
 
@@ -199,7 +202,18 @@ e^{-\frac{k}{\rho c}\left( \frac{m^2\pi^2}{L^2} + \frac{\alpha_n^2}{R^2}\right) 
 \end{equation}
 
 In order to compare this solution to a numerical solution, we will need to have a value for $\alpha_n$. An analytical expression
-for these zeros does not exist, but there are several numerical libraries that provide functions to calculate them.
+for these zeros does not exist, but they have been tabulated, and there are several numerical libraries that provide functions to calculate them.
+The first five zeros are listed on the Wolfram MathWorld page for Bessesl Function Zeros \url{https://mathworld.wolfram.com/BesselFunctionZeros.html}
+
+\begin{tabular}{cc}
+  $n$ & $\alpha_n$ \\
+  \hline
+  $1$ & $2.4048$ \\
+  $2$ & $5.5201$ \\
+  $3$ & $8.6537$ \\
+  $4$ & $11.7915$ \\
+  $5$ & $14.9309$
+\end{tabular}
 
 \subsubsection{Neumann Boundary Conditions}
 Consider a uniform material over the domain $(r,z) \in (0,R)\times(0,L)$ with boundary conditions
@@ -255,7 +269,7 @@ So the temperature will be linear with $x$ between the boundaries,
 \end{equation}
 The constants $m$ and $b$ will be determined by the boundary conditions.
 
-Let $T(0) = 0$, and $k\dv{T}{x} \right|_{x = L} = -Q$. Applying the boundary conditions gives $b = 0$ and $m = -\frac{Q}{k}$. The temperature
+Let $T(0) = 0$, and $\left.k\dv{T}{x} \right|_{x = L} = -Q$. Applying the boundary conditions gives $b = 0$ and $m = -\frac{Q}{k}$. The temperature
 distribution after long times then will be
 \begin{equation}
   T(x) = -\frac{Q}{k} x.

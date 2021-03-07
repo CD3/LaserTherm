@@ -36,7 +36,7 @@ TEST_CASE("Property Tree Unit Conversion")
 
   convertPropertyTreeUnits(config, ureg);
 
-  boost::property_tree::write_xml(std::cout, config);
+  /* boost::property_tree::write_xml(std::cout, config); */
 }
 
 TEST_CASE("Property Tree Utils")

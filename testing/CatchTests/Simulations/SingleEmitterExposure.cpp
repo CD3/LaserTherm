@@ -22,7 +22,7 @@
 #include <LaserTherm/Structures/_1D/Cartesian/Slab.hpp>
 #include <LaserTherm/Waveforms/ContinuousWave.hpp>
 
-TEST_CASE("Simple Simulation Test", "[simulations]")
+TEST_CASE("Simple Simulation Test", "[.][simulations][longrunning]")
 {
   // this is basically a testing ground for building and running a simulation
 

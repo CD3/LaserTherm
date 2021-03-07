@@ -6,7 +6,7 @@
 #include <Benchmark.hpp>
 #include <LaserTherm/HeatSolvers/_1D/Cartesian/CrankNicholson.hpp>
 
-TEST_CASE("CrankNicholson Heat Solver Optimizations","[.]")
+TEST_CASE("CrankNicholson Heat Solver Optimizations","[.][benchmarks]]")
 {
   // this test case is for benchmarking the crank-nicholson
   // heat solver and comparing them

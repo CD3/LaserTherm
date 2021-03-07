@@ -10,7 +10,7 @@ void nop(T& a)
 {
 }
 
-TEST_CASE("Heat Solver Construction and Setup", "[heatsolver]")
+TEST_CASE("Heat Solver Construction and Setup", "[.][heatsolver]")
 {
   SECTION("Crank-Nicholson")
   {
@@ -129,7 +129,7 @@ TEST_CASE("Heat Solver Signals", "[heatsolver]")
   }
 }
 
-TEST_CASE("1D Cartesian Heat Solver Validation", "[heatsolver][validation]")
+TEST_CASE("1D Cartesian Heat Solver Validation", "[.][heatsolver][validation]")
 {
   // see ./doc/writups/Validation/AnalyticalSolutions/AnalyticalSolutions.pdf
   // for a derivation of these tests

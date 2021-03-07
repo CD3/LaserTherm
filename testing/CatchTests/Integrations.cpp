@@ -6,7 +6,7 @@
 #include <LaserTherm/HeatSolvers/_1D/Cartesian/CrankNicholson.hpp>
 #include <LaserTherm/HeatSources/_1D/Cartesian/BeersLaw.hpp>
 
-TEST_CASE("Crank-Nicholson Heat Solver with Beers Law Source")
+TEST_CASE("Crank-Nicholson Heat Solver with Beers Law Source","[.][heatsolvers][heatsources]")
 {
   HeatSolvers::_1D::Cartesian::CrankNicholson<double> HeatSolver(600);
   HeatSolver.T.setCoordinateSystem(Uniform(-2, 2));

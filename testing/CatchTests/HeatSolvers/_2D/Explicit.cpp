@@ -2,11 +2,13 @@
 
 #include <fstream>
 #include <iostream>
+#include <cmath>
 
+#include <libField/HDF5.hpp>
 #include <LaserTherm/HeatSolvers/_2D/Cylindrical/Explicit.hpp>
 using namespace std;
 
-TEST_CASE("Explicit 2D Cylindrical Heat Solver")
+TEST_CASE("Explicit 2D Cylindrical Heat Solver","[heatsolver]")
 {
 
      //HeatSolvers::_2D::Cylindrical::Explicit<double> HeatSolver(10,20);
@@ -50,4 +52,48 @@ TEST_CASE("Explicit 2D Cylindrical Heat Solver")
       output << Tinit;
       output.close();
     }
+}
+
+TEST_CASE("Explicit 2D Cylindrical Heat Solver Validation","[heatsolver][validation]")
+{
+  // see ./doc/writups/Validation/AnalyticalSolutions/AnalyticalSolutions.pdf
+  // for a derivation of these tests
+  Explicit<double> HeatSolver(100,200);
+  double R = 2;
+  double L = 4;
+  HeatSolver.T.setCoordinateSystem( Uniform(0.,R), Uniform(0., L) );
+
+  double k = 0.5; // W/m/K
+  double rho = 1000; // kg/m^3
+  double c = 4.18; // J/kg/K
+  HeatSolver.A.set(0.0);
+  HeatSolver.VHC.set(rho*c);
+  HeatSolver.k.set(k);
+
+  SECTION("Dirichlet BC")
+  {
+    auto solution = [&](double r, double z, double t)
+    {
+      double lambda_r = 2.4048/R;
+      double lambda_z = M_PI/L;
+      double alpha = k/rho/c*( lambda_z*lambda_z + lambda_r*lambda_r);
+
+      return exp(-alpha*t) * sin(lambda_z*z) * std::cyl_bessel_j(0,lambda_r*r);
+      
+    };
+
+    HeatSolver.T.set_f([&](auto x) { return solution(x[0],x[1],0); });
+
+    /* hdf5write("T_initial.h5", HeatSolver.T); */
+
+    double dt = 0.01;
+    int Nt = 100;
+    for(int i = 0; i < Nt; i++){
+      HeatSolver.stepForward(0.01);
+    }
+
+    CHECK( HeatSolver.T(50,1) == Approx( solution(R/2,L/2,Nt*dt) ) );
+
+
+  }
 }
