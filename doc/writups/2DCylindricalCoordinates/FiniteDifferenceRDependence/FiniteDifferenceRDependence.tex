@@ -88,9 +88,10 @@
 		\begin{equation}
 		\begin{aligned}
 		% line break
-		\mathrm{T}^{n+1}_{r, z} - \mathrm{T}^{n}_{r, z} &= \frac{\Delta t}{\rho c}(\mathrm{T}^{n}_{r, z} \left [\frac{-2\kappa^n_{r, z}}{(\Delta r)^2} -\frac{2\kappa^n_{r, z}}{(\Delta z)^2}  \right ] + \mathrm{T}^{n}_{r + 1, z} \left [\frac{\kappa^n_{r, z}}{2r\Delta r} + \frac{\kappa^n_{r, z}}{(\Delta r)^2} + \frac{1}{2\Delta r}(\frac{\Delta\kappa}{\Delta r})^n_{r, z} \right ] \\
-		&+ \mathrm{T}^{n}_{r - 1, z} \left [\frac{-\kappa^n_{r, z}}{2r\Delta r} + \frac{\kappa^n_{r, z}}{(\Delta r)^2} - \frac{1}{2\Delta r}(\frac{\Delta\kappa}{\Delta r})^n_{r, z} \right ] + \mathrm{T}^{n}_{r, z - 1} \left [\frac{\kappa^n_{r, z}}{(\Delta z)^2} - \frac{1}{2\Delta z}(\frac{\Delta\kappa}{\Delta z})^n_{r, z}  \right ] \\
-		&+ \mathrm{T}^{n}_{r, z + 1} \left [ \frac{\kappa^n_{r, z}}{(\Delta z)^2} + \frac{1}{2\Delta z}(\frac{\Delta\kappa}{\Delta z})^n_{r, z} \right ]) \\
+		\mathrm{T}^{n+1}_{r, z} - \mathrm{T}^{n}_{r, z} &=  \mathrm{T}^{n}_{r, z} \left [ \frac{\Delta t}{\rho c} \left (\frac{-2\kappa^n_{r, z}}{(\Delta r)^2} -\frac{2\kappa^n_{r, z}}{(\Delta z)^2} \right ) \right ] + \mathrm{T}^{n}_{r + 1, z} \left [ \frac{\Delta t}{\rho c} \left (\frac{\kappa^n_{r, z}}{2r\Delta r} + \frac{\kappa^n_{r, z}}{(\Delta r)^2} + \frac{1}{2\Delta r}\left(\frac{\Delta\kappa}{\Delta r}\right)^n_{r, z} \right ) \right ] \\
+		&+ \mathrm{T}^{n}_{r - 1, z} \left [ \frac{\Delta t}{\rho c} \left (\frac{-\kappa^n_{r, z}}{2r\Delta r} + \frac{\kappa^n_{r, z}}{(\Delta r)^2} - \frac{1}{2\Delta r} \left(\frac{\Delta\kappa}{\Delta r}\right)^n_{r, z} \right )\right ] \\
+		&+ \mathrm{T}^{n}_{r, z - 1} \left [ \frac{\Delta t}{\rho c}\left (\frac{\kappa^n_{r, z}}{(\Delta z)^2} - \frac{1}{2\Delta z}\left(\frac{\Delta\kappa}{\Delta z}\right)^n_{r, z} \right ) \right ] \\
+		&+ \mathrm{T}^{n}_{r, z + 1} \left [ \frac{\Delta t}{\rho c}\left ( \frac{\kappa^n_{r, z}}{(\Delta z)^2} + \frac{1}{2\Delta z}\left(\frac{\Delta\kappa}{\Delta z}\right )^n_{r, z} \right ) \right ] \\
 		\end{aligned}
 		\end{equation}
 		
@@ -98,31 +99,31 @@
 
 		\begin{equation}
 		\begin{aligned}
-		A^n_{r, z} &= \left [\frac{-2\kappa^n_{r, z}}{(\Delta r)^2} -\frac{2\kappa^n_{r, z}}{(\Delta z)^2}  \right ] \\
+		A^n_{r, z} &= \left [ \frac{\Delta t}{\rho c}\left (\frac{-2\kappa^n_{r, z}}{(\Delta r)^2} -\frac{2\kappa^n_{r, z}}{(\Delta z)^2} \right ) \right ] \\
 		\end{aligned}
 		\end{equation}
 		
 		\begin{equation}
 		\begin{aligned}
-		B^n_{r, z} &= \left [\frac{\kappa^n_{r, z}}{2r\Delta r} + \frac{\kappa^n_{r, z}}{(\Delta r)^2} + \frac{1}{2\Delta r}(\frac{\Delta\kappa}{\Delta r})^n_{r, z} \right ] \\
+		B^n_{r, z} &=  \left [ \frac{\Delta t}{\rho c}\left (\frac{\kappa^n_{r, z}}{2r\Delta r} + \frac{\kappa^n_{r, z}}{(\Delta r)^2} + \frac{1}{2\Delta r}\left(\frac{\Delta\kappa}{\Delta r}\right)^n_{r, z} \right ) \right ]
 		\end{aligned}
 		\end{equation}
 		
 		\begin{equation}
 		\begin{aligned}
-		C^n_{r, z} &= \left [\frac{-\kappa^n_{r, z}}{2r\Delta r} + \frac{\kappa^n_{r, z}}{(\Delta r)^2} - \frac{1}{2\Delta r}(\frac{\Delta\kappa}{\Delta r})^n_{r, z} \right ] \\
+		C^n_{r, z} &= \left [ \frac{\Delta t}{\rho c}\left (\frac{-\kappa^n_{r, z}}{2r\Delta r} + \frac{\kappa^n_{r, z}}{(\Delta r)^2} - \frac{1}{2\Delta r} \left(\frac{\Delta\kappa}{\Delta r}\right)^n_{r, z} \right )\right ]
 		\end{aligned}
 		\end{equation}
 		
 		\begin{equation}
 		\begin{aligned}
-		D^n_{r, z} &= \left [\frac{\kappa^n_{r, z}}{(\Delta z)^2} - \frac{1}{2\Delta z}(\frac{\Delta\kappa}{\Delta z})^n_{r, z}  \right ] \\
+		D^n_{r, z} &= \left [ \frac{\Delta t}{\rho c}\left (\frac{\kappa^n_{r, z}}{(\Delta z)^2} - \frac{1}{2\Delta z}\left(\frac{\Delta\kappa}{\Delta z}\right)^n_{r, z} \right ) \right ]
 		\end{aligned}
 		\end{equation}
 		
 		\begin{equation}
 		\begin{aligned}
-		E^n_{r, z} &= \left [ \frac{\kappa^n_{r, z}}{(\Delta z)^2} + \frac{1}{2\Delta z}(\frac{\Delta\kappa}{\Delta z})^n_{r, z} \right ] \\
+		E^n_{r, z} &= \left [ \frac{\Delta t}{\rho c}\left ( \frac{\kappa^n_{r, z}}{(\Delta z)^2} + \frac{1}{2\Delta z}\left(\frac{\Delta\kappa}{\Delta z}\right )^n_{r, z} \right ) \right ] 
 		\end{aligned}
 		\end{equation}
 
