@@ -65,14 +65,6 @@ TEST_CASE("Explicit 2D Cylindrical Heat Solver","[heatsolver]")
     }
 
 }
-
-TEST_CASE("Analytic Comparisons"){
-  SECTION("Rod with end at constant temp"){
-  
-  }
-  SECTION("Bessel Function"){
-  
-  }
 }
 
 TEST_CASE("Explicit 2D Cylindrical Heat Solver Validation","[heatsolver][validation]")
@@ -100,9 +92,9 @@ TEST_CASE("Explicit 2D Cylindrical Heat Solver Validation","[heatsolver][validat
       double alpha = k/rho/c*( lambda_z*lambda_z + lambda_r*lambda_r);
 
       return exp(-alpha*t) * sin(lambda_z*z) * std::cyl_bessel_j(0,lambda_r*r);
-      
-    };
 
+    };
+    solution(98.6, 12, 100);
     HeatSolver.T.set_f([&](auto x) { return solution(x[0],x[1],0); });
 
     /* hdf5write("T_initial.h5", HeatSolver.T); */

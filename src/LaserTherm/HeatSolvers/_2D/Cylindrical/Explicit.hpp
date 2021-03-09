@@ -39,6 +39,25 @@ class Explicit{
       }
       T += T_prime;
     }
+    void stepForward(N delta_t, BC::Type Bound){
+      N beta;
+      Field<N, 2> T_prime(zN, rN);
+      for(int i = 1; i < zN - 1; i++){
+        for(int j = 1; j < rN - 1; j++){
+          beta = delta_t / VHC[i][j];
+          // probably make this a function? vvv
+          // Sink boundary conditions (if we go from 1 to )
+          // Make Tprime the increase amount and just add it
+          T_prime[i][j] = beta
+          * (T[i][j] * A_n(i , j)
+          + T[i][j+1] * B_n(i , j)
+          + T[i][j-1] * C_n(i , j)
+          + T[i-1][j] * D_n(i , j)
+          + T[i+1][j] * E_n(i , j));
+        }
+      }
+      T += T_prime;
+    }
     int get_rdims(){
       return this->rN;
     }
@@ -111,7 +130,7 @@ class Explicit{
       // kappa / dr**2
       N T2 = k[i][j] / pow(dr, 2);
       // dk_dr / 2 dr
-      N T3 = - dk_dr(i, j) / (2 * dr); 
+      N T3 = - dk_dr(i, j) / (2 * dr);
       return T1 + T2 + T3;
     }
     N C_nBC(int i, int j){
