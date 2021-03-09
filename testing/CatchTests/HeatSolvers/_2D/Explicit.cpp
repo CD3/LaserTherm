@@ -10,7 +10,7 @@ using namespace std;
 
 TEST_CASE("Explicit 2D Cylindrical Heat Solver","[heatsolver]")
 {
-    SECTION("Sandbox testing area"){
+    SECTION("Build Explicit Heat Solver"){
       //HeatSolvers::_2D::Cylindrical::Explicit<double> HeatSolver(10,20);
       Explicit<double> HeatSolver(10,20);
       Field<double,2> Tinit(10,20);
@@ -53,19 +53,8 @@ TEST_CASE("Explicit 2D Cylindrical Heat Solver","[heatsolver]")
         output.close();
       }
     }
-    SECTION("Build Explicit Heat Solver"){
-      // Create and set variables for Explicit. Checking constructors and accessing members
-    }
-    SECTION("Step Forward"){
-      // Check step Forward runs successfully, keeps a constant field constant,
-      // and the center point of a gaussian GOES DOWN!
-    }
-    SECTION("Boundary Conditions"){
-      // Check boundary conditions hold up somehow... what's a good test?
-    }
+}
 
-}
-}
 
 TEST_CASE("Explicit 2D Cylindrical Heat Solver Validation","[heatsolver][validation]")
 {
@@ -85,7 +74,7 @@ TEST_CASE("Explicit 2D Cylindrical Heat Solver Validation","[heatsolver][validat
 
   SECTION("Dirichlet BC")
   {
-    auto solution = [&](double r, double z, double t)
+    auto solution = [&](double z, double r, double t)
     {
       double lambda_r = 2.4048/R;
       double lambda_z = M_PI/L;
@@ -102,10 +91,10 @@ TEST_CASE("Explicit 2D Cylindrical Heat Solver Validation","[heatsolver][validat
     double dt = 0.01;
     int Nt = 100;
     for(int i = 0; i < Nt; i++){
-      HeatSolver.stepForward(0.01);
+      HeatSolver.stepForward(dt);
     }
 
-    CHECK( HeatSolver.T(50,1) == Approx( solution(R/2,L/2,Nt*dt) ) );
+    CHECK( HeatSolver.T(50,100) == Approx( solution(R/2,L/2,Nt*dt) ) );
 
 
   }
