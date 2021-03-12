@@ -94,7 +94,7 @@ TEST_CASE("Explicit 2D Cylindrical Heat Solver Validation","[heatsolver][validat
       HeatSolver.stepForward(dt);
     }
 
-    CHECK( HeatSolver.T(50,100) == Approx( solution(R/2,L/2,Nt*dt) ) );
+    CHECK( HeatSolver.T(50,100) == Approx( solution(L/2,R/2,Nt*dt) ) );
 
 
   }

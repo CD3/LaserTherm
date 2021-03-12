@@ -1,4 +1,6 @@
 #pragma once
+#ifndef LaserTherm_HeatSolvers__2D_Cylindrical_FiniteDifferenceHeatSolver_hpp
+#define LaserTherm_HeatSolvers__2D_Cylindrical_FiniteDifferenceHeatSolver_hpp
 
 /** @file FiniteDifferenceHeatSolver.hpp
  * @brief
@@ -9,7 +11,7 @@
 
 #include <libField/Field.hpp>
 
-#include "../BoundaryConditions.hpp"
+#include "LaserTherm/HeatSolvers/BoundaryConditions.hpp"
 
 namespace HeatSolvers::_2D::Cylindrical
 {
@@ -78,3 +80,4 @@ class FiniteDifferenceHeatSolver
 }  // namespace HeatSolvers::_1D
 
 #endif  // include protector
+
