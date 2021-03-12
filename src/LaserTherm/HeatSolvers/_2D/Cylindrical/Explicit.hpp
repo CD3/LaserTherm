@@ -3,7 +3,7 @@
 
 namespace BC = HeatSolvers::BoundaryConditions;
 
-template <class N>
+template <class REAL>
 class Explicit{
   public:
     // -------------------- PUBLIC CONSTRUCTORS --------------------
@@ -22,7 +22,7 @@ class Explicit{
     // delta_t is a step forward in time in seconds
     void stepForward(REAL delta_t){
       REAL beta;
-      Field<N, 2> T_prime(zN, rN);
+      Field<REAL, 2> T_prime(zN, rN);
       for(int i = 1; i < zN - 1; i++){
         for(int j = 1; j < rN - 1; j++){
           beta = delta_t / VHC[i][j];
@@ -41,7 +41,7 @@ class Explicit{
     }
     void stepForward(REAL delta_t, BC::Type Bound){
       REAL beta;
-      Field<N, 2> T_prime(zN, rN);
+      Field<REAL, 2> T_prime(zN, rN);
       for(int i = 1; i < zN - 1; i++){
         for(int j = 1; j < rN - 1; j++){
           beta = delta_t / VHC[i][j];
@@ -65,10 +65,10 @@ class Explicit{
       return this->zN;
     }
     // ----------------- PUBLIC MEMBER VARIABLES -------------------
-    Field<N, 2> T;
-    Field<N, 2> A;
-    Field<N, 2> VHC;
-    Field<N, 2> k;
+    Field<REAL, 2> T;
+    Field<REAL, 2> A;
+    Field<REAL, 2> VHC;
+    Field<REAL, 2> k;
     // we (probably) can't explicitly define dt as REAL type :(
     double dt = 0.001;
 
@@ -103,7 +103,7 @@ class Explicit{
     }
     REAL A_nBC(int i, int j){
       // Some reference to Boundary Conditions set elsewhere
-      // double fprime = BC::FiniteDifference<N>::f;
+      // double fprime = BC::FiniteDifference<REAL>::f;
     }
     // Calculate Coefficent for T^n_(r+1, z)
     REAL B_n(int i, int j){
