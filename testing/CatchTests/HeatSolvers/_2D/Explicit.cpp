@@ -30,28 +30,15 @@ TEST_CASE("Explicit 2D Cylindrical Heat Solver","[heatsolver]")
       HeatSolver.VHC.set(3.0);
       HeatSolver.k.set(4.0);
 
-      {
-        ofstream output;
-        output.open("Tbefore.txt");
-        output << HeatSolver.T;
-        output.close();
-      }
+      HeatSolver.stepForward(0.001);
 
-      HeatSolver.stepForward(0.05);
+    {
+      ofstream output;
+      output.open("quickTest.txt");
+      output << HeatSolver.T;
+      output.close();
+    }
 
-      {
-        ofstream output;
-        output.open("Tafter.txt");
-        output << HeatSolver.T;
-        output.close();
-      }
-
-      {
-        ofstream output;
-        output.open("Tdiff.txt");
-        output << Tinit;
-        output.close();
-      }
     }
 }
 
@@ -61,9 +48,15 @@ TEST_CASE("Explicit 2D Cylindrical Heat Solver Validation","[heatsolver][validat
   // see ./doc/writups/Validation/AnalyticalSolutions/AnalyticalSolutions.pdf
   // for a derivation of these tests
   Explicit<double> HeatSolver(100,200);
+  Field<double, 2> Aplot(200,100);
   double R = 2;
   double L = 4;
-  HeatSolver.T.setCoordinateSystem( Uniform(0.,R), Uniform(0., L) );
+  HeatSolver.T.setCoordinateSystem( Uniform(0.,L), Uniform(0., R) );
+  HeatSolver.k.setCoordinateSystem( Uniform(0.,L), Uniform(0., R) );
+  HeatSolver.A.setCoordinateSystem( Uniform(0.,L), Uniform(0., R) );
+  HeatSolver.VHC.setCoordinateSystem( Uniform(0.,L), Uniform(0., R) );
+  Aplot.setCoordinateSystem( Uniform(0.,L), Uniform(0., R) );
+
 
   double k = 0.5; // W/m/K
   double rho = 1000; // kg/m^3
@@ -83,18 +76,32 @@ TEST_CASE("Explicit 2D Cylindrical Heat Solver Validation","[heatsolver][validat
       return exp(-alpha*t) * sin(lambda_z*z) * std::cyl_bessel_j(0,lambda_r*r);
 
     };
-    solution(98.6, 12, 100);
+    
+    double dt = 0.001;
+    int Nt = 100;
     HeatSolver.T.set_f([&](auto x) { return solution(x[0],x[1],0); });
+    Aplot.set_f([&](auto x) { return solution(x[0],x[1],Nt*dt); });
+    {
+      ofstream output;
+      output.open("NumericalSol.txt");
+      output << HeatSolver.T;
+      output.close();
+    }
+    {
+      ofstream output;
+      output.open("AnalyticalSol.txt");
+      output << Aplot;
+      output.close();
+    }
 
     /* hdf5write("T_initial.h5", HeatSolver.T); */
 
-    double dt = 0.01;
-    int Nt = 100;
     for(int i = 0; i < Nt; i++){
       HeatSolver.stepForward(dt);
     }
 
-    CHECK( HeatSolver.T(50,100) == Approx( solution(L/2,R/2,Nt*dt) ) );
+    CHECK( HeatSolver.T(100,50) == Approx( solution(L/2,R/2,Nt*dt) ) );
+    CHECK( abs((HeatSolver.T(100,50) - solution(L/2,R/2,Nt*dt)) / solution(L/2,R/2,Nt*dt)) == Approx(0.01 ) );
 
 
   }
