@@ -11,7 +11,7 @@ template <class REAL>
 class Explicit : public FDHS::FiniteDifferenceHeatSolver<REAL> {
   public:
     // -------------------- PUBLIC CONSTRUCTORS --------------------
-    Explicit(size_t _rN, size_t _zN){
+    Explicit(size_t _zN, size_t _rN){
       this->rN = _rN;
       this->zN = _zN;
       this->T.reset(zN, rN);

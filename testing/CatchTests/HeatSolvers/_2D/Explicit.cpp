@@ -12,7 +12,7 @@ TEST_CASE("Explicit 2D Cylindrical Heat Solver","[heatsolver]")
 {
     SECTION("Build Explicit Heat Solver"){
       //HeatSolvers::_2D::Cylindrical::Explicit<double> HeatSolver(10,20);
-      Explicit<double> HeatSolver(10,20);
+      Explicit<double> HeatSolver(20,10);
       Field<double,2> Tinit(10,20);
       Tinit.setCoordinateSystem(Uniform(-2, 2),Uniform(-4,4));
       HeatSolver.T.setCoordinateSystem(Uniform(-2, 2),Uniform(-4,4));
@@ -47,7 +47,7 @@ TEST_CASE("Explicit 2D Cylindrical Heat Solver Validation","[heatsolver][validat
 {
   // see ./doc/writups/Validation/AnalyticalSolutions/AnalyticalSolutions.pdf
   // for a derivation of these tests
-  Explicit<double> HeatSolver(100,200);
+  Explicit<double> HeatSolver(200,100);
   Field<double, 2> Aplot(200,100);
   double R = 2;
   double L = 4;
