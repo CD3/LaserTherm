@@ -4,7 +4,7 @@
 #include <iostream>
 #include <cmath>
 
-#include <libField/HDF5.hpp>
+//#include <libField/HDF5.hpp>
 #include <LaserTherm/HeatSolvers/_2D/Cylindrical/Explicit.hpp>
 using namespace std;
 
@@ -76,7 +76,7 @@ TEST_CASE("Explicit 2D Cylindrical Heat Solver Validation","[heatsolver][validat
       return exp(-alpha*t) * sin(lambda_z*z) * std::cyl_bessel_j(0,lambda_r*r);
 
     };
-    
+
     double dt = 0.001;
     int Nt = 100;
     HeatSolver.T.set_f([&](auto x) { return solution(x[0],x[1],0); });
