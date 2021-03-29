@@ -27,8 +27,32 @@ class Explicit : public FDHS::FiniteDifferenceHeatSolver<REAL> {
     void stepForward(REAL delta_t){
       REAL beta;
       Field<REAL, 2> T_prime(zN, rN);
-      for(int i = 1; i < zN - 1; i++){
-        for(int j = 1; j < rN - 1; j++){
+      for(int i = 0; i < zN; i++){
+        for(int j = 0; j < rN; j++){
+          if(i == 0){
+            //L'hospital formulas
+            beta = delta_t / this->VHC[i][j];
+            REAL T1 = this->T[i][j]   * A_nBC(i , j);
+            REAL T2 = this->T[i][j+1] * B_nBC(i , j);
+            REAL T3 = this->T[i][j-1] * C_nBC(i , j);
+            //T[1][j] from symmetry about origin
+            REAL T4 = this->T[1][j] * D_nBC(i , j);
+            REAL T5 = this->T[i+1][j] * E_nBC(i , j);
+            T_prime[i][j] = beta * (T1 + T2 + T3 + T4 + T5)
+            continue;
+          }
+          if(i == zN-1){
+            //bc stuff
+            continue;
+          }
+          if(j == 0){
+            //bc stuff
+            continue;
+          }
+          if(j == rN-1){
+            //bc stuff
+            continue;
+          }
           beta = delta_t / this->VHC[i][j];
           REAL T1 = this->T[i][j]   * A_n(i , j);
           REAL T2 = this->T[i][j+1] * B_n(i , j);
