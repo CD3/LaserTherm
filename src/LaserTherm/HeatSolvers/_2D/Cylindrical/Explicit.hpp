@@ -15,9 +15,9 @@ class Explicit : public FDHS::FiniteDifferenceHeatSolver<REAL> {
       this->rN = _rN;
       this->zN = _zN;
       this->T.reset(zN, rN);
-      this->A.reset(zN, rN);
-      this->VHC.reset(zN, rN);
-      this->k.reset(zN, rN);
+      this->A.reset(this->T.getCoordinateSystemPtr());
+      this->VHC.reset(this->T.getCoordinateSystemPtr());
+      this->k.reset(this->T.getCoordinateSystemPtr());
     }
     Explicit(){
       // Default constructor to be safe
@@ -30,26 +30,14 @@ class Explicit : public FDHS::FiniteDifferenceHeatSolver<REAL> {
       for(int i = 1; i < zN - 1; i++){
         for(int j = 1; j < rN - 1; j++){
           beta = delta_t / this->VHC[i][j];
-          // probably make this a function? vvv
-          // Sink boundary conditions (if we go from 1 to )
-          // Make Tprime the increase amount and just add it
-          /*T_prime[i][j] = beta
-          * (this->T[i][j] * A_n(i , j)
-          + this->T[i][j+1] * B_n(i , j)
-          + this->T[i][j-1] * C_n(i , j)
-          + this->T[i-1][j] * D_n(i , j)
-          + this->T[i+1][j] * E_n(i , j));*/
           REAL T1 = this->T[i][j]   * A_n(i , j);
           REAL T2 = this->T[i][j+1] * B_n(i , j);
           REAL T3 = this->T[i][j-1] * C_n(i , j);
           REAL T4 = this->T[i-1][j] * D_n(i , j);
           REAL T5 = this->T[i+1][j] * E_n(i , j);
-          std::cout << A_n(i, j) << "\t" << B_n(i, j) << "\t" << C_n(i, j) << "\t" << D_n(i, j) << "\t" << E_n(i, j) << "\n" ;
           T_prime[i][j] = beta * (T1 + T2 + T3 + T4 + T5);
           if(isnan(T_prime[i][j])){
-            std::cout << "NaN found at: (" << j  << ", " << i << ")\n";
-            std::cout << "NaN found at: (" << this->T.getCoord(i, j)[1]  << ", " << this->T.getCoord(i, j)[1] << ")\n";
-            std::cout << "Old temp was: " << this->T[i][j] << "\n";
+            // make this a better error
             throw 20;
           }
         }

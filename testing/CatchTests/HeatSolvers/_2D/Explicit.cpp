@@ -52,9 +52,6 @@ TEST_CASE("Explicit 2D Cylindrical Heat Solver Validation","[heatsolver][validat
   double R = 2;
   double L = 4;
   HeatSolver.T.setCoordinateSystem( Uniform(0.,L), Uniform(0., R) );
-  HeatSolver.k.setCoordinateSystem( Uniform(0.,L), Uniform(0., R) );
-  HeatSolver.A.setCoordinateSystem( Uniform(0.,L), Uniform(0., R) );
-  HeatSolver.VHC.setCoordinateSystem( Uniform(0.,L), Uniform(0., R) );
   Aplot.setCoordinateSystem( Uniform(0.,L), Uniform(0., R) );
 
 
