@@ -122,14 +122,21 @@ class Explicit : public FDHS::FiniteDifferenceHeatSolver<REAL> {
       return T1 + T2 + T3;
     }
     REAL B_nBC(int i, int j){
-      // Some reference to Boundary Conditions set elsewhere
+      REAL dr = this->k.getCoord(i, j + 1)[1] - this->k.getCoord(i, j)[1];
+      // 2 * kappa / dr**2
+      REAL T1 = 2 * this->k[i][j] / pow(dr, 2);
+      // 1 / 2 * dr
+      REAL T2 = 2 * dr;
+      // dk / dr
+      REAL T3 = dk_dr(i, j) / dr;
+      return T1 + T2 * T3
     }
     // Calculate Coefficent for T^n_(r-1, z)
     REAL C_n(int i, int j){
       //return (N) 0;
       REAL dr = this->k.getCoord(i, j + 1)[1] - this->k.getCoord(i, j)[1];
       REAL dz = this->k.getCoord(i + 1, j)[0] - this->k.getCoord(i, j)[0];
-      // -this->kappa / 2r * dr
+      // - kappa / 2r * dr
       REAL T1 = - this->k[i][j] / (2 * this->k.getCoord(i, j)[1] * dr);
       // kappa / dr**2
       REAL T2 = this->k[i][j] / pow(dr, 2);
@@ -138,7 +145,14 @@ class Explicit : public FDHS::FiniteDifferenceHeatSolver<REAL> {
       return T1 + T2 + T3;
     }
     REAL C_nBC(int i, int j){
-    // Some reference to Boundary Conditions set elsewhere
+      REAL dr = this->k.getCoord(i, j + 1)[1] - this->k.getCoord(i, j)[1];
+      // 2 * kappa / dr**2
+      REAL T1 = 2 * this->k[i][j] / pow(dr, 2);
+      // 1 / 2 * dr
+      REAL T2 = 2 * dr;
+      // dk / dr
+      REAL T3 = dk_dr(i, j) / dr;
+      return T1 - T2 * T3
     }
     // Calculate Coefficent for T^n_(r, z-1)
     REAL D_n(int i, int j){
@@ -152,7 +166,7 @@ class Explicit : public FDHS::FiniteDifferenceHeatSolver<REAL> {
       return T1 + T2;
     }
     REAL D_nBC(int i, int j){
-      // Some reference to Boundary Conditions set elsewhere
+      return D_n(i, j);
     }
     // Calculate Coefficent for T^n_(r, z+1)
     REAL E_n(int i, int j){
@@ -166,7 +180,7 @@ class Explicit : public FDHS::FiniteDifferenceHeatSolver<REAL> {
       return T1 + T2;
     }
     REAL E_nBC(int i, int j){
-      // Some reference to Boundary Conditions set elsewhere
+      return E_n(i, j);
     }
 
 
