@@ -38,7 +38,7 @@ class Explicit : public FDHS::FiniteDifferenceHeatSolver<REAL> {
             //T[1][j] from symmetry about origin
             REAL T4 = this->T[1][j] * D_nBC(i , j);
             REAL T5 = this->T[i+1][j] * E_nBC(i , j);
-            T_prime[i][j] = beta * (T1 + T2 + T3 + T4 + T5)
+            T_prime[i][j] = beta * (T1 + T2 + T3 + T4 + T5);
             continue;
           }
           if(i == zN-1){
