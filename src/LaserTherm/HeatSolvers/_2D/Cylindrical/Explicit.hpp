@@ -27,30 +27,89 @@ class Explicit : public FDHS::FiniteDifferenceHeatSolver<REAL> {
     void stepForward(REAL delta_t){
       REAL beta;
       Field<REAL, 2> T_prime(zN, rN);
+      REAL T1, T2, T3, T4, T5;
       for(int i = 0; i < zN; i++){
         for(int j = 0; j < rN; j++){
+          // r=0 case
           if(j == 0){
             //L'hospital formulas
             beta = delta_t / this->VHC[i][j];
             REAL T1 = this->T[i][0]   * A_nBC(i , j);
             REAL T2 = this->T[i][1] * B_nBC(i , j);
+            //T[i][1] from symmetry about origin
             REAL T3 = this->T[i][1] * C_nBC(i , j);
-            //T[1][j] from symmetry about origin
             REAL T4 = this->T[i-1][0] * D_nBC(i , j);
             REAL T5 = this->T[i+1][0] * E_nBC(i , j);
             T_prime[i][j] = beta * (T1 + T2 + T3 + T4 + T5);
             continue;
           }
-          if(i == 0){
-            //bc stuff
-            continue;
-          }
-          if(i == zN-1){
-            //bc stuff
-            continue;
-          }
+          // r = Rmax
           if(j == rN-1){
-            //bc stuff
+            switch(this->maxRBC.type){
+              case BC::Type::None:
+                beta = delta_t / this->VHC[i][j];
+                REAL T1 = this->T[i][j]   * A_n(i , j);
+                REAL T2 = this->maxRBC.f * B_n(i , j);
+                REAL T3 = this->T[i][j-1] * C_n(i , j);
+                REAL T4 = this->T[i-1][j] * D_n(i , j);
+                REAL T5 = this->T[i+1][j] * E_n(i , j);
+                T_prime[i][j] = beta * (T1 + T2 + T3 + T4 + T5);
+                break;
+              case BC::Type::Temperature:
+                // do stuff for temp type
+                break;
+              case BC::Type::HeatFlux:
+                // do HeatFlux stuff
+                break;
+              default:
+                throw 42;
+            }
+            continue;
+          }
+          // z = 0
+          if(i == 0){
+            switch(this->minZBC.type){
+              case BC::Type::None:
+                beta = delta_t / this->VHC[i][j];
+                REAL T1 = this->T[i][j]   * A_n(i , j);
+                REAL T2 = this->T[i][j+1] * B_n(i , j);
+                REAL T3 = this->T[i][j-1] * C_n(i , j);
+                REAL T4 = this->minZBC.f * D_n(i , j);
+                REAL T5 = this->T[i+1][j] * E_n(i , j);
+                T_prime[i][j] = beta * (T1 + T2 + T3 + T4 + T5);
+                break;
+              case BC::Type::Temperature:
+                // do stuff for temp type
+                break;
+              case BC::Type::HeatFlux:
+                // do HeatFlux stuff
+                break;
+              default:
+                throw 42;
+            }
+            continue;
+          }
+          // z = Zmax
+          if(i == zN-1){
+            switch(this->maxZBC.type){
+              case BC::Type::None:
+                beta = delta_t / this->VHC[i][j];
+                REAL T1 = this->T[i][j]   * A_n(i , j);
+                REAL T2 = this->T[i][j+1] * B_n(i , j);
+                REAL T3 = this->T[i][j-1] * C_n(i , j);
+                REAL T4 = this->T[i-1][j] * D_n(i , j);
+                REAL T5 = this->maxZBC.f * E_n(i , j);
+                T_prime[i][j] = beta * (T1 + T2 + T3 + T4 + T5);
+                break;
+              case BC::Type::Temperature:
+                // do stuff for temp type
+                break;
+              case BC::Type::HeatFlux:
+                // do HeatFlux stuff
+                break;
+              default:
+                throw 42;
+            }
             continue;
           }
           beta = delta_t / this->VHC[i][j];
