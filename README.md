@@ -99,6 +99,11 @@ $ ~/.local/bin/conan
 ```
 Adding it to your `PATH` just makes it available as a command.
 
+You also need to set the compiler settings in conan to avoid certain version conflicts with the following comman
+```
+$ conan profile update settings.compiler.libcxx=libstd11 default
+```
+
 ### Install `LaserTherm` Dependencies
 
 You need to add Dr. Clark's Conan package repository to download the the `LaserTherm
