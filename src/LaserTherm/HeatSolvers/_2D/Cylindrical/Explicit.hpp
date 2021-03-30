@@ -29,23 +29,23 @@ class Explicit : public FDHS::FiniteDifferenceHeatSolver<REAL> {
       Field<REAL, 2> T_prime(zN, rN);
       for(int i = 0; i < zN; i++){
         for(int j = 0; j < rN; j++){
-          if(i == 0){
+          if(j == 0){
             //L'hospital formulas
             beta = delta_t / this->VHC[i][j];
-            REAL T1 = this->T[i][j]   * A_nBC(i , j);
-            REAL T2 = this->T[i][j+1] * B_nBC(i , j);
-            REAL T3 = this->T[i][j-1] * C_nBC(i , j);
+            REAL T1 = this->T[i][0]   * A_nBC(i , j);
+            REAL T2 = this->T[i][1] * B_nBC(i , j);
+            REAL T3 = this->T[i][1] * C_nBC(i , j);
             //T[1][j] from symmetry about origin
-            REAL T4 = this->T[1][j] * D_nBC(i , j);
-            REAL T5 = this->T[i+1][j] * E_nBC(i , j);
+            REAL T4 = this->T[i-1][0] * D_nBC(i , j);
+            REAL T5 = this->T[i+1][0] * E_nBC(i , j);
             T_prime[i][j] = beta * (T1 + T2 + T3 + T4 + T5);
             continue;
           }
-          if(i == zN-1){
+          if(i == 0){
             //bc stuff
             continue;
           }
-          if(j == 0){
+          if(i == zN-1){
             //bc stuff
             continue;
           }
@@ -62,7 +62,7 @@ class Explicit : public FDHS::FiniteDifferenceHeatSolver<REAL> {
           T_prime[i][j] = beta * (T1 + T2 + T3 + T4 + T5);
           if(isnan(T_prime[i][j])){
             // make this a better error
-            throw 20;
+            throw 42;
           }
         }
       }
@@ -129,7 +129,7 @@ class Explicit : public FDHS::FiniteDifferenceHeatSolver<REAL> {
       REAL T2 = 2 * dr;
       // dk / dr
       REAL T3 = dk_dr(i, j) / dr;
-      return T1 + T2 * T3
+      return T1 + T2 * T3;
     }
     // Calculate Coefficent for T^n_(r-1, z)
     REAL C_n(int i, int j){
@@ -152,7 +152,7 @@ class Explicit : public FDHS::FiniteDifferenceHeatSolver<REAL> {
       REAL T2 = 2 * dr;
       // dk / dr
       REAL T3 = dk_dr(i, j) / dr;
-      return T1 - T2 * T3
+      return T1 - T2 * T3;
     }
     // Calculate Coefficent for T^n_(r, z-1)
     REAL D_n(int i, int j){
