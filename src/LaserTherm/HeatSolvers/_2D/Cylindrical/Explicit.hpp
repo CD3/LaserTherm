@@ -25,21 +25,22 @@ class Explicit : public FDHS::FiniteDifferenceHeatSolver<REAL> {
     // ---------------------- PUBLIC METHODS -----------------------
     // delta_t is a step forward in time in seconds
     void stepForward(REAL delta_t){
-      REAL beta;
       Field<REAL, 2> T_prime(zN, rN);
       REAL T1, T2, T3, T4, T5;
+      REAL beta;
       for(int i = 0; i < zN; i++){
         for(int j = 0; j < rN; j++){
           // r=0 case
           if(j == 0){
+            std::cout << "HIT: r=0\n";
             //L'hospital formulas
             beta = delta_t / this->VHC[i][j];
-            REAL T1 = this->T[i][0]   * A_nBC(i , 0);
-            REAL T2 = this->T[i][1]   * B_nBC(i , 0);
+            T1 = this->T[i][0]   * A_nBC(i , 0);
+            T2 = this->T[i][1]   * B_nBC(i , 0);
             //T[i][1] from symmetry about origin
-            REAL T3 = this->T[i][1]   * C_nBC(i , 0);
-            REAL T4 = this->T[i-1][0] * D_nBC(i , 0);
-            REAL T5 = this->T[i+1][0] * E_nBC(i , 0);
+            T3 = this->T[i][1]   * C_nBC(i , 0);
+            T4 = this->T[i-1][0] * D_nBC(i , 0);
+            T5 = this->T[i+1][0] * E_nBC(i , 0);
             T_prime[i][j] = beta * (T1 + T2 + T3 + T4 + T5);
             continue;
           }
@@ -47,12 +48,13 @@ class Explicit : public FDHS::FiniteDifferenceHeatSolver<REAL> {
           if(j == rN-1){
             switch(this->maxRBC.type){
               case BC::Type::None:
+                std::cout << "HIT: r=RMax\n";
                 beta = delta_t / this->VHC[i][j];
-                REAL T1 = this->T[i][j]   * A_n(i , j);
-                REAL T2 = this->maxRBC.f * B_n(i , j);
-                REAL T3 = this->T[i][j-1] * C_n(i , j);
-                REAL T4 = this->T[i-1][j] * D_n(i , j);
-                REAL T5 = this->T[i+1][j] * E_n(i , j);
+                T1 = this->T[i][j]   * A_n(i , j);
+                T2 = this->maxRBC.f  * B_n(i , j);
+                T3 = this->T[i][j-1] * C_n(i , j);
+                T4 = this->T[i-1][j] * D_n(i , j);
+                T5 = this->T[i+1][j] * E_n(i , j);
                 T_prime[i][j] = beta * (T1 + T2 + T3 + T4 + T5);
                 break;
               case BC::Type::Temperature:
@@ -70,12 +72,13 @@ class Explicit : public FDHS::FiniteDifferenceHeatSolver<REAL> {
           if(i == 0){
             switch(this->minZBC.type){
               case BC::Type::None:
+                std::cout << "HIT: z=0\n";
                 beta = delta_t / this->VHC[i][j];
-                REAL T1 = this->T[i][j]   * A_n(i , j);
-                REAL T2 = this->T[i][j+1] * B_n(i , j);
-                REAL T3 = this->T[i][j-1] * C_n(i , j);
-                REAL T4 = this->minZBC.f * D_n(i , j);
-                REAL T5 = this->T[i+1][j] * E_n(i , j);
+                T1 = this->T[i][j]   * A_n(i , j);
+                T2 = this->T[i][j+1] * B_n(i , j);
+                T3 = this->T[i][j-1] * C_n(i , j);
+                T4 = this->minZBC.f  * D_n(i , j);
+                T5 = this->T[i+1][j] * E_n(i , j);
                 T_prime[i][j] = beta * (T1 + T2 + T3 + T4 + T5);
                 break;
               case BC::Type::Temperature:
@@ -93,12 +96,13 @@ class Explicit : public FDHS::FiniteDifferenceHeatSolver<REAL> {
           if(i == zN-1){
             switch(this->maxZBC.type){
               case BC::Type::None:
+                std::cout << "HIT: z=zmax\n";
                 beta = delta_t / this->VHC[i][j];
-                REAL T1 = this->T[i][j]   * A_n(i , j);
-                REAL T2 = this->T[i][j+1] * B_n(i , j);
-                REAL T3 = this->T[i][j-1] * C_n(i , j);
-                REAL T4 = this->T[i-1][j] * D_n(i , j);
-                REAL T5 = this->maxZBC.f * E_n(i , j);
+                T1 = this->T[i][j]   * A_n(i , j);
+                T2 = this->T[i][j+1] * B_n(i , j);
+                T3 = this->T[i][j-1] * C_n(i , j);
+                T4 = this->T[i-1][j] * D_n(i , j);
+                T5 = this->maxZBC.f  * E_n(i , j);
                 T_prime[i][j] = beta * (T1 + T2 + T3 + T4 + T5);
                 break;
               case BC::Type::Temperature:
@@ -113,11 +117,11 @@ class Explicit : public FDHS::FiniteDifferenceHeatSolver<REAL> {
             continue;
           }
           beta = delta_t / this->VHC[i][j];
-          REAL T1 = this->T[i][j]   * A_n(i , j);
-          REAL T2 = this->T[i][j+1] * B_n(i , j);
-          REAL T3 = this->T[i][j-1] * C_n(i , j);
-          REAL T4 = this->T[i-1][j] * D_n(i , j);
-          REAL T5 = this->T[i+1][j] * E_n(i , j);
+          T1 = this->T[i][j]   * A_n(i , j);
+          T2 = this->T[i][j+1] * B_n(i , j);
+          T3 = this->T[i][j-1] * C_n(i , j);
+          T4 = this->T[i-1][j] * D_n(i , j);
+          T5 = this->T[i+1][j] * E_n(i , j);
           T_prime[i][j] = beta * (T1 + T2 + T3 + T4 + T5);
           if(isnan(T_prime[i][j])){
             // make this a better error

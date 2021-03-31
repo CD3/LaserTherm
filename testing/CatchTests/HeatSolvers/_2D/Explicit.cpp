@@ -97,9 +97,22 @@ TEST_CASE("Explicit 2D Cylindrical Heat Solver Validation","[heatsolver][validat
       HeatSolver.stepForward(dt);
     }
 
-    CHECK( HeatSolver.T(100,50) == Approx( solution(L/2,R/2,Nt*dt) ) );
-    CHECK( abs((HeatSolver.T(100,50) - solution(L/2,R/2,Nt*dt)) / solution(L/2,R/2,Nt*dt)) == Approx(0.01 ) );
+    vector<std::pair<int, int>> Points;
+    Points.push_back(std::make_pair<int, int>(100, 50));
+    Points.push_back(std::make_pair<int, int>(100, 98));
+    Points.push_back(std::make_pair<int, int>(198, 50));
+    Points.push_back(std::make_pair<int, int>(1, 50));
+    Points.push_back(std::make_pair<int, int>(100, 1));
 
+    for(int i = 0; i < Points.size(); i++){
+      std::pair<int, int> temp = Points[i];
+      CHECK( HeatSolver.T(temp.first, temp.second) == Approx( solution((temp.first / 200.0) * L, (temp.second / 100.0) * R, Nt*dt)));
+      //CHECK( abs((HeatSolver.T(temp.first, temp.second) - solution((temp.first / 200) * L, (temp.second / 100) * R, Nt*dt)) / solution((temp.first / 200) * L, (temp.second / 100) * R, Nt*dt)) == Approx(0.01) );
+    }
+
+    // center
+//    CHECK( HeatSolver.T(100,50) == Approx( solution(L/2,R/2,Nt*dt) ) );
+//    CHECK( abs((HeatSolver.T(100,50) - solution(L/2,R/2,Nt*dt)) / solution(L/2,R/2,Nt*dt)) == Approx(0.01 ) );
 
   }
 }
