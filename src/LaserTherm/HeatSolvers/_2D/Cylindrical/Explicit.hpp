@@ -34,12 +34,12 @@ class Explicit : public FDHS::FiniteDifferenceHeatSolver<REAL> {
           if(j == 0){
             //L'hospital formulas
             beta = delta_t / this->VHC[i][j];
-            REAL T1 = this->T[i][0]   * A_nBC(i , j);
-            REAL T2 = this->T[i][1] * B_nBC(i , j);
+            REAL T1 = this->T[i][0]   * A_nBC(i , 0);
+            REAL T2 = this->T[i][1]   * B_nBC(i , 0);
             //T[i][1] from symmetry about origin
-            REAL T3 = this->T[i][1] * C_nBC(i , j);
-            REAL T4 = this->T[i-1][0] * D_nBC(i , j);
-            REAL T5 = this->T[i+1][0] * E_nBC(i , j);
+            REAL T3 = this->T[i][1]   * C_nBC(i , 0);
+            REAL T4 = this->T[i-1][0] * D_nBC(i , 0);
+            REAL T5 = this->T[i+1][0] * E_nBC(i , 0);
             T_prime[i][j] = beta * (T1 + T2 + T3 + T4 + T5);
             continue;
           }
@@ -166,7 +166,11 @@ class Explicit : public FDHS::FiniteDifferenceHeatSolver<REAL> {
     }
     REAL A_nBC(int i, int j){
       // Some reference to Boundary Conditions set elsewhere
-      // double fprime = BC::FiniteDifference<REAL>::f;
+      REAL dr = this->k.getCoord(i, j + 1)[1] - this->k.getCoord(i, j)[1];
+      REAL dz = this->k.getCoord(i + 1, j)[0] - this->k.getCoord(i, j)[0];
+      REAL T1 = (-4 * this->k[i][j]) / (dr * dr);
+      REAL T2 = (-2 * this->k[i][j]) / (dz * dz);
+      return T1 + T2;
     }
     // Calculate Coefficent for T^n_(r+1, z)
     REAL B_n(int i, int j){
