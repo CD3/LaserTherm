@@ -97,6 +97,14 @@ TEST_CASE("Explicit 2D Cylindrical Heat Solver Validation","[heatsolver][validat
       HeatSolver.stepForward(dt);
     }
 
+    vector<string> Name;
+    Name.push_back("center");
+    Name.push_back("rmax");
+    Name.push_back("zmax");
+    Name.push_back("zmin");
+    Name.push_back("r=0");
+
+
     vector<std::pair<int, int>> Points;
     Points.push_back(std::make_pair<int, int>(100, 50));
     Points.push_back(std::make_pair<int, int>(100, 98));
@@ -106,6 +114,7 @@ TEST_CASE("Explicit 2D Cylindrical Heat Solver Validation","[heatsolver][validat
 
     for(int i = 0; i < Points.size(); i++){
       std::pair<int, int> temp = Points[i];
+      std::cout << "Testing " << Name[i] << "\n";
       CHECK( HeatSolver.T(temp.first, temp.second) == Approx( solution((temp.first / 200.0) * L, (temp.second / 100.0) * R, Nt*dt)));
       //CHECK( abs((HeatSolver.T(temp.first, temp.second) - solution((temp.first / 200) * L, (temp.second / 100) * R, Nt*dt)) / solution((temp.first / 200) * L, (temp.second / 100) * R, Nt*dt)) == Approx(0.01) );
     }
