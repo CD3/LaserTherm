@@ -78,6 +78,10 @@ TEST_CASE("Explicit 2D Cylindrical Heat Solver Validation","[heatsolver][validat
     int Nt = 100;
     HeatSolver.T.set_f([&](auto x) { return solution(x[0],x[1],0); });
     Aplot.set_f([&](auto x) { return solution(x[0],x[1],Nt*dt); });
+    for(int i = 0; i < Nt; i++){
+      HeatSolver.stepForward(dt);
+    }
+
     {
       ofstream output;
       output.open("NumericalSol.txt");
@@ -90,12 +94,8 @@ TEST_CASE("Explicit 2D Cylindrical Heat Solver Validation","[heatsolver][validat
       output << Aplot;
       output.close();
     }
-
+    
     /* hdf5write("T_initial.h5", HeatSolver.T); */
-
-    for(int i = 0; i < Nt; i++){
-      HeatSolver.stepForward(dt);
-    }
 
     vector<string> Name;
     Name.push_back("center");
