@@ -61,6 +61,9 @@ TEST_CASE("Explicit 2D Cylindrical Heat Solver Validation","[heatsolver][validat
   HeatSolver.A.set(0.0);
   HeatSolver.VHC.set(rho*c);
   HeatSolver.k.set(k);
+  HeatSolver.minZBC.f = 0;
+  HeatSolver.maxZBC.f = 0;
+  HeatSolver.maxRBC.f = 0;
 
   SECTION("Dirichlet BC")
   {
@@ -94,7 +97,7 @@ TEST_CASE("Explicit 2D Cylindrical Heat Solver Validation","[heatsolver][validat
       output << Aplot;
       output.close();
     }
-    
+
     /* hdf5write("T_initial.h5", HeatSolver.T); */
 
     vector<string> Name;
