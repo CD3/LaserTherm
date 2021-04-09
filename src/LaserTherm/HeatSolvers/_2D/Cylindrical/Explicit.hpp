@@ -59,8 +59,16 @@ class Explicit : public FDHS::FiniteDifferenceHeatSolver<REAL> {
                 T1 = this->T[i][j]   * A_n(i , j);
                 T2 = this->maxRBC.f  * B_n(i , j);
                 T3 = this->T[i][j-1] * C_n(i , j);
-                T4 = this->T[i-1][j] * D_n(i , j);
-                T5 = this->T[i+1][j] * E_n(i , j);
+                if(i == 0){
+                  T4 = this->minZBC.f  * D_n(i, j);
+                  T5 = this->T[i+1][j] * E_n(i , j);
+                } else if(i == zN-1){
+                  T4 = this->T[i-1][j] * D_n(i , j);
+                  T5 = this->maxZBC.f  * E_n(i , j);
+                } else {
+                  T4 = this->T[i-1][j] * D_n(i , j);
+                  T5 = this->T[i+1][j] * E_n(i , j);
+                }
                 T_prime[i][j] = beta * (T1 + T2 + T3 + T4 + T5);
                 break;
               case BC::Type::None:
