@@ -80,7 +80,22 @@ class Explicit : public FDHS::FiniteDifferenceHeatSolver<REAL> {
                 // do stuff for temp type
                 break;
               case BC::Type::HeatFlux:
-                // do HeatFlux stuff
+                T2 = (this->T[i][rN-2] + get_dr(i, j) * this->maxRBC.dfdT)  * B_n(i , rN-1);
+                T3 = this->T[i][j-1] * C_n(i , rN-1);
+                if(i == 0){
+                  // (z, r) = (0, rmax)
+                  T4 = this->minZBC.f  * D_n(i, rN-1);
+                  T5 = this->T[i+1][j] * E_n(i , rN-1);
+                } else if(i == zN-1){
+                  // (z, r) = (zmax, rmax)
+                  T4 = this->T[i-1][j] * D_n(i , rN-1);
+                  T5 = this->maxZBC.f  * E_n(i , rN-1);
+                } else {
+                  // (z, r) = (i, rmax)
+                  T4 = this->T[i-1][j] * D_n(i , rN-1);
+                  T5 = this->T[i+1][j] * E_n(i , rN-1);
+                }
+                T_prime[i][j] = beta * (T1 + T2 + T3 + T4 + T5);
                 break;
               default:
                 throw 42;
@@ -157,7 +172,7 @@ class Explicit : public FDHS::FiniteDifferenceHeatSolver<REAL> {
   protected:
     // ---------------- PROTECTED MEMBER VARIABLES  ----------------
     // --------------------- PROTECTED METHODS ---------------------
-    
+
     // get forward r spacing (backwards at rmax)
     REAL get_dr(int i, int j){
       REAL dr;
@@ -230,7 +245,7 @@ class Explicit : public FDHS::FiniteDifferenceHeatSolver<REAL> {
       REAL T3 = - dk_dr(i, j) / (2 * dr);
       return T1 + T2 + T3;
     }
-    
+
     // Calculate Coefficent for T^n_(z-1, r)
     REAL D_n(int i, int j){
       //return (N) 0;
