@@ -30,21 +30,25 @@ class Explicit : public FDHS::FiniteDifferenceHeatSolver<REAL> {
       REAL beta;
       for(int i = 0; i < zN; i++){
         for(int j = 0; j < rN; j++){
+          beta = delta_t / this->VHC[i][j];
+          T1 = this->T[i][j] * A_n(i , j);
           // r=0 case
           if(j == 0){
-            //L'hospital formulas
-            beta = delta_t / this->VHC[i][j];
+            // overwrite T1
             T1 = this->T[i][0]   * A_nR0(i , 0);
             T2 = this->T[i][1]   * B_nR0(i , 0);
-            //T[i][1] from symmetry about origin
             T3 = this->T[i][1]   * C_nR0(i , 0);
+            //^^T[i][1] from symmetry about origin
             if(i == 0){
+              // (z, r) = (0, 0)
               T4 = this->minZBC.f  * D_nR0(i, 0);
               T5 = this->T[i+1][0] * E_nR0(i , 0);
             } else if(i == zN-1){
+              // (z, r) = (zmax, 0)
               T4 = this->T[i-1][0] * D_nR0(i , 0);
               T5 = this->maxZBC.f  * E_nR0(i , 0);
             } else {
+              // (z, r) = (i, 0)
               T4 = this->T[i-1][0] * D_nR0(i , 0);
               T5 = this->T[i+1][0] * E_nR0(i , 0);
             }
@@ -55,17 +59,18 @@ class Explicit : public FDHS::FiniteDifferenceHeatSolver<REAL> {
           if(j == rN-1){
             switch(this->maxRBC.type){
               case BC::Type::Temperature:
-                beta = delta_t / this->VHC[i][j];
-                T1 = this->T[i][j]   * A_n(i , rN-1);
                 T2 = this->maxRBC.f  * B_n(i , rN-1);
                 T3 = this->T[i][j-1] * C_n(i , rN-1);
                 if(i == 0){
+                // (z, r) = (0, rmax)
                   T4 = this->minZBC.f  * D_n(i, rN-1);
                   T5 = this->T[i+1][j] * E_n(i , rN-1);
                 } else if(i == zN-1){
+                // (z, r) = (zmax, rmax)
                   T4 = this->T[i-1][j] * D_n(i , rN-1);
                   T5 = this->maxZBC.f  * E_n(i , rN-1);
                 } else {
+                // (z, r) = (i, rmax)
                   T4 = this->T[i-1][j] * D_n(i , rN-1);
                   T5 = this->T[i+1][j] * E_n(i , rN-1);
                 }
@@ -86,8 +91,7 @@ class Explicit : public FDHS::FiniteDifferenceHeatSolver<REAL> {
           if(i == 0){
             switch(this->minZBC.type){
               case BC::Type::Temperature:
-                beta = delta_t / this->VHC[i][j];
-                T1 = this->T[0][j]   * A_n(0 , j);
+                // r = {0, rmax} caught by earlier ifs
                 T2 = this->T[0][j+1] * B_n(0 , j);
                 T3 = this->T[0][j-1] * C_n(0 , j);
                 T4 = this->minZBC.f  * D_n(0 , j);
@@ -109,8 +113,7 @@ class Explicit : public FDHS::FiniteDifferenceHeatSolver<REAL> {
           if(i == zN-1){
             switch(this->maxZBC.type){
               case BC::Type::Temperature:
-                beta = delta_t / this->VHC[i][j];
-                T1 = this->T[i][j]   * A_n(i , zN-1);
+                // r = {0, rmax} caught by earlier ifs
                 T2 = this->T[i][j+1] * B_n(i , zN-1);
                 T3 = this->T[i][j-1] * C_n(i , zN-1);
                 T4 = this->T[i-1][j] * D_n(i , zN-1);
@@ -128,8 +131,6 @@ class Explicit : public FDHS::FiniteDifferenceHeatSolver<REAL> {
             }
             continue;
           }
-          beta = delta_t / this->VHC[i][j];
-          T1 = this->T[i][j]   * A_n(i , j);
           T2 = this->T[i][j+1] * B_n(i , j);
           T3 = this->T[i][j-1] * C_n(i , j);
           T4 = this->T[i-1][j] * D_n(i , j);
@@ -143,9 +144,11 @@ class Explicit : public FDHS::FiniteDifferenceHeatSolver<REAL> {
       }
       this->T += T_prime;
     }
+
     int get_rdims(){
       return this->rN;
     }
+
     int get_zdims(){
       return this->zN;
     }
@@ -155,8 +158,7 @@ class Explicit : public FDHS::FiniteDifferenceHeatSolver<REAL> {
     // ---------------- PROTECTED MEMBER VARIABLES  ----------------
     // --------------------- PROTECTED METHODS ---------------------
     
-    //REAL dr = this->k.getCoord(i, j + 1)[1] - this->k.getCoord(i, j)[1];
-    //REAL dz = this->k.getCoord(i + 1, j)[0] - this->k.getCoord(i, j)[0];
+    // get forward r spacing (backwards at rmax)
     REAL get_dr(int i, int j){
       REAL dr;
       if(j == rN - 1){
@@ -167,6 +169,7 @@ class Explicit : public FDHS::FiniteDifferenceHeatSolver<REAL> {
       return dr;
     }
 
+    // get forward z spacing (backwards at zmax)
     REAL get_dz(int i, int j){
       REAL dz;
       if(i == zN - 1){
@@ -191,10 +194,8 @@ class Explicit : public FDHS::FiniteDifferenceHeatSolver<REAL> {
       REAL denom = this->k.getCoord(i + 1, j)[0] - this->k.getCoord(i - 1, j)[0];
       return numer / denom;
     }
-    // Calculate Coefficent for T^n_(r, z)
+    // Calculate Coefficent for T^n_(z, r)
     REAL A_n(int i, int j){
-      // k.getCoord returns an array, hopefully like {z, r} to be consistent
-      // so (r, z) is written as (k.getCoord[1], k.getCoord[0])
       REAL dr = get_dr(i, j);
       REAL dz = get_dz(i, j);
       // -2 * kappa / dr**2
@@ -203,15 +204,7 @@ class Explicit : public FDHS::FiniteDifferenceHeatSolver<REAL> {
       REAL T2 = -2 * this->k[i][j] / pow(dz, 2);
       return T1 + T2;
     }
-    REAL A_nR0(int i, int j){
-      // Some reference to Boundary Conditions set elsewhere
-      REAL dr = get_dr(i, j);
-      REAL dz = get_dz(i, j);
-      REAL T1 = (-4 * this->k[i][j]) / (dr * dr);
-      REAL T2 = (-2 * this->k[i][j]) / (dz * dz);
-      return T1 + T2;
-    }
-    // Calculate Coefficent for T^n_(r+1, z)
+    // Calculate Coefficent for T^n_(z, r+1)
     REAL B_n(int i, int j){
       REAL dr = get_dr(i, j);
       REAL dz = get_dz(i, j);
@@ -223,17 +216,8 @@ class Explicit : public FDHS::FiniteDifferenceHeatSolver<REAL> {
       REAL T3 = dk_dr(i, j) / (2 * dr);
       return T1 + T2 + T3;
     }
-    REAL B_nR0(int i, int j){
-      REAL dr = get_dr(i, j);
-      // 2 * kappa / dr**2
-      REAL T1 = 2 * this->k[i][j] / pow(dr, 2);
-      // 1 / 2 * dr
-      REAL T2 = 2 * dr;
-      // dk / dr
-      REAL T3 = dk_dr(i, j) / dr;
-      return T1 + T2 * T3;
-    }
-    // Calculate Coefficent for T^n_(r-1, z)
+
+    // Calculate Coefficent for T^n_(z, r-1)
     REAL C_n(int i, int j){
       //return (N) 0;
       REAL dr = get_dr(i, j);
@@ -246,17 +230,8 @@ class Explicit : public FDHS::FiniteDifferenceHeatSolver<REAL> {
       REAL T3 = - dk_dr(i, j) / (2 * dr);
       return T1 + T2 + T3;
     }
-    REAL C_nR0(int i, int j){
-      REAL dr = get_dr(i, j);
-      // 2 * kappa / dr**2
-      REAL T1 = 2 * this->k[i][j] / pow(dr, 2);
-      // 1 / 2 * dr
-      REAL T2 = 2 * dr;
-      // dk / dr
-      REAL T3 = dk_dr(i, j) / dr;
-      return T1 - T2 * T3;
-    }
-    // Calculate Coefficent for T^n_(r, z-1)
+    
+    // Calculate Coefficent for T^n_(z-1, r)
     REAL D_n(int i, int j){
       //return (N) 0;
       REAL dr = get_dr(i, j);
@@ -267,10 +242,8 @@ class Explicit : public FDHS::FiniteDifferenceHeatSolver<REAL> {
       REAL T2 = - dk_dz(i, j) / (2 * dz);
       return T1 + T2;
     }
-    REAL D_nR0(int i, int j){
-      return D_n(i, j);
-    }
-    // Calculate Coefficent for T^n_(r, z+1)
+
+    // Calculate Coefficent for T^n_(z+1, r)
     REAL E_n(int i, int j){
       //return (N) 0;
       REAL dr = get_dr(i, j);
@@ -281,6 +254,46 @@ class Explicit : public FDHS::FiniteDifferenceHeatSolver<REAL> {
       REAL T2 = dk_dz(i, j) / (2 * dz);
       return T1 + T2;
     }
+
+    // Calculate Coefficent for T^n_(z+1, 0)
+    REAL A_nR0(int i, int j){
+      REAL dr = get_dr(i, j);
+      REAL dz = get_dz(i, j);
+      REAL T1 = (-4 * this->k[i][j]) / (dr * dr);
+      REAL T2 = (-2 * this->k[i][j]) / (dz * dz);
+      return T1 + T2;
+    }
+
+    // Calculate Coefficent for T^n_(z+1, 0)
+    REAL B_nR0(int i, int j){
+      REAL dr = get_dr(i, j);
+      // 2 * kappa / dr**2
+      REAL T1 = 2 * this->k[i][j] / pow(dr, 2);
+      // 1 / 2 * dr
+      REAL T2 = 2 * dr;
+      // dk / dr
+      REAL T3 = dk_dr(i, j) / dr;
+      return T1 + T2 * T3;
+    }
+
+    // Calculate Coefficent for T^n_(z+1, 0)
+    REAL C_nR0(int i, int j){
+      REAL dr = get_dr(i, j);
+      // 2 * kappa / dr**2
+      REAL T1 = 2 * this->k[i][j] / pow(dr, 2);
+      // 1 / 2 * dr
+      REAL T2 = 2 * dr;
+      // dk / dr
+      REAL T3 = dk_dr(i, j) / dr;
+      return T1 - T2 * T3;
+    }
+
+    // Calculate Coefficent for T^n_(z+1, 0)
+    REAL D_nR0(int i, int j){
+      return D_n(i, j);
+    }
+
+    // Calculate Coefficent for T^n_(z+1, 0)
     REAL E_nR0(int i, int j){
       return E_n(i, j);
     }
