@@ -32,124 +32,74 @@ class Explicit : public FDHS::FiniteDifferenceHeatSolver<REAL> {
         for(int j = 0; j < rN; j++){
           beta = delta_t / this->VHC[i][j];
           T1 = this->T[i][j] * A_n(i , j);
-          // r=0 case
           if(j == 0){
+            // r=0 case
             // overwrite T1
             T1 = this->T[i][0]   * A_nR0(i , 0);
             T2 = this->T[i][1]   * B_nR0(i , 0);
             T3 = this->T[i][1]   * C_nR0(i , 0);
             //^^T[i][1] from symmetry about origin
-            if(i == 0){
-              // (z, r) = (0, 0)
-              T4 = this->minZBC.f  * D_nR0(i, 0);
-              T5 = this->T[i+1][0] * E_nR0(i , 0);
-            } else if(i == zN-1){
-              // (z, r) = (zmax, 0)
-              T4 = this->T[i-1][0] * D_nR0(i , 0);
-              T5 = this->maxZBC.f  * E_nR0(i , 0);
-            } else {
-              // (z, r) = (i, 0)
-              T4 = this->T[i-1][0] * D_nR0(i , 0);
-              T5 = this->T[i+1][0] * E_nR0(i , 0);
-            }
-            T_prime[i][j] = beta * (T1 + T2 + T3 + T4 + T5);
-            continue;
-          }
-          // r = Rmax
-          if(j == rN-1){
+          } else if(j == rN-1){
+            // r = Rmax
             switch(this->maxRBC.type){
               case BC::Type::Temperature:
                 T2 = this->maxRBC.f  * B_n(i , rN-1);
                 T3 = this->T[i][j-1] * C_n(i , rN-1);
-                if(i == 0){
-                // (z, r) = (0, rmax)
-                  T4 = this->minZBC.f  * D_n(i, rN-1);
-                  T5 = this->T[i+1][j] * E_n(i , rN-1);
-                } else if(i == zN-1){
-                // (z, r) = (zmax, rmax)
-                  T4 = this->T[i-1][j] * D_n(i , rN-1);
-                  T5 = this->maxZBC.f  * E_n(i , rN-1);
-                } else {
-                // (z, r) = (i, rmax)
-                  T4 = this->T[i-1][j] * D_n(i , rN-1);
-                  T5 = this->T[i+1][j] * E_n(i , rN-1);
-                }
-                T_prime[i][j] = beta * (T1 + T2 + T3 + T4 + T5);
+                break;
+              case BC::Type::HeatFlux:
+                T2 = (this->T[i][rN-2] + get_dr(i, j) * this->maxRBC.f)  * B_n(i , rN-1);
+                T3 = this->T[i][j-1] * C_n(i , rN-1);
                 break;
               case BC::Type::None:
                 // do stuff for temp type
                 break;
-              case BC::Type::HeatFlux:
-                T2 = (this->T[i][rN-2] + get_dr(i, j) * this->maxRBC.dfdT)  * B_n(i , rN-1);
-                T3 = this->T[i][j-1] * C_n(i , rN-1);
-                if(i == 0){
-                  // (z, r) = (0, rmax)
-                  T4 = this->minZBC.f  * D_n(i, rN-1);
-                  T5 = this->T[i+1][j] * E_n(i , rN-1);
-                } else if(i == zN-1){
-                  // (z, r) = (zmax, rmax)
-                  T4 = this->T[i-1][j] * D_n(i , rN-1);
-                  T5 = this->maxZBC.f  * E_n(i , rN-1);
-                } else {
-                  // (z, r) = (i, rmax)
-                  T4 = this->T[i-1][j] * D_n(i , rN-1);
-                  T5 = this->T[i+1][j] * E_n(i , rN-1);
-                }
-                T_prime[i][j] = beta * (T1 + T2 + T3 + T4 + T5);
-                break;
               default:
                 throw 42;
             }
-            continue;
+          } else {
+            // if not on r boundary give 'normal T2 T3'
+            T2 = this->T[i][j+1] * B_n(i , j);
+            T3 = this->T[i][j-1] * C_n(i , j);
           }
-          // z = 0
           if(i == 0){
+            // z = 0
             switch(this->minZBC.type){
               case BC::Type::Temperature:
                 // r = {0, rmax} caught by earlier ifs
-                T2 = this->T[0][j+1] * B_n(0 , j);
-                T3 = this->T[0][j-1] * C_n(0 , j);
                 T4 = this->minZBC.f  * D_n(0 , j);
                 T5 = this->T[1][j]   * E_n(0 , j);
-                T_prime[i][j] = beta * (T1 + T2 + T3 + T4 + T5);
-                break;
-              case BC::Type::None:
-                // do stuff for temp type
                 break;
               case BC::Type::HeatFlux:
                 // do HeatFlux stuff
                 break;
+              case BC::Type::None:
+                // do stuff for temp type
+                break;
               default:
                 throw 42;
             }
-            continue;
-          }
-          // z = Zmax
-          if(i == zN-1){
+          } else if(i == zN-1){
+            // z = Zmax
             switch(this->maxZBC.type){
               case BC::Type::Temperature:
                 // r = {0, rmax} caught by earlier ifs
-                T2 = this->T[i][j+1] * B_n(i , zN-1);
-                T3 = this->T[i][j-1] * C_n(i , zN-1);
                 T4 = this->T[i-1][j] * D_n(i , zN-1);
                 T5 = this->maxZBC.f  * E_n(i , zN-1);
-                T_prime[i][j] = beta * (T1 + T2 + T3 + T4 + T5);
-                break;
-              case BC::Type::None:
-                // do stuff for temp type
                 break;
               case BC::Type::HeatFlux:
                 // do HeatFlux stuff
                 break;
+              case BC::Type::None:
+                // do stuff for temp type
+                break;
               default:
                 throw 42;
             }
-            continue;
+          } else {
+            // if not on z boundary give 'normal T4 T5'
+            T4 = this->T[i-1][j] * D_n(i , j);
+            T5 = this->T[i+1][j] * E_n(i , j);
           }
-          T2 = this->T[i][j+1] * B_n(i , j);
-          T3 = this->T[i][j-1] * C_n(i , j);
-          T4 = this->T[i-1][j] * D_n(i , j);
-          T5 = this->T[i+1][j] * E_n(i , j);
           T_prime[i][j] = beta * (T1 + T2 + T3 + T4 + T5);
           if(isnan(T_prime[i][j])){
             // make this a better error
@@ -172,7 +122,6 @@ class Explicit : public FDHS::FiniteDifferenceHeatSolver<REAL> {
   protected:
     // ---------------- PROTECTED MEMBER VARIABLES  ----------------
     // --------------------- PROTECTED METHODS ---------------------
-
     // get forward r spacing (backwards at rmax)
     REAL get_dr(int i, int j){
       REAL dr;
