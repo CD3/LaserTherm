@@ -70,7 +70,8 @@ class Explicit : public FDHS::FiniteDifferenceHeatSolver<REAL> {
                 T5 = this->T[1][j]   * E_n(0 , j);
                 break;
               case BC::Type::HeatFlux:
-                // do HeatFlux stuff
+                T4 = (this-> T[1][j] - get_dz(i,j) * this->minZBC.f)  * D_n(0 , j);
+                T5 = this->T[1][j]   * E_n(0 , j);
                 break;
               case BC::Type::None:
                 // do stuff for temp type
@@ -87,7 +88,8 @@ class Explicit : public FDHS::FiniteDifferenceHeatSolver<REAL> {
                 T5 = this->maxZBC.f  * E_n(i , zN-1);
                 break;
               case BC::Type::HeatFlux:
-                // do HeatFlux stuff
+                T4 = this->T[i-1][j] * D_n(i , zN-1);
+                T5 = (this->T[zN-2][j] + get_dz(i,j) * this->maxZBC.f)  * E_n(i , zN-1);
                 break;
               case BC::Type::None:
                 // do stuff for temp type

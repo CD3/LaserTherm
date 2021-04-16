@@ -47,11 +47,13 @@ TEST_CASE("Explicit 2D Cylindrical Heat Solver Validation","[heatsolver][validat
 {
   // see ./doc/writups/Validation/AnalyticalSolutions/AnalyticalSolutions.pdf
   // for a derivation of these tests
-  Explicit<double> HeatSolver(200,100);
+  Explicit<double> HeatSolver(200-2,100-2);
   Field<double, 2> Aplot(200,100);
   double R = 2;
   double L = 4;
-  HeatSolver.T.setCoordinateSystem( Uniform(0.,L), Uniform(0., R) );
+  double dR = R/100;
+  double dL = L/200;
+  HeatSolver.T.setCoordinateSystem( Uniform(dL, L-dL), Uniform(dR, R-dR) );
   Aplot.setCoordinateSystem( Uniform(0.,L), Uniform(0., R) );
 
 
@@ -110,19 +112,20 @@ TEST_CASE("Explicit 2D Cylindrical Heat Solver Validation","[heatsolver][validat
 
     vector<std::pair<int, int>> Points;
     Points.push_back(std::make_pair<int, int>(100, 50));
-    Points.push_back(std::make_pair<int, int>(100, 98));
-    Points.push_back(std::make_pair<int, int>(198, 50));
+    Points.push_back(std::make_pair<int, int>(100, 98-1));
+    Points.push_back(std::make_pair<int, int>(198-1, 50));
     Points.push_back(std::make_pair<int, int>(1, 50));
     Points.push_back(std::make_pair<int, int>(100, 1));
 
     for(int i = 0; i < Points.size(); i++){
       std::pair<int, int> temp = Points[i];
       std::cout << "Testing " << Name[i] << "\n";
-      CHECK( HeatSolver.T(temp.first, temp.second) == Approx( solution((temp.first / 200.0) * L, (temp.second / 100.0) * R, Nt*dt)));
+      //CHECK( HeatSolver.T(temp.first, temp.second) == Approx( solution((temp.first / 200.0) * L, (temp.second / 100.0) * R, Nt*dt - 1)));
+      CHECK( HeatSolver.T(temp.first, temp.second) == Approx(Aplot(temp.first+1, temp.second+1)).epsilon(0.01));
     }
   }
 
   SECTION("Nuemann BC"){
-      
+
   }
 }
