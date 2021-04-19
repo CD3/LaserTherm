@@ -102,7 +102,7 @@ class Explicit : public FDHS::FiniteDifferenceHeatSolver<REAL> {
             T4 = this->T[i-1][j] * D_n(i , j);
             T5 = this->T[i+1][j] * E_n(i , j);
           }
-          T_prime[i][j] = beta * (T1 + T2 + T3 + T4 + T5);
+          T_prime[i][j] = beta * (T1 + T2 + T3 + T4 + T5 + this->A[i][j]);
           if(isnan(T_prime[i][j])){
             // make this a better error
             throw 42;

@@ -31,14 +31,6 @@ TEST_CASE("Explicit 2D Cylindrical Heat Solver","[heatsolver]")
       HeatSolver.k.set(4.0);
 
       HeatSolver.stepForward(0.001);
-
-    {
-      ofstream output;
-      output.open("quickTest.txt");
-      output << HeatSolver.T;
-      output.close();
-    }
-
     }
 }
 
@@ -120,7 +112,6 @@ TEST_CASE("Explicit 2D Cylindrical Heat Solver Validation","[heatsolver][validat
     for(int i = 0; i < Points.size(); i++){
       std::pair<int, int> temp = Points[i];
       std::cout << "Testing " << Name[i] << "\n";
-      //CHECK( HeatSolver.T(temp.first, temp.second) == Approx( solution((temp.first / 200.0) * L, (temp.second / 100.0) * R, Nt*dt - 1)));
       CHECK( HeatSolver.T(temp.first, temp.second) == Approx(Aplot(temp.first+1, temp.second+1)).epsilon(0.01));
     }
   }
