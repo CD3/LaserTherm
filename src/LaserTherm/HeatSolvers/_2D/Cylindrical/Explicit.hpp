@@ -146,19 +146,47 @@ class Explicit : public FDHS::FiniteDifferenceHeatSolver<REAL> {
       return dz;
     }
 
+    REAL forward_finite_r(Field<REAL, 2>& f, int i, int j){
+      return f[i][j+1] - f[i][j] / get_dr(i, j);
+    }
+    REAL backward_finite_r(Field<REAL, 2>& f, int i, int j){
+      return f[i][j] - f[i][j-1] / get_dr(i, j);
+    }
+    REAL central_finite_r(Field<REAL, 2>& f, int i, int j){
+      return f[i][j+1] - f[i][j-1] / (2 * get_dr(i,j));
+    }
+    REAL forward_finite_z(Field<REAL, 2>& f, int i, int j){
+      return f[i+1][j] - f[i][j] / get_dz(i, j);
+    }
+    REAL backward_finite_z(Field<REAL, 2>& f, int i, int j){
+      return f[i][j] - f[i-1][j] / get_dz(i, j);
+    }
+    REAL central_finite_z(Field<REAL, 2>& f, int i, int j){
+      return f[i+1][j] - f[i-1][j] / (2 * get_dz(i, j));
+    }
     // Finite Difference deriv for kappa wrt r
     REAL dk_dr(int i, int j){
-      REAL numer = (this->k[i][j + 1] - this->k[i][j - 1]);
-      // is this an ok way to do 2\Delta r?
-      REAL denom = this->k.getCoord(i, j + 1)[1] - this->k.getCoord(i, j - 1)[1];
-      return numer / denom;
+      if (j == 0){
+        return forward_finite_r(this->k, i, j);
+      }
+      else if (j == rN-1){
+        return backward_finite_r(this->k, i, j);
+      }
+      else{
+        return central_finite_r(this->k, i, j);
+      }
     }
     // Finite Difference deriv for kappa wrt z
     REAL dk_dz(int i, int j){
-      REAL numer = (this->k[i + 1][j] - this->k[i - 1][j]);
-      // is this an ok way to do 2\Delta r?
-      REAL denom = this->k.getCoord(i + 1, j)[0] - this->k.getCoord(i - 1, j)[0];
-      return numer / denom;
+      if (i == 0){
+        return forward_finite_z(this->k, i, j);
+      }
+      else if (i == zN-1){
+        return backward_finite_z(this->k, i, j);
+      }
+      else{
+        return central_finite_z(this->k, i, j);
+      }
     }
     // Calculate Coefficent for T^n_(z, r)
     REAL A_n(int i, int j){

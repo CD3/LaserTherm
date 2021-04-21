@@ -176,6 +176,6 @@ TEST_CASE("Explicit 2D Cylindrical Heat Solver Validation","[heatsolver][validat
       std::cout << "Testing " << Name[i] << "\n";
       //CHECK( HeatSolver.T(temp.first, temp.second) == Approx(Aplot(temp.first+1, temp.second+1)).epsilon(0.01));
     }
-  
+
   }
 }
