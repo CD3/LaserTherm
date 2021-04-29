@@ -69,9 +69,9 @@ TEST_CASE("2D Cylindrical Explicit Heat Solver Optimizations","[.][benchmarks]]"
 
   BENCHMARK("stepForward")
   {
-    HeatSolver.StepForward(0.01);
+    HeatSolver.stepForward(0.01);
     return HeatSolver.T(0,0);
-  }
+  };
 
   meter.run([&]() { HeatSolver.stepForward(0.01); });
   auto result = bm(meter);
