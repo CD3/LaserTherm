@@ -84,12 +84,12 @@ class Explicit : public FDHS::FiniteDifferenceHeatSolver<REAL> {
             switch(this->maxZBC.type){
               case BC::Type::Temperature:
                 // r = {0, rmax} caught by earlier ifs
-                T4 = this->T[i-1][j] * D_n(i , zN-1);
-                T5 = this->maxZBC.f  * E_n(i , zN-1);
+                T4 = this->T[i-1][j] * D_n(zN-1, j);
+                T5 = this->maxZBC.f  * E_n(zN-1, j);
                 break;
               case BC::Type::HeatFlux:
-                T4 = this->T[i-1][j] * D_n(i , zN-1);
-                T5 = (this->T[zN-2][j] + get_dz(i,j) * this->maxZBC.f)  * E_n(i , zN-1);
+                T4 = this->T[i-1][j] * D_n(zN-1, j);
+                T5 = (this->T[zN-2][j] + get_dz(i,j) * this->maxZBC.f)  * E_n(zN-1, j);
                 break;
               case BC::Type::None:
                 // do stuff for temp type

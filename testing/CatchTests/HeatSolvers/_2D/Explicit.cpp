@@ -39,8 +39,8 @@ TEST_CASE("Explicit 2D Cylindrical Heat Solver Validation","[heatsolver][validat
 {
   // see ./doc/writups/Validation/AnalyticalSolutions/AnalyticalSolutions.pdf
   // for a derivation of these tests
-  int rN = 141;
-  int zN = 282;
+  int rN = 400;
+  int zN = 800;
   double R = 2; // m
   double L = 4; // m
   double k = 0.5; // W/m/K
@@ -84,18 +84,6 @@ TEST_CASE("Explicit 2D Cylindrical Heat Solver Validation","[heatsolver][validat
       HeatSolver.stepForward(dt);
     }
 
-    {
-      ofstream output;
-      output.open("NumericalSol.txt");
-      output << HeatSolver.T;
-      output.close();
-    }
-    {
-      ofstream output;
-      output.open("AnalyticalSol.txt");
-      output << Aplot;
-      output.close();
-    }
 
     vector<string> Name;
     Name.push_back("center");
@@ -124,9 +112,16 @@ TEST_CASE("Explicit 2D Cylindrical Heat Solver Validation","[heatsolver][validat
     double dt = 0.001;
     int Nt = 100;
 
+    HeatSolver.minZBC.type = BC::Type::HeatFlux;
+    HeatSolver.maxZBC.type = BC::Type::HeatFlux;
+    HeatSolver.maxRBC.type = BC::Type::HeatFlux;
+    HeatSolver.minZBC.f = 0;
+    HeatSolver.maxZBC.f = 0;
+    HeatSolver.maxRBC.f = 0;
+
     auto solution = [&](double z, double r, double t)
     {
-      double lambda_r = 2.4048/R;
+      double lambda_r = 3.8317/R;
       double lambda_z = M_PI/L;
       double alpha = k/rho/c*( lambda_z*lambda_z + lambda_r*lambda_r);
 
@@ -136,8 +131,23 @@ TEST_CASE("Explicit 2D Cylindrical Heat Solver Validation","[heatsolver][validat
 
     HeatSolver.T.set_f([&](auto x) { return solution(x[0],x[1],0); });
     Aplot.set_f([&](auto x) { return solution(x[0],x[1],Nt*dt); });
-    for(int i = 0; i < Nt; i++){
+    for(int i = 0; i < Nt / 2; i++){
       HeatSolver.stepForward(dt);
+    }
+    {
+      ofstream output;
+      output.open("T_half.txt");
+      output << HeatSolver.T;
+      output.close();
+    }
+    for(int i = Nt / 2; i < Nt; i++){
+      HeatSolver.stepForward(dt);
+    }
+    {
+      ofstream output;
+      output.open("T_full.txt");
+      output << HeatSolver.T;
+      output.close();
     }
 
     vector<string> Name;
@@ -178,9 +188,11 @@ TEST_CASE("Explicit 2D Cylindrical Heat Solver Validation","[heatsolver][validat
 
     HeatSolver.A[zN / 2][rN / 2] = 1;
 
-    for(int i = 0; i < Nt; i++){
+    for(int i = 0; i < Nt / 2; i++){
       HeatSolver.stepForward(dt);
     }
+
+
 
     vector<string> Name;
     Name.push_back("center");
