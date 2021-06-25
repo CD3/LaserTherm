@@ -39,8 +39,8 @@ TEST_CASE("Explicit 2D Cylindrical Heat Solver Validation","[heatsolver][validat
 {
   // see ./doc/writups/Validation/AnalyticalSolutions/AnalyticalSolutions.pdf
   // for a derivation of these tests
-  int rN = 400;
-  int zN = 800;
+  int rN = 100;
+  int zN = 200;
   double R = 2; // m
   double L = 4; // m
   double k = 0.5; // W/m/K
@@ -126,7 +126,6 @@ TEST_CASE("Explicit 2D Cylindrical Heat Solver Validation","[heatsolver][validat
       double alpha = k/rho/c*( lambda_z*lambda_z + lambda_r*lambda_r);
 
       return exp(-alpha*t) * cos(lambda_z*z) * std::cyl_bessel_j(0,lambda_r*r);
-
     };
 
     HeatSolver.T.set_f([&](auto x) { return solution(x[0],x[1],0); });
@@ -134,19 +133,19 @@ TEST_CASE("Explicit 2D Cylindrical Heat Solver Validation","[heatsolver][validat
     for(int i = 0; i < Nt / 2; i++){
       HeatSolver.stepForward(dt);
     }
-    {
-      ofstream output;
-      output.open("T_half.txt");
-      output << HeatSolver.T;
-      output.close();
-    }
     for(int i = Nt / 2; i < Nt; i++){
       HeatSolver.stepForward(dt);
     }
     {
       ofstream output;
-      output.open("T_full.txt");
+      output.open("T1.txt");
       output << HeatSolver.T;
+      output.close();
+    }
+    {
+      ofstream output;
+      output.open("T2.txt");
+      output << Aplot;
       output.close();
     }
 
