@@ -102,7 +102,7 @@ class UniformExplicit : public ExplicitBase<UniformExplicit<REAL>, REAL> {
       return T1 + T2;
     }
     // Calculate Coefficent for T^n_(z, r+1)
-    REAL B_n(int i, int j){
+    REAL C_n(int i, int j){
       REAL dr = this->get_dr(i, j);
       REAL dz = this->get_dz(i, j);
       // kappa / 2 r dr
@@ -115,7 +115,7 @@ class UniformExplicit : public ExplicitBase<UniformExplicit<REAL>, REAL> {
     }
 
     // Calculate Coefficent for T^n_(z, r-1)
-    REAL C_n(int i, int j){
+    REAL B_n(int i, int j){
       //return (N) 0;
       REAL dr = this->get_dr(i, j);
       REAL dz = this->get_dz(i, j);
@@ -162,7 +162,7 @@ class UniformExplicit : public ExplicitBase<UniformExplicit<REAL>, REAL> {
     }
 
     // Calculate Coefficent for T^n_(z+1, 0)
-    REAL B_nR0(int i, int j){
+    REAL C_nR0(int i, int j){
       REAL dr = this->get_dr(i, j);
       // 2 * kappa / dr**2
       REAL T1 = 2 * this->k[i][j] / pow(dr, 2);
@@ -174,7 +174,7 @@ class UniformExplicit : public ExplicitBase<UniformExplicit<REAL>, REAL> {
     }
 
     // Calculate Coefficent for T^n_(z+1, 0)
-    REAL C_nR0(int i, int j){
+    REAL B_nR0(int i, int j){
       REAL dr = this->get_dr(i, j);
       // 2 * kappa / dr**2
       REAL T1 = 2 * this->k[i][j] / pow(dr, 2);
