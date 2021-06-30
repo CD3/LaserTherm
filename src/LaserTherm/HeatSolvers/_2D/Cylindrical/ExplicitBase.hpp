@@ -38,12 +38,12 @@ class ExplicitBase : public FDHS::FiniteDifferenceHeatSolver<REAL> {
             // r = Rmax
             switch(this->maxRBC.type){
               case BC::Type::Temperature:
-                T2 = this->maxRBC.f  * static_cast<IMP*>(this)->B_n(i , rN-1);
-                T3 = this->T[i][j-1] * static_cast<IMP*>(this)->C_n(i , rN-1);
+                T2 = this->T[i][j-1] * static_cast<IMP*>(this)->B_n(i , rN-1);
+                T3 = this->maxRBC.f  * static_cast<IMP*>(this)->C_n(i , rN-1);
                 break;
               case BC::Type::HeatFlux:
-                T2 = (this->T[i][rN-2] + static_cast<IMP*>(this)->get_dr(i, j) * this->maxRBC.f) * static_cast<IMP*>(this)->B_n(i , rN-1);
-                T3 = this->T[i][j-1] * static_cast<IMP*>(this)->C_n(i , rN-1);
+                T2 = this->T[i][j-1] * static_cast<IMP*>(this)->B_n(i , rN-1);
+                T3 = (this->T[i][rN-2] + static_cast<IMP*>(this)->get_dr(i, j) * this->maxRBC.f) * static_cast<IMP*>(this)->C_n(i , rN-1);
                 break;
               case BC::Type::None:
                 // do stuff for temp type
@@ -53,8 +53,8 @@ class ExplicitBase : public FDHS::FiniteDifferenceHeatSolver<REAL> {
             }
           } else {
             // if not on r boundary give 'normal T2 T3'
-            T2 = this->T[i][j+1] * static_cast<IMP*>(this)->B_n(i , j);
-            T3 = this->T[i][j-1] * static_cast<IMP*>(this)->C_n(i , j);
+            T2 = this->T[i][j-1] * static_cast<IMP*>(this)->B_n(i , j);
+            T3 = this->T[i][j+1] * static_cast<IMP*>(this)->C_n(i , j);
           }
           if(zMin){
             // z = 0
