@@ -6,7 +6,7 @@
 
 #include <Benchmark.hpp>
 #include <LaserTherm/HeatSolvers/_1D/Cartesian/CrankNicholson.hpp>
-#include <LaserTherm/HeatSolvers/_2D/Cylindrical/Explicit.hpp>
+#include <LaserTherm/HeatSolvers/_2D/Cylindrical/UniformExplicit.hpp>
 
 TEST_CASE("CrankNicholson Heat Solver Optimizations","[.][benchmarks]]")
 {
@@ -51,7 +51,7 @@ TEST_CASE("2D Cylindrical Explicit Heat Solver Optimizations","[.][benchmarks]]"
   int zN = 282;
   double dR = R / rN;
   double dL = L / zN;
-  Explicit<double> HeatSolver(zN-2,rN-2);
+  UniformExplicit<double> HeatSolver(zN-2,rN-2);
   Field<double, 2> Aplot(zN,rN);
   HeatSolver.T.setCoordinateSystem( Uniform(dL, L-dL), Uniform(dR, R-dR) );
   Aplot.setCoordinateSystem( Uniform(0.,L), Uniform(0., R) );

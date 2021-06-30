@@ -5,14 +5,14 @@
 #include <cmath>
 
 //#include <libField/HDF5.hpp>
-#include <LaserTherm/HeatSolvers/_2D/Cylindrical/Explicit.hpp>
+#include <LaserTherm/HeatSolvers/_2D/Cylindrical/UniformExplicit.hpp>
 using namespace std;
 
-TEST_CASE("Explicit 2D Cylindrical Heat Solver","[heatsolver]")
+TEST_CASE("UniformExplicit 2D Cylindrical Heat Solver","[heatsolver]")
 {
-    SECTION("Build Explicit Heat Solver"){
+    SECTION("Build UniformExplicit Heat Solver"){
       //HeatSolvers::_2D::Cylindrical::Explicit<double> HeatSolver(10,20);
-      Explicit<double> HeatSolver(20,10);
+      UniformExplicit<double> HeatSolver(20,10);
       Field<double,2> Tinit(10,20);
       Tinit.setCoordinateSystem(Uniform(-2, 2),Uniform(-4,4));
       HeatSolver.T.setCoordinateSystem(Uniform(-2, 2),Uniform(-4,4));
@@ -35,7 +35,7 @@ TEST_CASE("Explicit 2D Cylindrical Heat Solver","[heatsolver]")
 }
 
 
-TEST_CASE("Explicit 2D Cylindrical Heat Solver Validation","[heatsolver][validation]")
+TEST_CASE("UniformExplicit 2D Cylindrical Heat Solver Validation","[heatsolver][validation]")
 {
   // see ./doc/writups/Validation/AnalyticalSolutions/AnalyticalSolutions.pdf
   // for a derivation of these tests
@@ -49,7 +49,7 @@ TEST_CASE("Explicit 2D Cylindrical Heat Solver Validation","[heatsolver][validat
   double dR = R / rN; // m
   double dL = L / zN; // m
 
-  Explicit<double> HeatSolver(zN-2,rN-2);
+  UniformExplicit<double> HeatSolver(zN-2,rN-2);
   Field<double, 2> Aplot(zN,rN);
 
   HeatSolver.T.setCoordinateSystem( Uniform(dL, L-dL), Uniform(dR, R-dR) );
