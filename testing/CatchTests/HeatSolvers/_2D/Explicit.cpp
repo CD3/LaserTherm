@@ -101,6 +101,8 @@ TEST_CASE("UniformExplicit 2D Cylindrical Heat Solver Validation","[heatsolver][
       return exp(-alpha*t) * sin(lambda_z*z) * std::cyl_bessel_j(0,lambda_r*r);
     };
 
+    HeatSolver.setSolution(&solution);
+
     HeatSolver.T.set_f([&](auto x) { return solution(x[0],x[1],0); });
     Aplot.set_f([&](auto x) { return solution(x[0],x[1],Nt*dt); });
 
@@ -246,19 +248,24 @@ TEST_CASE("NonUniformExplicit 2D Cylindrical Heat Solver Validation","[heatsolve
   // for a derivation of these tests
   int rN = 100;
   int zN = 200;
+  double r_s = 1.2;
+  double z_s = 1.2;
   double R = 2; // m
   double L = 4; // m
   double k = 0.5; // W/m/K
   double rho = 1000; // kg/m^3
   double c = 4.18; // J/kg/K
-  double dR = R / rN; // m
-  double dL = L / zN; // m
+  double dR, dL; // m
+  dR = (1. - pow(r_s, rN)) / (1. - r_s); // -
+  dL = (1. - pow(z_s, zN)) / (1. - z_s); // -
+  dR = R / dR; // m
+  dL = L / dL; // m
 
   NonUniformExplicit<double> HeatSolver(zN-2,rN-2);
   Field<double, 2> Aplot(zN,rN);
 
-  HeatSolver.T.setCoordinateSystem( Geometric(0., 0.0117, 1.01), Geometric(0., 0.00633, 1.01) );
-  Aplot.setCoordinateSystem( Geometric(0., 0.0117, 1.01), Geometric(0., 0.00633, 1.01) );
+  HeatSolver.T.setCoordinateSystem( Geometric(0., dL, z_s), Geometric(0., dR, r_s) );
+  Aplot.setCoordinateSystem( Geometric(0., dL, z_s), Geometric(0., dR, r_s) );
 
 
   HeatSolver.A.set(0.0);
@@ -270,7 +277,7 @@ TEST_CASE("NonUniformExplicit 2D Cylindrical Heat Solver Validation","[heatsolve
 
   SECTION("Dirichlet BC")
   {
-    double dt = 0.001;
+    double dt = 0.01;
     int Nt = 100;
 
     auto solution = [&](double z, double r, double t)
@@ -321,7 +328,7 @@ TEST_CASE("NonUniformExplicit 2D Cylindrical Heat Solver Validation","[heatsolve
 
   SECTION("Nuemann BC"){
     // Neumann is --sad-- happy because his boundary condition test case is ---empty--- full --:(-- :)
-    double dt = 0.001;
+    double dt = 0.01;
     int Nt = 100;
 
     HeatSolver.minZBC.type = BC::Type::HeatFlux;
@@ -391,7 +398,7 @@ TEST_CASE("NonUniformExplicit 2D Cylindrical Heat Solver Validation","[heatsolve
 
     };
 
-    double dt = 0.001;
+    double dt = 0.01;
     int Nt = 100;
 
     HeatSolver.T.set(0);

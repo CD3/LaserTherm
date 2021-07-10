@@ -119,4 +119,48 @@ class ExplicitBase : public FDHS::FiniteDifferenceHeatSolver<REAL> {
     int rN;
     int zN;
   private:
+    double percErr(REAL num, REAL correct){
+      return abs((num - correct) / correct);
+    }
+
+    double randSampleErr(Field<REAL, 2>& f, REAL (*sol)(REAL, REAL, REAL), REAL (*err)(REAL, REAL), REAL t, int n){
+      double e = 0.0;
+      int i, j;
+      REAL r, z;
+      for(int i = 0; i < n; i++){
+        i = rand() % f.size(0);
+        j = rand() % f.size(1);
+        r = f.getCoord(i, j)[1];
+        z = f.getCoord(i, j)[1];
+        e += err(f[i][j], sol(r, z, t));
+      }
+      return e;
+    }
+
+    double avgErr(Field<REAL, 2>& f, REAL (*sol)(REAL, REAL, REAL), REAL (*err)(REAL, REAL), REAL t){
+      double e = 0.0;
+      REAL r, z;
+      for(int i = 0; i < f.size(0); i++){
+        for(int j = 0; j < f.size(1); j++){
+          r = f.getCoord(i, j)[1];
+          z = f.getCoord(i, j)[0];
+          e += err(f[i][j], sol(r, z, t));
+        }
+      }
+      e /= f.size(0) * f.size(1) * 1.;
+      return e;
+    }
+
+    double totalErr(Field<REAL, 2>& f, REAL (*sol)(REAL, REAL, REAL), REAL (*err)(REAL, REAL), REAL t){
+      double e = 0.0;
+      REAL r, z;
+      for(int i = 0; i < f.size(0); i++){
+        for(int j = 0; j < f.size(1); j++){
+          r = f.getCoord(i, j)[1];
+          z = f.getCoord(i, j)[0];
+          e += err(f[i][j], sol(r, z, t));
+        }
+      }
+      return e;
+    }
 };
