@@ -23,7 +23,7 @@
 		  Solving the heat equation in cylindrical coordinates is of great interest to applications where heat energy is deposited normal to a surface via a laser exposure. With Dr. Clark's work in solving the heat equation with thermal conductivity, $\kappa$ as a function of $z$ allowed for better simulating the weakly homogenous media of tissue. The following derivation aims to take this work a step further, solving with $\kappa = \kappa(r, z)$, in order to extend our weak homogeny to the radial direction, especially valuable in situations with irregularities such as a hair follicle in the center of the beam path.
 		\section{The Problem}
 		  The problem is first expanding the differential equation to reflect the radial dependence of thermal conductivity. We implement a finite difference method in order to substitute our derivatives for the values of $\mathrm{T}$ and $\kappa$ that are easily implemented in a computational setting. In the derivation, our result is discontinuous at $r = 0$ and so we utilize L'Hospital's rule and create a solution valid for the case where $r\rightarrow0$.
-		\section{Derivation}
+		\section{Derivations}
 		We begin with the heat transfer equation
 		\begin{equation}
 		\begin{aligned}
@@ -198,5 +198,39 @@
         E^n_{r=0, z} &= \left [ \frac{\kappa^n_{0, z}}{(\Delta z)^2} + \frac{1}{2\Delta z}(\frac{\Delta\kappa}{\Delta z})^n_{0, z} \right ] \\
       \end{aligned}
 		\end{equation}
+
+	\subsection{Stretched Finite Difference Expansion of Derivatives}
+    For cases where a solution is desired for non-uniform spacing, stretched finite difference derivatives can be used in place of physical derivatives. We have the same aim as our uniform case, and the coefficients we calculated beforehand are going to have the same names, ($A^n_{r, z}, ... , E^n_{r, z}$). Starting at the same place, Eq. \ref{eq:6}, we can replace each spacial derivative with finite difference operators
+  \begin{equation}
+    \begin{aligned}
+      \rho c \frac{d\mathrm{T}}{dt} &= \frac{1}{r} \delta_r\mathrm{T}\kappa(r, z) + \frac{\partial^2\mathrm{T}}{\partial r^2}\kappa(r, z)  + \frac{\partial\mathrm{T}}{\partial r} \frac{\partial\mathrm{\kappa}}{\partial r}  + \frac{\partial^2\mathrm{T}}{\partial z^2}\kappa(r, z) + \frac{\partial\mathrm{T}}{\partial z}\frac{\partial\mathrm{\kappa}}{\partial z} \\
+    \end{aligned}
+  \end{equation} 
+    
+  \begin{equation}
+    \begin{aligned}
+      \rho c (\delta_t\mathrm{T})^n_{z, r} &= \frac{1}{r} \left [ \frac{\Delta r_{i-}}{\Delta r_{i} \Delta r_{i+}}\mathrm{T}^n_{z, r+1} + \frac{\Delta r_{i+} - \Delta r_{i-}}{\Delta r_{i-} \Delta r_{i+}}\mathrm{T}^n_{z, r} - \frac{\Delta r_{i+}}{\Delta r_{i} \Delta r_{i-}}\mathrm{T}^n_{z, r-1} \right ] \kappa^n_{z, r} \\
+       & + \left [ \frac{2}{\Delta r_{i} \Delta r_{i+}}\mathrm{T}^n_{z, r+1} - \frac{2}{\Delta r_{i-} \Delta r_{i+}}\mathrm{T}^n_{z, r} + \frac{2}{\Delta r_{i} \Delta r_{i-}}\mathrm{T}^n_{z, r-1} \right ] \kappa^n_{z, r} \\
+       & +  \left [ \frac{\Delta r_{i-}}{\Delta r_{i} \Delta r_{i+}}\mathrm{T}^n_{z, r+1} + \frac{\Delta r_{i+} - \Delta r_{i-}}{\Delta r_{i-} \Delta r_{i+}}\mathrm{T}^n_{z, r} - \frac{\Delta r_{i+}}{\Delta r_{i} \Delta r_{i-}}\mathrm{T}^n_{z, r-1} \right ] \\
+       & \cdot \left [ \frac{\Delta r_{i-}}{\Delta r_{i} \Delta r_{i+}}\kappa^n_{z, r+1} + \frac{\Delta r_{i+} - \Delta r_{i-}}{\Delta r_{i-} \Delta r_{i+}}\kappa^n_{z, r} - \frac{\Delta r_{i+}}{\Delta r_{i} \Delta r_{i-}}\kappa^n_{z, r-1} \right ]   \\
+       & + \left [ \frac{2}{\Delta z_{i} \Delta z_{i+}}\mathrm{T}^n_{z+1, r} - \frac{2}{\Delta z_{i-} \Delta z_{i+}}\mathrm{T}^n_{z, r} + \frac{2}{\Delta z_{i} \Delta z_{i-}}\mathrm{T}^n_{z-1, r} \right ] \kappa^n_{z, r} \\
+       & +  \left [ \frac{\Delta z_{i-}}{\Delta z_{i} \Delta z_{i+}}\mathrm{T}^n_{z, r+1} + \frac{\Delta z_{i+} - \Delta z_{i-}}{\Delta z_{i-} \Delta z_{i+}}\mathrm{T}^n_{z, r} - \frac{\Delta z_{i+}}{\Delta z_{i} \Delta z_{i-}}\mathrm{T}^n_{z, r-1} \right ] \\
+       & \cdot \left [ \frac{\Delta z_{i-}}{\Delta z_{i} \Delta z_{i+}}\kappa^n_{z, r+1} + \frac{\Delta z_{i+} - \Delta z_{i-}}{\Delta z_{i-} \Delta z_{i+}}\kappa^n_{z, r} - \frac{\Delta z_{i+}}{\Delta z_{i} \Delta z_{i-}}\kappa^n_{z, r-1} \right ]   \\
+    \end{aligned}
+  \end{equation} 
+  This is an equation so monstrous it should not be viewed with human eyes, but the author has chosen to leave it as a cautionary tale.
+  We will replace our stretched derivative in terms of $\kappa$ with the $\delta$ notation to represent a stretched finite difference derivative, which in the same way as our previous derivation can be calculated beforehand
+
+  After carefully consolidating temrs, our formula is given as follows:
+  \begin{equation}
+    \begin{aligned}
+      \rho c (\delta_t\mathrm{T})^n_{z, r} &= \\
+      \mathrm{T}^n_{z, r} \left [\frac{1}{r}\cdot\kappa^n_{z, r}\cdot\frac{\Delta r_{i+} - \Delta r_{i-}}{\Delta r_{i-} \Delta r_{i+}} \right.&\left.- \frac{2\kappa^n_{z, r}}{\Delta r_{i-} \Delta r_{i+}} + (\delta_r\kappa)^n_{z, r}\frac{\Delta r_{i+} - \Delta r_{i-}}{\Delta r_{i-} \Delta r_{i+}} - \frac{2\kappa^n_{z, r}}{\Delta z_{i-} \Delta z_{i+}} + (\delta_z\kappa)^n_{z, r}\frac{\Delta z_{i+} - \Delta z_{i-}}{\Delta z_{i-} \Delta z_{i+}} \right ] \\
+       & + \mathrm{T}^n_{z, r-1} \left [-\frac{1}{r}\cdot\frac{\kappa^n_{z, r}\Delta r_{i+}}{\Delta r_{i} \Delta r_{i-}}  + \frac{2\kappa^n_{z, r}}{\Delta r_{i} \Delta r_{i-}} - (\delta_r\kappa)^n_{z, r}\frac{\Delta r_{i+}}{\Delta r_{i} \Delta r_{i-}} \right ] \\
+       & + \mathrm{T}^n_{z, r+1} \left [\frac{1}{r}\cdot\frac{\kappa^n_{z, r}\Delta r_{i-}}{\Delta r_{i} \Delta r_{i+}}  + \frac{2\kappa^n_{z, r}}{\Delta r_{i} \Delta r_{i+}} + (\delta_r\kappa)^n_{z, r}\frac{\Delta r_{i-}}{\Delta r_{i} \Delta r_{i+}} \right ] \\
+       & + \mathrm{T}^n_{z-1, r} \left [ \frac{2\kappa^n_{z, r}}{\Delta z_{i} \Delta z_{i-}} - (\delta_z\kappa)^n_{z, r}\frac{\Delta z_{i+}}{\Delta z_{i} \Delta z_{i-}} \right ] \\
+       & + \mathrm{T}^n_{z+1, r} \left [ \frac{2\kappa^n_{z, r}}{\Delta z_{i} \Delta z_{i+}} + (\delta_z\kappa)^n_{z, r}\frac{\Delta z_{i-}}{\Delta z_{i} \Delta z_{i+}} \right ] \\
+    \end{aligned}
+  \end{equation} 
 
 \end{document}

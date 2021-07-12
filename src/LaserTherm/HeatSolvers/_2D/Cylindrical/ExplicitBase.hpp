@@ -106,6 +106,25 @@ class ExplicitBase : public FDHS::FiniteDifferenceHeatSolver<REAL> {
       }
       this->T += T_prime;
     }
+    
+    void stepForward(REAL delta_t, int n){
+      for(int i = 0; i < n i++){
+        this->stepForward(delta_t);
+      }
+    }
+    
+    // time step optimization occurs here
+    void moveForward(REAL Delta_t){
+      // use T_prime to store initial state
+      Field<REAL, 2> T2, T1
+      // calculate single initial guess for timestep, save all or some of the values
+      // calculate 2 t/2 timesteps
+      // compare error
+      // rinse n repeat
+      // once have smallest time step, t*
+      // divide Delta_t by t*, and run
+      // stepForward(t*, Delta_t / t*)
+    }
 
     int get_rdims(){
       return this->rN;
