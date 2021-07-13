@@ -109,7 +109,7 @@ class ExplicitBase : public FDHS::FiniteDifferenceHeatSolver<REAL> {
     }
     
     void stepForward(REAL delta_t, int n){
-      for(int i = 0; i < n i++){
+      for(int i = 0; i < n; i++){
         this->stepForward(delta_t);
       }
     }
@@ -140,9 +140,11 @@ class ExplicitBase : public FDHS::FiniteDifferenceHeatSolver<REAL> {
      *
      * */
     REAL findTimeStep(REAL Delta_t, REAL t_min){
+      assert(t_min >= 0); 
+      assert(Delta_t > 0); 
       // use T0 store initial state, so this-> MUST be initialized with temperature at t=0
-      bool invalidNodeFound = false;
-      Field<REAL, 2> T0, T_Dt, , T_Dt2, T2_Dt;
+      bool invalidNodeFound = true;
+      Field<REAL, 2> T0, T_Dt, T_Dt2, T2_Dt;
       T0.reset(this->T.getCoordinateSystemPtr());
       T_Dt.reset(this->T.getCoordinateSystemPtr());
       T_Dt2.reset(this->T.getCoordinateSystemPtr());
@@ -167,10 +169,10 @@ class ExplicitBase : public FDHS::FiniteDifferenceHeatSolver<REAL> {
         this->stepForward(Delta_t/2);
         T2_Dt += this->T;
         //double totalErr(Field<REAL, 2>& f, REAL (*sol)(REAL, REAL, REAL), REAL (*err)(REAL, REAL), REAL t){
-        for(int i = 0; i < this->T.size(0); i++){
-          for(int j = 0; j < this->T.size(1); j++){
+        for(int i = 0; i < T0.size(0); i++){
+          for(int j = 0; j < T0.size(1); j++){
+            // set to true if error limit is surpassed, false otherwise
             invalidNodeFound = totalErr() > 100;
-            invalidNodeFound ? break break : ;
             if(invalidNodeFound){
               // Replace T_Dt with T_Dt2 ???
               T_Dt.set(0);
@@ -182,11 +184,13 @@ class ExplicitBase : public FDHS::FiniteDifferenceHeatSolver<REAL> {
               break;
             }
           }
-          if(invalidNodeFound) { break; }
-          // LASTMARK
-          // find some way to code 3(b)(i) with conditionals...
         }
       }
+    
+      //if HERE is reached, all nodes are valid, so reset to initial condition and return Delta_t
+      this->T.set(0);
+      this->T += T0;
+      return Delta_t;
       // calculate single initial guess for timestep, save all or some of the values
       // calculate 2 t/2 timesteps
       // compare error
@@ -194,8 +198,6 @@ class ExplicitBase : public FDHS::FiniteDifferenceHeatSolver<REAL> {
       // once have smallest time step, t*
       // divide Delta_t by t*, and run
       // stepForward(t*, Delta_t / t*)
-      return Delta_t / 2;
-      // lol
     }
 
     int get_rdims(){
@@ -256,5 +258,6 @@ class ExplicitBase : public FDHS::FiniteDifferenceHeatSolver<REAL> {
     }
     double totalErr(){
       double e = 0.0;
+      return e;
     }
 };
