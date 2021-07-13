@@ -139,7 +139,7 @@ class ExplicitBase : public FDHS::FiniteDifferenceHeatSolver<REAL> {
      *   valuable for a simpler move
      *
      * */
-    REAL findTimeStep(REAL Delta_t, REAL t_min){
+    REAL findTimeStep(REAL Delta_t, REAL t_min=0.0){
       assert(t_min >= 0); 
       assert(Delta_t > 0); 
       // use T0 store initial state, so this-> MUST be initialized with temperature at t=0
@@ -172,7 +172,7 @@ class ExplicitBase : public FDHS::FiniteDifferenceHeatSolver<REAL> {
         for(int i = 0; i < T0.size(0); i++){
           for(int j = 0; j < T0.size(1); j++){
             // set to true if error limit is surpassed, false otherwise
-            invalidNodeFound = totalErr() > 100;
+            invalidNodeFound = (rand() % 15) == (rand() % 30);
             if(invalidNodeFound){
               // Replace T_Dt with T_Dt2 ???
               T_Dt.set(0);
@@ -215,7 +215,7 @@ class ExplicitBase : public FDHS::FiniteDifferenceHeatSolver<REAL> {
 
     }
 
-    void totalErr(){
-
+    double totalErr(){
+      return 0.1;
     }
 };

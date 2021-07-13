@@ -234,7 +234,7 @@ TEST_CASE("UniformExplicit 2D Cylindrical Heat Solver Validation","[heatsolver][
 
     for(int i = 0; i < Points.size(); i++){
       std::pair<int, int> temp = Points[i];
-      std::cout << "Testing " << Name[i] << "\n";
+      //std::cout << "Testing " << Name[i] << "\n";
       //CHECK( HeatSolver.T(temp.first, temp.second) == Approx(Aplot(temp.first+1, temp.second+1)).epsilon(0.01));
     }
 
@@ -245,20 +245,21 @@ TEST_CASE("NonUniformExplicit 2D Cylindrical Heat Solver Validation","[heatsolve
 {
   // see ./doc/writups/Validation/AnalyticalSolutions/AnalyticalSolutions.pdf
   // for a derivation of these tests
-  int rN = 100;
-  int zN = 200;
-  double r_s = 1.02;
-  double z_s = 1.02;
+  int rN0 = 100;
+  int zN0 = 200;
+  int rN, zN;
+  double r_s = 1.2;
+  double z_s = 1.2;
   double R = 2; // m
   double L = 4; // m
   double k = 0.5; // W/m/K
   double rho = 1000; // kg/m^3
   double c = 4.18; // J/kg/K
-  double dR, dL; // m
-  dR = (1. - pow(r_s, rN)) / (1. - r_s); // -
-  dL = (1. - pow(z_s, zN)) / (1. - z_s); // -
-  dR = R / dR; // m
-  dL = L / dL; // m
+  double dR = R / rN0; // m
+  double dL = L / zN0; // m
+  // need to calculate n from finite geometric series formula
+  rN = static_cast<int>(log( (1 - ( R * (1 - r_s) ) ) / dR ) / log(r_s));
+  zN = static_cast<int>(log( (1 - ( L * (1 - z_s) ) ) / dL ) / log(z_s));
 
   NonUniformExplicit<double> HeatSolver(zN,rN);
   Field<double, 2> Aplot(zN,rN);
@@ -449,5 +450,60 @@ TEST_CASE("NonUniformExplicit 2D Cylindrical Heat Solver Validation","[heatsolve
       //CHECK( HeatSolver.T(temp.first, temp.second) == Approx(Aplot(temp.first+1, temp.second+1)).epsilon(0.01));
     }
 
+  }
+}
+
+
+TEST_CASE("Auto Adaptive Time Step","[heatsolver][validation]"){
+  int rN0 = 100;
+  int zN0 = 200;
+  int rN, zN;
+  double r_s = 1.2;
+  double z_s = 1.2;
+  double R = 2; // m
+  double L = 4; // m
+  double k = 0.5; // W/m/K
+  double rho = 1000; // kg/m^3
+  double c = 4.18; // J/kg/K
+  double dR = R / rN0; // m
+  double dL = L / zN0; // m
+  // need to calculate n from finite geometric series formula
+  rN = static_cast<int>(log( (1 - ( R * (1 - r_s) ) ) / dR ) / log(r_s));
+  zN = static_cast<int>(log( (1 - ( L * (1 - z_s) ) ) / dL ) / log(z_s));
+
+  NonUniformExplicit<double> HeatSolver(zN,rN);
+  Field<double, 2> Aplot(zN,rN);
+
+  HeatSolver.T.setCoordinateSystem( Geometric(0., dL, z_s), Geometric(0., dR, r_s) );
+  Aplot.setCoordinateSystem( Geometric(0., dL, z_s), Geometric(0., dR, r_s) );
+
+
+  HeatSolver.A.set(0.0);
+  HeatSolver.VHC.set(rho*c);
+  HeatSolver.k.set(k);
+  HeatSolver.minZBC.f = 0;
+  HeatSolver.maxZBC.f = 0;
+  HeatSolver.maxRBC.f = 0;
+
+  SECTION("Algorithm Convergence")
+  {
+    double dt = 100;
+    int Nt = 100;
+
+    auto solution = [&](double z, double r, double t)
+    {
+      double lambda_r = 2.4048/R;
+      double lambda_z = M_PI/L;
+      double alpha = k/rho/c*( lambda_z*lambda_z + lambda_r*lambda_r);
+
+      return exp(-alpha*t) * sin(lambda_z*z) * std::cyl_bessel_j(0,lambda_r*r);
+    };
+
+    HeatSolver.T.set_f([&](auto x) { return solution(x[0],x[1],0); });
+    Aplot.set_f([&](auto x) { return solution(x[0],x[1],Nt*dt); });
+
+    dt = HeatSolver.findTimeStep(dt);
+    std::cout << "Time step: " << dt << "\n";
+    
   }
 }
