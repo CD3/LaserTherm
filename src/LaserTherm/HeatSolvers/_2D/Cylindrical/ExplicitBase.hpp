@@ -99,15 +99,8 @@ class ExplicitBase : public FDHS::FiniteDifferenceHeatSolver<REAL> {
             T5 = this->T[i+1][j] * static_cast<IMP*>(this)->E_n(i , j);
           }
           this->T_prime[i][j] = beta * (T1 + T2 + T3 + T4 + T5 + this->A[i][j]);
-          /*REAL culprits[] = {T1, T2, T3, T4, T5, this->A[i][j], beta};
-          std::string names[] = {"1", "2", "3", "4", "5", "A", "beta"};
-          for(int i = 0; i < 7; i++){
-             std::cout << names[i] << ": " << culprits[i];
-             i == 6 ? std::cout << "\n" : std::cout << ", ";
-          }*/
           if(isnan(this->T_prime[i][j])){
             // make this a better error
-            std::cout << "@ (" << i << ", " << j << ")";
             throw std::runtime_error(std::string("NaN Encountered!"));
           }
         }
@@ -214,48 +207,15 @@ class ExplicitBase : public FDHS::FiniteDifferenceHeatSolver<REAL> {
       return abs((num - correct) / correct);
     }
 
-    double randSampleErr(Field<REAL, 2>& f, REAL (*sol)(REAL, REAL, REAL), REAL (*err)(REAL, REAL), REAL t, int n){
-      double e = 0.0;
-      int i, j;
-      REAL r, z;
-      for(int i = 0; i < n; i++){
-        i = rand() % f.size(0);
-        j = rand() % f.size(1);
-        r = f.getCoord(i, j)[1];
-        z = f.getCoord(i, j)[1];
-        e += err(f[i][j], sol(r, z, t));
-      }
-      return e;
+    void randSampleErr(){
+
     }
 
-    double avgErr(Field<REAL, 2>& f, REAL (*sol)(REAL, REAL, REAL), REAL (*err)(REAL, REAL), REAL t){
-      double e = 0.0;
-      REAL r, z;
-      for(int i = 0; i < f.size(0); i++){
-        for(int j = 0; j < f.size(1); j++){
-          r = f.getCoord(i, j)[1];
-          z = f.getCoord(i, j)[0];
-          e += err(f[i][j], sol(r, z, t));
-        }
-      }
-      e /= f.size(0) * f.size(1) * 1.;
-      return e;
+    void avgErr(){
+
     }
 
-    double totalErr(Field<REAL, 2>& f, REAL (*sol)(REAL, REAL, REAL), REAL (*err)(REAL, REAL), REAL t){
-      double e = 0.0;
-      REAL r, z;
-      for(int i = 0; i < f.size(0); i++){
-        for(int j = 0; j < f.size(1); j++){
-          r = f.getCoord(i, j)[1];
-          z = f.getCoord(i, j)[0];
-          e += err(f[i][j], sol(r, z, t));
-        }
-      }
-      return e;
-    }
-    double totalErr(){
-      double e = 0.0;
-      return e;
+    void totalErr(){
+
     }
 };

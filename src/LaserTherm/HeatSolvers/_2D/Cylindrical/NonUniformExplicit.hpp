@@ -81,10 +81,10 @@ class NonUniformExplicit : public ExplicitBase<NonUniformExplicit<REAL>, REAL> {
 
   // see if you wan overwrite all of these FD methods with weighted versions? Check derivation for stretched
   REAL forward_finite_r(Field<REAL, 2>& f, int i, int j){
-    return f[i][j+1] - f[i][j] / get_dr(i, j, 0);
+    return f[i][j+1] - f[i][j] / get_dr(i, j, 1);
   }
   REAL backward_finite_r(Field<REAL, 2>& f, int i, int j){
-    return f[i][j] - f[i][j-1] / get_dr(i, j, 0);
+    return f[i][j] - f[i][j-1] / get_dr(i, j, -1);
   }
   REAL central_finite_r(Field<REAL, 2>& f, int i, int j){
     REAL C1, C2, C3;
@@ -94,10 +94,10 @@ class NonUniformExplicit : public ExplicitBase<NonUniformExplicit<REAL>, REAL> {
     return C1 * f[i][j+1] + C2 * f[i][j] + C3 * f[i][j-1];
   }
   REAL forward_finite_z(Field<REAL, 2>& f, int i, int j){
-    return f[i+1][j] - f[i][j] / get_dz(i, j, 0);
+    return f[i+1][j] - f[i][j] / get_dz(i, j, 1);
   }
   REAL backward_finite_z(Field<REAL, 2>& f, int i, int j){
-    return f[i][j] - f[i-1][j] / get_dz(i, j, 0);
+    return f[i][j] - f[i-1][j] / get_dz(i, j, -1);
   }
   REAL central_finite_z(Field<REAL, 2>& f, int i, int j){
     REAL C1, C2, C3;
@@ -194,7 +194,7 @@ class NonUniformExplicit : public ExplicitBase<NonUniformExplicit<REAL>, REAL> {
 
     REAL T1 = (1.0 / r) * this->k[i][j] * dr_l / (dr_c * dr_r);
     REAL T2 = (2.0 / (dr_c * dr_r)) * this->k[i][j];
-    REAL T3 = dk_r * dr_c / (dr_c * dr_r);
+    REAL T3 = dk_r * dr_l / (dr_c * dr_r);
     return T1 + T2 + T3;
   }
 
@@ -232,8 +232,8 @@ class NonUniformExplicit : public ExplicitBase<NonUniformExplicit<REAL>, REAL> {
 
   // Calculate Coefficent for T^n_(z+1, 0)
   REAL A_nR0(int i, int j){
-    REAL dr = get_dr(i, j, 0);
-    REAL dz = get_dz(i, j, 0);
+    REAL dr = get_dr(i, j, -1);
+    REAL dz = get_dz(i, j);
     REAL T1 = (-4 * this->k[i][j]) / (dr * dr);
     REAL T2 = (-2 * this->k[i][j]) / (dz * dz);
     return T1 + T2;
@@ -241,7 +241,7 @@ class NonUniformExplicit : public ExplicitBase<NonUniformExplicit<REAL>, REAL> {
 
   // Calculate Coefficent for T^n_(z+1, 0)
   REAL C_nR0(int i, int j){
-    REAL dr = get_dr(i, j);
+    REAL dr = get_dr(i, j, -1);
     // 2 * kappa / dr**2
     REAL T1 = 2 * this->k[i][j] / pow(dr, 2);
     // 1 / 2 * dr
@@ -253,7 +253,7 @@ class NonUniformExplicit : public ExplicitBase<NonUniformExplicit<REAL>, REAL> {
 
   // Calculate Coefficent for T^n_(z+1, 0)
   REAL B_nR0(int i, int j){
-    REAL dr = get_dr(i, j);
+    REAL dr = get_dr(i, j, -1);
     // 2 * kappa / dr**2
     REAL T1 = 2 * this->k[i][j] / pow(dr, 2);
     // 1 / 2 * dr
