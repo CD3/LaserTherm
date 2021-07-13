@@ -241,7 +241,7 @@ class NonUniformExplicit : public ExplicitBase<NonUniformExplicit<REAL>, REAL> {
 
   // Calculate Coefficent for T^n_(z+1, 0)
   REAL C_nR0(int i, int j){
-    REAL dr = get_dr(i, j, 0);
+    REAL dr = get_dr(i, j);
     // 2 * kappa / dr**2
     REAL T1 = 2 * this->k[i][j] / pow(dr, 2);
     // 1 / 2 * dr
@@ -253,7 +253,7 @@ class NonUniformExplicit : public ExplicitBase<NonUniformExplicit<REAL>, REAL> {
 
   // Calculate Coefficent for T^n_(z+1, 0)
   REAL B_nR0(int i, int j){
-    REAL dr = get_dr(i, j, 0);
+    REAL dr = get_dr(i, j);
     // 2 * kappa / dr**2
     REAL T1 = 2 * this->k[i][j] / pow(dr, 2);
     // 1 / 2 * dr

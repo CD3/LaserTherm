@@ -1,6 +1,7 @@
 #include <libField/Field.hpp>
 #include <math.h>
 #include <exception>
+#include <stdexcept>
 #include "LaserTherm/HeatSolvers/BoundaryConditions.hpp"
 #include "LaserTherm/HeatSolvers/_2D/Cylindrical/FiniteDifferenceHeatSolver.hpp"
 
@@ -16,7 +17,6 @@ class ExplicitBase : public FDHS::FiniteDifferenceHeatSolver<REAL> {
     void stepForward(REAL delta_t){
       REAL T1, T2, T3, T4, T5;
       REAL beta;
-      this->T_prime.set(0);
       for(int i = 0; i < zN; i++){
         for(int j = 0; j < rN; j++){
           // flags for boundary conditions
@@ -50,7 +50,7 @@ class ExplicitBase : public FDHS::FiniteDifferenceHeatSolver<REAL> {
                 // do stuff for temp type
                 break;
               default:
-                throw 42;
+                throw std::runtime_error(std::string("No BC Type!"));
             }
           } else {
             // if not on r boundary give 'normal T2 T3'
@@ -73,7 +73,7 @@ class ExplicitBase : public FDHS::FiniteDifferenceHeatSolver<REAL> {
                 // do stuff for temp type
                 break;
               default:
-                throw 42;
+                throw std::runtime_error(std::string("No BC Type!"));
             }
           } else if(zMax){
             // z = Zmax
@@ -91,17 +91,24 @@ class ExplicitBase : public FDHS::FiniteDifferenceHeatSolver<REAL> {
                 // do stuff for temp type
                 break;
               default:
-                throw 42;
+                throw std::runtime_error(std::string("No BC Type!"));
             }
           } else {
             // if not on z boundary give 'normal T4 T5'
             T4 = this->T[i-1][j] * static_cast<IMP*>(this)->D_n(i , j);
             T5 = this->T[i+1][j] * static_cast<IMP*>(this)->E_n(i , j);
           }
-          T_prime[i][j] = beta * (T1 + T2 + T3 + T4 + T5 + this->A[i][j]);
-          if(isnan(T_prime[i][j])){
+          this->T_prime[i][j] = beta * (T1 + T2 + T3 + T4 + T5 + this->A[i][j]);
+          /*REAL culprits[] = {T1, T2, T3, T4, T5, this->A[i][j], beta};
+          std::string names[] = {"1", "2", "3", "4", "5", "A", "beta"};
+          for(int i = 0; i < 7; i++){
+             std::cout << names[i] << ": " << culprits[i];
+             i == 6 ? std::cout << "\n" : std::cout << ", ";
+          }*/
+          if(isnan(this->T_prime[i][j])){
             // make this a better error
-            throw 42;
+            std::cout << "@ (" << i << ", " << j << ")";
+            throw std::runtime_error(std::string("NaN Encountered!"));
           }
         }
       }
@@ -168,7 +175,7 @@ class ExplicitBase : public FDHS::FiniteDifferenceHeatSolver<REAL> {
         T_Dt2 += this->T;
         this->stepForward(Delta_t/2);
         T2_Dt += this->T;
-        //double totalErr(Field<REAL, 2>& f, REAL (*sol)(REAL, REAL, REAL), REAL (*err)(REAL, REAL), REAL t){
+        //double totalErr(Field<REAL, 2>& f, REAL (*sol)(REAL, REAL, REAL), REAL (*err)(REAL, REAL), REAL t)
         for(int i = 0; i < T0.size(0); i++){
           for(int j = 0; j < T0.size(1); j++){
             // set to true if error limit is surpassed, false otherwise
@@ -186,18 +193,9 @@ class ExplicitBase : public FDHS::FiniteDifferenceHeatSolver<REAL> {
           }
         }
       }
-    
-      //if HERE is reached, all nodes are valid, so reset to initial condition and return Delta_t
       this->T.set(0);
       this->T += T0;
       return Delta_t;
-      // calculate single initial guess for timestep, save all or some of the values
-      // calculate 2 t/2 timesteps
-      // compare error
-      // rinse n repeat
-      // once have smallest time step, t*
-      // divide Delta_t by t*, and run
-      // stepForward(t*, Delta_t / t*)
     }
 
     int get_rdims(){
