@@ -471,24 +471,34 @@ TEST_CASE("Auto Adaptive Time Step","[heatsolver][validation]"){
   rN = static_cast<int>(log( (1 - ( R * (1 - r_s) ) ) / dR ) / log(r_s));
   zN = static_cast<int>(log( (1 - ( L * (1 - z_s) ) ) / dL ) / log(z_s));
 
-  NonUniformExplicit<double> HeatSolver(zN,rN);
+  NonUniformExplicit<double> NU_HeatSolver(zN,rN);
+  UniformExplicit<double> U_HeatSolver(200,100);
   Field<double, 2> Aplot(zN,rN);
 
-  HeatSolver.T.setCoordinateSystem( Geometric(0., dL, z_s), Geometric(0., dR, r_s) );
+  NU_HeatSolver.T.setCoordinateSystem( Geometric(0., dL, z_s), Geometric(0., dR, r_s) );
+  U_HeatSolver.T.setCoordinateSystem( Uniform(0., L), Uniform(0., R) );
   Aplot.setCoordinateSystem( Geometric(0., dL, z_s), Geometric(0., dR, r_s) );
 
 
-  HeatSolver.A.set(0.0);
-  HeatSolver.VHC.set(rho*c);
-  HeatSolver.k.set(k);
-  HeatSolver.minZBC.f = 0;
-  HeatSolver.maxZBC.f = 0;
-  HeatSolver.maxRBC.f = 0;
+  NU_HeatSolver.A.set(0.0);
+  NU_HeatSolver.VHC.set(rho*c);
+  NU_HeatSolver.k.set(k);
+  NU_HeatSolver.minZBC.f = 0;
+  NU_HeatSolver.maxZBC.f = 0;
+  NU_HeatSolver.maxRBC.f = 0;
+
+  U_HeatSolver.A.set(0.0);
+  U_HeatSolver.VHC.set(rho*c);
+  U_HeatSolver.k.set(k);
+  U_HeatSolver.minZBC.f = 0;
+  U_HeatSolver.maxZBC.f = 0;
+  U_HeatSolver.maxRBC.f = 0;
 
   SECTION("Algorithm Convergence")
   {
-    double dt = 100;
-    int Nt = 100;
+    double NUdt = 100;
+    double Udt = 100;
+    int t_f = 10;
 
     auto solution = [&](double z, double r, double t)
     {
@@ -499,11 +509,15 @@ TEST_CASE("Auto Adaptive Time Step","[heatsolver][validation]"){
       return exp(-alpha*t) * sin(lambda_z*z) * std::cyl_bessel_j(0,lambda_r*r);
     };
 
-    HeatSolver.T.set_f([&](auto x) { return solution(x[0],x[1],0); });
-    Aplot.set_f([&](auto x) { return solution(x[0],x[1],Nt*dt); });
+    NU_HeatSolver.T.set_f([&](auto x) { return solution(x[0],x[1],0); });
+    U_HeatSolver.T.set_f([&](auto x) { return solution(x[0],x[1],0); });
+    Aplot.set_f([&](auto x) { return solution(x[0],x[1],t_f); });
 
-    dt = HeatSolver.findTimeStep(dt);
-    std::cout << "Time step: " << dt << "\n";
+    NUdt = NU_HeatSolver.findTimeStep(NUdt);
+    std::cout << "NonUniform Time Step: " << NUdt << "\n";
+
+    Udt = U_HeatSolver.findTimeStep(Udt);
+    std::cout << "Uniform Time Step: " << Udt << "\n";
     
   }
 }

@@ -172,7 +172,9 @@ class ExplicitBase : public FDHS::FiniteDifferenceHeatSolver<REAL> {
         for(int i = 0; i < T0.size(0); i++){
           for(int j = 0; j < T0.size(1); j++){
             // set to true if error limit is surpassed, false otherwise
-            invalidNodeFound = (rand() % 15) == (rand() % 30);
+            invalidNodeFound = randSampleErr(T_Dt, T2_Dt, percErr, 10) > 0.01;
+            // invalidNodeFound = avgErr(T_Dt, T2_Dt, percErr) > 0.001;
+            // invalidNodeFound = totalErr(T_Dt, T2_Dt, percErr) > 1;
             if(invalidNodeFound){
               // Replace T_Dt with T_Dt2 ???
               T_Dt.set(0);
@@ -184,6 +186,7 @@ class ExplicitBase : public FDHS::FiniteDifferenceHeatSolver<REAL> {
               break;
             }
           }
+          if(invalidNodeFound) { break; }
         }
       }
       this->T.set(0);
@@ -203,19 +206,51 @@ class ExplicitBase : public FDHS::FiniteDifferenceHeatSolver<REAL> {
     int rN;
     int zN;
   private:
-    double percErr(REAL num, REAL correct){
-      return abs((num - correct) / correct);
+    static double percErr(REAL num, REAL correct){
+      return abs((num - correct) / (num + correct));
     }
 
-    void randSampleErr(){
-
+    double randSampleErr(Field<REAL, 2>& T1, Field<REAL, 2>& T2, double (*err)(REAL, REAL), int n){
+      double e = 0;
+      int zi, rj;
+      int rMAX = T1.size(1);
+      int zMAX = T1.size(0);
+      assert(T1.size(0) == T2.size(0));
+      assert(T1.size(1) == T2.size(1));
+      for(int i = 0; i < n; i++){
+        rj = rand() % rMAX;
+        zi = rand() % zMAX;
+        e += err(T1[zi][rj], T2[zi][rj]);
+      }
+      return e / n;
     }
 
-    void avgErr(){
-
+    double avgErr(Field<REAL, 2>& T1, Field<REAL, 2>& T2, double (*err)(double, double)){
+      double e = 0;
+      int rMAX = T1.size(1);
+      int zMAX = T1.size(0);
+      assert(T1.size(0) == T2.size(0));
+      assert(T1.size(1) == T2.size(1));
+      for(int i = 0; i < zMAX; i++){
+        for(int j = 0; j < rMAX; j++){
+          e += err(T1[i][j], T2[i][j]);
+        }
+      }
+      e /= zMAX * rMAX;
+      return e;
     }
 
-    double totalErr(){
-      return 0.1;
+    double totalErr(Field<REAL, 2>& T1, Field<REAL, 2>& T2, double (*err)(double, double)){
+      double e = 0;
+      int rMAX = T1.size(1);
+      int zMAX = T1.size(0);
+      assert(T1.size(0) == T2.size(0));
+      assert(T1.size(1) == T2.size(1));
+      for(int i = 0; i < zMAX; i++){
+        for(int j = 0; j < rMAX; j++){
+          e += err(T1[i][j], T2[i][j]);
+        }
+      }
+      return e;
     }
 };
