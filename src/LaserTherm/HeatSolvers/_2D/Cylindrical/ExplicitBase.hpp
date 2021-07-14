@@ -163,7 +163,6 @@ class ExplicitBase : public FDHS::FiniteDifferenceHeatSolver<REAL> {
 
       // Enter algorithm
       while(invalidNodeFound){
-
         // At the beginning of each iteration, clear values
         T_Dt2.set(0);
         T2_Dt.set(0);
@@ -178,27 +177,33 @@ class ExplicitBase : public FDHS::FiniteDifferenceHeatSolver<REAL> {
         this->stepForward(Delta_t/2);
         T2_Dt += this->T;
 
-        // I'm parsing through the field here but only really using the 'average method'...
+        // I'm parsing through the field here but I could also use one of the
+        // wholistic methods I already wrote
+        // invalidNodeFound = avgErr(T_Dt, T2_Dt, percErr) > 0.001;
         for(int i = 0; i < T0.size(0); i++){
           for(int j = 0; j < T0.size(1); j++){
             // set to true if error limit is surpassed, false otherwise
-            invalidNodeFound = randSampleErr(T_Dt, T2_Dt, percErr, 10) > 0.01;
-            // invalidNodeFound = avgErr(T_Dt, T2_Dt, percErr) > 0.001;
-            // invalidNodeFound = totalErr(T_Dt, T2_Dt, percErr) > 1;
+            invalidNodeFound = percErr(T_Dt[i][j], T2_Dt[i][j]) > 0.01;
             if(invalidNodeFound){
               // Replace T_Dt with T_Dt2 ???
               T_Dt.set(0);
               T_Dt += T_Dt2;
+              // Jump out if we're under t_min!
               if(Delta_t / 2 <= t_min){
                 return t_min;
               }
               Delta_t /= 2;
+              // Pt. 1
               break;
             }
           }
+          // Pt. 2
           if(invalidNodeFound) { break; }
         }
       }
+      // jump out once an invalid node is NOT found
+      
+      // Reset your temperature profile to initial state
       this->T.set(0);
       this->T += T0;
       return Delta_t;

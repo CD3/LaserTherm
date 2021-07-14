@@ -161,18 +161,6 @@ TEST_CASE("UniformExplicit 2D Cylindrical Heat Solver Validation","[heatsolver][
     for(int i = Nt / 2; i < Nt; i++){
       HeatSolver.stepForward(dt);
     }
-    {
-      ofstream output;
-      output.open("T1.txt");
-      output << HeatSolver.T;
-      output.close();
-    }
-    {
-      ofstream output;
-      output.open("T2.txt");
-      output << Aplot;
-      output.close();
-    }
 
     vector<string> Name;
     Name.push_back("center");
@@ -292,35 +280,9 @@ TEST_CASE("NonUniformExplicit 2D Cylindrical Heat Solver Validation","[heatsolve
     HeatSolver.T.set_f([&](auto x) { return solution(x[0],x[1],0); });
     Aplot.set_f([&](auto x) { return solution(x[0],x[1],Nt*dt); });
 
-    {
-      ofstream output;
-      output.open("T.txt");
-      output << HeatSolver.T;
-      output.close();
-    }
-    {
-      ofstream output;
-      output.open("A.txt");
-      output << HeatSolver.A;
-      output.close();
-    }
-    {
-      ofstream output;
-      output.open("k.txt");
-      output << HeatSolver.k;
-      output.close();
-    }
-    {
-      ofstream output;
-      output.open("VHC.txt");
-      output << HeatSolver.VHC;
-      output.close();
-    }
-    
     for(int i = 0; i < Nt; i++){
       HeatSolver.stepForward(dt);
     }
-
 
     vector<string> Name;
     Name.push_back("center");
@@ -328,7 +290,6 @@ TEST_CASE("NonUniformExplicit 2D Cylindrical Heat Solver Validation","[heatsolve
     Name.push_back("zmax");
     Name.push_back("zmin");
     Name.push_back("r=0");
-
 
     vector<std::pair<int, int>> Points;
     Points.push_back(std::make_pair<int, int>(zN/2, rN/2));
@@ -519,5 +480,6 @@ TEST_CASE("Auto Adaptive Time Step","[heatsolver][validation]"){
     Udt = U_HeatSolver.findTimeStep(Udt);
     std::cout << "Uniform Time Step: " << Udt << "\n";
     
+    // still need to test moveForward method just for errors
   }
 }
