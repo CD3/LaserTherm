@@ -419,8 +419,8 @@ TEST_CASE("Auto Adaptive Time Step","[heatsolver][validation]"){
   int rN0 = 100;
   int zN0 = 200;
   int rN, zN;
-  double r_s = 1.2;
-  double z_s = 1.2;
+  double r_s = 1.18;
+  double z_s = 1.18;
   double R = 2; // m
   double L = 4; // m
   double k = 0.5; // W/m/K
@@ -429,16 +429,18 @@ TEST_CASE("Auto Adaptive Time Step","[heatsolver][validation]"){
   double dR = R / rN0; // m
   double dL = L / zN0; // m
   // need to calculate n from finite geometric series formula
-  rN = static_cast<int>(log( (1 - ( R * (1 - r_s) ) ) / dR ) / log(r_s));
-  zN = static_cast<int>(log( (1 - ( L * (1 - z_s) ) ) / dL ) / log(z_s));
+  rN = static_cast<int>(log( (1 - ( R * (1 - r_s) ) / dR ) ) / log(r_s)) + 2;
+  zN = static_cast<int>(log( (1 - ( L * (1 - z_s) ) / dL ) ) / log(z_s)) + 2;
 
   NonUniformExplicit<double> NU_HeatSolver(zN,rN);
   UniformExplicit<double> U_HeatSolver(200,100);
   Field<double, 2> Aplot(zN,rN);
+  Field<double, 2> Bplot(zN,rN);
 
   NU_HeatSolver.T.setCoordinateSystem( Geometric(0., dL, z_s), Geometric(0., dR, r_s) );
   U_HeatSolver.T.setCoordinateSystem( Uniform(0., L), Uniform(0., R) );
   Aplot.setCoordinateSystem( Geometric(0., dL, z_s), Geometric(0., dR, r_s) );
+  Bplot.setCoordinateSystem( Geometric(0., dL, z_s), Geometric(0., dR, r_s) );
 
 
   NU_HeatSolver.A.set(0.0);
@@ -474,12 +476,42 @@ TEST_CASE("Auto Adaptive Time Step","[heatsolver][validation]"){
     U_HeatSolver.T.set_f([&](auto x) { return solution(x[0],x[1],0); });
     Aplot.set_f([&](auto x) { return solution(x[0],x[1],t_f); });
 
-    NUdt = NU_HeatSolver.findTimeStep(NUdt);
+    NUdt = NU_HeatSolver.findTimeStep(NUdt, 0.0, 0.01);
     std::cout << "NonUniform Time Step: " << NUdt << "\n";
 
-    Udt = U_HeatSolver.findTimeStep(Udt);
+    Udt = U_HeatSolver.findTimeStep(Udt, 0.0, 0.01);
     std::cout << "Uniform Time Step: " << Udt << "\n";
-    
-    // still need to test moveForward method just for errors
+
+    //moveForward in time using an adaptive timestep
+    NU_HeatSolver.moveForward(10, 0.0, 0.01);
+    {
+      ofstream output;
+      output.open("NU_HeatSolACTS.txt");
+      output << NU_HeatSolver.T;
+      output.close();
+    }
+    U_HeatSolver.moveForward(10, 0.0, 0.01);
+    {
+      ofstream output;
+      output.open("U_HeatSolACTS.txt");
+      output << U_HeatSolver.T;
+      output.close();
+    }
+    /* size difference doesn't allow, should find some way to quantify error
+     * use libInterpolate 2D... find out or write new constructor. Pull request maybe
+    Aplot.set(0);
+    Bplot.set(0);
+    Aplot += U_HeatSolver.T;
+    Aplot -= NU_HeatSolver.T;
+    Bplot += NU_HeatSolver.T;
+    Bplot += U_HeatSolver.T;
+    Aplot /= Bplot; 
+    {
+      ofstream output;
+      output.open("UvNU_percDiff.txt");
+      output << Aplot;
+      output.close();
+    }
+    */
   }
 }

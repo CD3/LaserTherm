@@ -132,12 +132,13 @@ class ExplicitBase : public FDHS::FiniteDifferenceHeatSolver<REAL> {
      *
      * @param Delta_t is the 'initial guess' for the minimum convergent time step
      * @param t_min is the minimum time step allowed by the algorithm, 0 by default
+     * @param alpha is the maximum perc. error allowed for a valid node, by default 1%, 0.01
      *
      * @returns A REAL representing an optimized timestep where the evolution of
      * T is convergent
      *
      * */
-    REAL findTimeStep(REAL Delta_t, REAL t_min=0.0){
+    REAL findTimeStep(REAL Delta_t, REAL t_min=0.0, REAL alpha=0.01){
       assert(t_min >= 0); 
       assert(Delta_t > 0); 
 
@@ -180,10 +181,24 @@ class ExplicitBase : public FDHS::FiniteDifferenceHeatSolver<REAL> {
         // I'm parsing through the field here but I could also use one of the
         // wholistic methods I already wrote
         // invalidNodeFound = avgErr(T_Dt, T2_Dt, percErr) > 0.001;
+
+        invalidNodeFound = avgErr(T_Dt, T2_Dt, percErr) > alpha;
+        if(invalidNodeFound){
+          // Replace T_Dt with T_Dt2 ???
+          T_Dt.set(0);
+          T_Dt += T_Dt2;
+          // Jump out if we're under t_min!
+          if(Delta_t / 2 <= t_min){
+            return t_min;
+          }
+          Delta_t /= 2;
+          // Pt. 1
+        }
+/*
         for(int i = 0; i < T0.size(0); i++){
           for(int j = 0; j < T0.size(1); j++){
             // set to true if error limit is surpassed, false otherwise
-            invalidNodeFound = percErr(T_Dt[i][j], T2_Dt[i][j]) > 0.01;
+            invalidNodeFound = percErr(T_Dt[i][j], T2_Dt[i][j]) > alpha;
             if(invalidNodeFound){
               // Replace T_Dt with T_Dt2 ???
               T_Dt.set(0);
@@ -200,6 +215,7 @@ class ExplicitBase : public FDHS::FiniteDifferenceHeatSolver<REAL> {
           // Pt. 2
           if(invalidNodeFound) { break; }
         }
+*/
       }
       // jump out once an invalid node is NOT found
       
@@ -216,10 +232,11 @@ class ExplicitBase : public FDHS::FiniteDifferenceHeatSolver<REAL> {
      *
      * @param Delta_t the desired time to 'move forward' in one step 
      * @param t_min the minimum time step allowed to increment by (0 by default)
+     * @param alpha is the maximum perc. error allowed for a valid node, by default 1%, 0.01
      * */
-    REAL moveForward(REAL Delta_t, REAL t_min=0.0){
+    void moveForward(REAL Delta_t, REAL t_min=0.0, REAL alpha=0.01){
       assert(Delta_t > t_min);
-      REAL dt = this->findTimeStep(Delta_t, t_min);
+      REAL dt = this->findTimeStep(Delta_t, t_min, alpha);
       stepForward(Delta_t, dt); 
     }
 
