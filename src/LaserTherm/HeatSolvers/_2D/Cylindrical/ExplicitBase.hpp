@@ -23,9 +23,7 @@ class ExplicitBase : public FDHS::FiniteDifferenceHeatSolver<REAL> {
           bool rMax, rMin, zMax, zMin;
           rMax = j == rN-1;
           rMin = j == 0;
-          zMax = i == zN-1;
-          zMin = i == 0;
-          // coefficient for calculations
+          zMax = i == zN-1; zMin = i == 0; // coefficient for calculations
           beta = delta_t / this->VHC[i][j];
           T1 = this->T[i][j] * static_cast<IMP*>(this)->A_n(i , j);
           if(rMin){
@@ -55,9 +53,7 @@ class ExplicitBase : public FDHS::FiniteDifferenceHeatSolver<REAL> {
           } else {
             // if not on r boundary give 'normal T2 T3'
             T2 = this->T[i][j-1] * static_cast<IMP*>(this)->B_n(i , j);
-            T3 = this->T[i][j+1] * static_cast<IMP*>(this)->C_n(i , j);
-          }
-          if(zMin){
+            T3 = this->T[i][j+1] * static_cast<IMP*>(this)->C_n(i , j); } if(zMin){
             // z = 0
             switch(this->minZBC.type){
               case BC::Type::Temperature:
@@ -108,67 +104,81 @@ class ExplicitBase : public FDHS::FiniteDifferenceHeatSolver<REAL> {
       this->T += T_prime;
     }
     
+    /**
+     * a function to evolve this->T in time a total of delta_t, in increments of dt
+     *
+     * @param delta_t the desired time to 'move forward' in one step
+     * @param n the number of steps to take
+     * */
     void stepForward(REAL delta_t, int n){
       for(int i = 0; i < n; i++){
         this->stepForward(delta_t);
       }
     }
     
-    /** T0 - initial temperature solution, T_Dt - the temperature solution at a
-     * time Dt in the future obtained by a single application of the heat
-     * solver, T_Dt2 - the temperature solution at a time Dt/2 in the future,
-     * T2_Dt - the temperature solution at a time Dt in the future
-     * obtained by two applications of the heat solver based on half time steps
+    /**
+     * a function to evolve this->T in time a total of delta_t, in increments of dt
      *
-     * time step optimization occurs here 
-     * 
-     * T_Dt is determined WITHIN the call,
-     * so auto convergence flag must already be called, possible change later 
+     * @param delta_t the total desired time to 'move forward' (non inclusive)
+     * @param dt the increment taken to reach delta_t
+     * */
+    void stepForward(REAL delta_t, REAL dt){
+      assert(delta_t > dt);
+      this->stepForward(dt, static_cast<int>(delta_t / dt));
+    }
+
+    /** 
+     * A method (roughly) implementing the Automatic Converge Time Step algorithm as detailed in /doc/writups/...
      *
-     * The algorithm is kind of about BOTH calculating the minimum convergent
-     * timestep AND moving forward by by two steps of that timestep and that
-     * kind of just feels weird... there should be a seperate functionality to
-     * FIND the minimum time step and a seperate function to actually move
-     * forward.
-     * Currently I'm thinking
-     * - function to find min convergent time step
-     * - overloaded stepforward(REAL a, REAL b) @param a the total time to move
-     *   by @param b the increment (step size) to use (assert a > b) 
-     * - function to JUST DO IT (moveForward a macro Deltat without returning
-     *   the timestep used), results in a loss of information but may be
-     *   valuable for a simpler move
+     * @param Delta_t is the 'initial guess' for the minimum convergent time step
+     * @param t_min is the minimum time step allowed by the algorithm, 0 by default
+     *
+     * @returns A REAL representing an optimized timestep where the evolution of
+     * T is convergent
      *
      * */
     REAL findTimeStep(REAL Delta_t, REAL t_min=0.0){
       assert(t_min >= 0); 
       assert(Delta_t > 0); 
-      // use T0 store initial state, so this-> MUST be initialized with temperature at t=0
+
       bool invalidNodeFound = true;
+      //T0 = T(0), T_Dt = T(\Delta t), T_Dt2 = T(\Delta t / 2), T2_Dt = T^2(\Delta t)
       Field<REAL, 2> T0, T_Dt, T_Dt2, T2_Dt;
+
       T0.reset(this->T.getCoordinateSystemPtr());
       T_Dt.reset(this->T.getCoordinateSystemPtr());
       T_Dt2.reset(this->T.getCoordinateSystemPtr());
       T2_Dt.reset(this->T.getCoordinateSystemPtr());
 
+      // This set(0), += method is a shorthand I found to 'copy' a Field's data
+      // to another without worrying about overwriting data or passing a
+      // reference by accident, and I use it a lot
+      // Make T0 have the same profile as T
       T0.set(0);
-      // T0 is holding T0, the initial temperature solution
       T0 += this->T;
-      // Calculate T_Dt (only has to happen once)
+      // Calculate and set T_Dt (calculation only has to happen once)
       this->stepForward(Delta_t);
       T_Dt.set(0);
       T_Dt += this->T;
+
+      // Enter algorithm
       while(invalidNodeFound){
+
+        // At the beginning of each iteration, clear values
         T_Dt2.set(0);
         T2_Dt.set(0);
-        // reset T to original value to prep for next calculation
+        // reset T to initial value to prep for next calculation since it
+        // changes with each stepForward
         this->T.set(0);
         this->T += T0;
-        // calculate T2_dt, and store T_dt2
+        // calculate and store T_Dt2, and store T_Dt2
         this->stepForward(Delta_t/2);
         T_Dt2 += this->T;
+        // calculate and store T2_Dt, and store T2_Dt
         this->stepForward(Delta_t/2);
         T2_Dt += this->T;
-        //double totalErr(Field<REAL, 2>& f, REAL (*sol)(REAL, REAL, REAL), REAL (*err)(REAL, REAL), REAL t)
+
+        // I'm parsing through the field here but only really using the 'average method'...
         for(int i = 0; i < T0.size(0); i++){
           for(int j = 0; j < T0.size(1); j++){
             // set to true if error limit is surpassed, false otherwise
@@ -194,6 +204,20 @@ class ExplicitBase : public FDHS::FiniteDifferenceHeatSolver<REAL> {
       return Delta_t;
     }
 
+
+    /**
+     * A function to evolve this->T in time a total of Delta_t, in increments
+     * based on an optimized time step larger than some minimum
+     *
+     * @param Delta_t the desired time to 'move forward' in one step 
+     * @param t_min the minimum time step allowed to increment by (0 by default)
+     * */
+    REAL moveForward(REAL Delta_t, REAL t_min=0.0){
+      assert(Delta_t > t_min);
+      REAL dt = this->findTimeStep(Delta_t, t_min);
+      stepForward(Delta_t, dt); 
+    }
+
     int get_rdims(){
       return this->rN;
     }
@@ -211,12 +235,12 @@ class ExplicitBase : public FDHS::FiniteDifferenceHeatSolver<REAL> {
     }
 
     double randSampleErr(Field<REAL, 2>& T1, Field<REAL, 2>& T2, double (*err)(REAL, REAL), int n){
+      assert(T1.size(0) == T2.size(0));
+      assert(T1.size(1) == T2.size(1));
       double e = 0;
       int zi, rj;
       int rMAX = T1.size(1);
       int zMAX = T1.size(0);
-      assert(T1.size(0) == T2.size(0));
-      assert(T1.size(1) == T2.size(1));
       for(int i = 0; i < n; i++){
         rj = rand() % rMAX;
         zi = rand() % zMAX;
@@ -226,11 +250,11 @@ class ExplicitBase : public FDHS::FiniteDifferenceHeatSolver<REAL> {
     }
 
     double avgErr(Field<REAL, 2>& T1, Field<REAL, 2>& T2, double (*err)(double, double)){
+      assert(T1.size(0) == T2.size(0));
+      assert(T1.size(1) == T2.size(1));
       double e = 0;
       int rMAX = T1.size(1);
       int zMAX = T1.size(0);
-      assert(T1.size(0) == T2.size(0));
-      assert(T1.size(1) == T2.size(1));
       for(int i = 0; i < zMAX; i++){
         for(int j = 0; j < rMAX; j++){
           e += err(T1[i][j], T2[i][j]);
@@ -241,11 +265,11 @@ class ExplicitBase : public FDHS::FiniteDifferenceHeatSolver<REAL> {
     }
 
     double totalErr(Field<REAL, 2>& T1, Field<REAL, 2>& T2, double (*err)(double, double)){
+      assert(T1.size(0) == T2.size(0));
+      assert(T1.size(1) == T2.size(1));
       double e = 0;
       int rMAX = T1.size(1);
       int zMAX = T1.size(0);
-      assert(T1.size(0) == T2.size(0));
-      assert(T1.size(1) == T2.size(1));
       for(int i = 0; i < zMAX; i++){
         for(int j = 0; j < rMAX; j++){
           e += err(T1[i][j], T2[i][j]);
