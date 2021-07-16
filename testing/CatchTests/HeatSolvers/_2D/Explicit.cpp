@@ -434,13 +434,13 @@ TEST_CASE("Auto Adaptive Time Step","[heatsolver][validation]"){
 
   NonUniformExplicit<double> NU_HeatSolver(zN,rN);
   UniformExplicit<double> U_HeatSolver(200,100);
-  Field<double, 2> Aplot(zN,rN);
-  Field<double, 2> Bplot(zN,rN);
+  Field<double, 2> NU_Analytic(zN,rN);
+  Field<double, 2> U_Analytic(zN,rN);
 
   NU_HeatSolver.T.setCoordinateSystem( Geometric(0., dL, z_s), Geometric(0., dR, r_s) );
   U_HeatSolver.T.setCoordinateSystem( Uniform(0., L), Uniform(0., R) );
-  Aplot.setCoordinateSystem( Geometric(0., dL, z_s), Geometric(0., dR, r_s) );
-  Bplot.setCoordinateSystem( Geometric(0., dL, z_s), Geometric(0., dR, r_s) );
+  NU_Analytic.setCoordinateSystem( Geometric(0., dL, z_s), Geometric(0., dR, r_s) );
+  U_Analytic.setCoordinateSystem( Uniform(0., L), Uniform(0., R) );
 
 
   NU_HeatSolver.A.set(0.0);
@@ -459,9 +459,9 @@ TEST_CASE("Auto Adaptive Time Step","[heatsolver][validation]"){
 
   SECTION("Algorithm Convergence")
   {
-    double NUdt = 100;
-    double Udt = 100;
-    int t_f = 10;
+    double NUdt = 100.;
+    double Udt = 100.;
+    double t_f = 10.;
 
     auto solution = [&](double z, double r, double t)
     {
@@ -474,7 +474,8 @@ TEST_CASE("Auto Adaptive Time Step","[heatsolver][validation]"){
 
     NU_HeatSolver.T.set_f([&](auto x) { return solution(x[0],x[1],0); });
     U_HeatSolver.T.set_f([&](auto x) { return solution(x[0],x[1],0); });
-    Aplot.set_f([&](auto x) { return solution(x[0],x[1],t_f); });
+    NU_Analytic.set_f([&](auto x) { return solution(x[0],x[1],t_f); });
+    U_Analytic.set_f([&](auto x) { return solution(x[0],x[1],t_f); });
 
     NUdt = NU_HeatSolver.findTimeStep(NUdt, 0.0, 0.01);
     std::cout << "NonUniform Time Step: " << NUdt << "\n";
@@ -482,36 +483,57 @@ TEST_CASE("Auto Adaptive Time Step","[heatsolver][validation]"){
     Udt = U_HeatSolver.findTimeStep(Udt, 0.0, 0.01);
     std::cout << "Uniform Time Step: " << Udt << "\n";
 
+    double U_err = 0;
+    double NU_err = 0;
+    for(int i = 0; i < U_Analytic.size(0); i++){
+      for(int j = 0; j < U_Analytic.size(1); j++){
+        if(U_HeatSolver.T[i][j] + U_Analytic[i][j] == 0){
+          if(U_HeatSolver.T[i][j] + U_Analytic[i][j] == U_HeatSolver.T[i][j] - U_Analytic[i][j]){
+            continue;
+          } else{
+            U_err += U_HeatSolver.T[i][j];
+          }
+        } else{
+        U_err += (U_HeatSolver.T[i][j] - U_Analytic[i][j]) / (U_HeatSolver.T[i][j] + U_Analytic[i][j]); 
+        }
+      }
+    }
+    U_err /= U_Analytic.size(0) * U_Analytic.size(1);
+
+    for(int i = 0; i < NU_Analytic.size(0); i++){
+      for(int j = 0; j < NU_Analytic.size(1); j++){
+        std::cout << "es numero es cero?" << (NU_HeatSolver.T[i][j] + NU_Analytic[i][j]) << "\n";
+        if(NU_HeatSolver.T[i][j] + NU_Analytic[i][j] == 0){
+          if(NU_HeatSolver.T[i][j] + NU_Analytic[i][j] == NU_HeatSolver.T[i][j] - NU_Analytic[i][j]){
+            continue;
+          } else{
+            NU_err += NU_HeatSolver.T[i][j];
+          }
+        } else{
+        NU_err += (NU_HeatSolver.T[i][j] - NU_Analytic[i][j]) / (NU_HeatSolver.T[i][j] + NU_Analytic[i][j]); 
+        }
+      }
+    }
+    NU_err /= NU_Analytic.size(0) * NU_Analytic.size(1);
+
+    std::cout << "Uniform Error:" << U_err << "\n";
+    std::cout << "NonUniform Error:" << NU_err << "\n";
+
     //moveForward in time using an adaptive timestep
-    NU_HeatSolver.moveForward(10, 0.0, 0.01);
+    NU_HeatSolver.moveForward(10., 0.0, 0.01);
     {
       ofstream output;
       output.open("NU_HeatSolACTS.txt");
       output << NU_HeatSolver.T;
       output.close();
     }
-    U_HeatSolver.moveForward(10, 0.0, 0.01);
+    U_HeatSolver.moveForward(10., 0.0, 0.01);
     {
       ofstream output;
       output.open("U_HeatSolACTS.txt");
       output << U_HeatSolver.T;
       output.close();
     }
-    /* size difference doesn't allow, should find some way to quantify error
-     * use libInterpolate 2D... find out or write new constructor. Pull request maybe
-    Aplot.set(0);
-    Bplot.set(0);
-    Aplot += U_HeatSolver.T;
-    Aplot -= NU_HeatSolver.T;
-    Bplot += NU_HeatSolver.T;
-    Bplot += U_HeatSolver.T;
-    Aplot /= Bplot; 
-    {
-      ofstream output;
-      output.open("UvNU_percDiff.txt");
-      output << Aplot;
-      output.close();
-    }
-    */
+
   }
 }
