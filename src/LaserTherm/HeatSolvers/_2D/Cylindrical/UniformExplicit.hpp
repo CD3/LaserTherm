@@ -24,9 +24,7 @@ class UniformExplicit : public ExplicitBase<UniformExplicit<REAL>, REAL> {
     UniformExplicit(){
       // Default constructor to be safe
     }
-    // ----------------- PUBLIC MEMBER VARIABLES -------------------
-    // ---------------- PROTECTED MEMBER VARIABLES  ----------------
-    // --------------------- PROTECTED METHODS ---------------------
+
     // get forward r spacing (backwards at rmax)
     REAL get_dr(int i, int j){
       REAL dr;
@@ -198,6 +196,4 @@ class UniformExplicit : public ExplicitBase<UniformExplicit<REAL>, REAL> {
 
   protected:
   private:
-    // ---------------------- PUBLIC METHODS -----------------------
-    // ----------------- PRIVATE MEMBER VARIABLES  -----------------
 };

@@ -194,7 +194,7 @@ class ExplicitBase : public FDHS::FiniteDifferenceHeatSolver<REAL> {
           Delta_t /= 2;
           // Pt. 1
         }
-/*
+        /*
         for(int i = 0; i < T0.size(0); i++){
           for(int j = 0; j < T0.size(1); j++){
             // set to true if error limit is surpassed, false otherwise
@@ -215,7 +215,7 @@ class ExplicitBase : public FDHS::FiniteDifferenceHeatSolver<REAL> {
           // Pt. 2
           if(invalidNodeFound) { break; }
         }
-*/
+        */
       }
       // jump out once an invalid node is NOT found
       
