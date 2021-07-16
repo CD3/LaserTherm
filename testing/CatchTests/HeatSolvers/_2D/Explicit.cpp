@@ -502,7 +502,6 @@ TEST_CASE("Auto Adaptive Time Step","[heatsolver][validation]"){
 
     for(int i = 0; i < NU_Analytic.size(0); i++){
       for(int j = 0; j < NU_Analytic.size(1); j++){
-        std::cout << "es numero es cero?" << (NU_HeatSolver.T[i][j] + NU_Analytic[i][j]) << "\n";
         if(NU_HeatSolver.T[i][j] + NU_Analytic[i][j] == 0){
           if(NU_HeatSolver.T[i][j] + NU_Analytic[i][j] == NU_HeatSolver.T[i][j] - NU_Analytic[i][j]){
             continue;
