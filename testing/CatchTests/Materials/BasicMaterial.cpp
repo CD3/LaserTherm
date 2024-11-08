@@ -1,12 +1,14 @@
-#include "catch.hpp"
+#include <catch2/catch_approx.hpp>
+#include <catch2/catch_test_macros.hpp>
+#include <catch2/matchers/catch_matchers_string.hpp>
+using namespace Catch;
 
 #include <fstream>
 #include <iostream>
 
 #include <LaserTherm/Materials/Basic.hpp>
 
-TEST_CASE("Basic Material Tests")
-{
+TEST_CASE("Basic Material Tests") {
   Materials::Basic<double> mat1, mat2;
 
   mat1.setDensity(1);

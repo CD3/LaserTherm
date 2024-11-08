@@ -1,4 +1,7 @@
-#include "catch.hpp"
+#include <catch2/catch_approx.hpp>
+#include <catch2/catch_test_macros.hpp>
+#include <catch2/matchers/catch_matchers_string.hpp>
+using namespace Catch;
 
 #include <fstream>
 #include <iostream>
@@ -8,20 +11,16 @@
 #include <LaserTherm/MaterialStructure.hpp>
 #include <LaserTherm/Materials/Basic.hpp>
 #include <LaserTherm/Structures/_1D/AnyStructure.hpp>
-#include <LaserTherm/Structures/_1D/Infinite.hpp>
 #include <LaserTherm/Structures/_1D/Cartesian/Slab.hpp>
+#include <LaserTherm/Structures/_1D/Infinite.hpp>
 #include <libField/Field.hpp>
 
-TEST_CASE("Structures")
-{
-  SECTION("Slab")
-  {
+TEST_CASE("Structures") {
+  SECTION("Slab") {
     Structures::_1D::Cartesian::Slab<double> slab;
 
-    SECTION("1 surface")
-    {
-      SECTION("min surface")
-      {
+    SECTION("1 surface") {
+      SECTION("min surface") {
         slab.setMinSurfacePosition(1.0);
 
         CHECK(!slab.isInside(0));
@@ -36,8 +35,7 @@ TEST_CASE("Structures")
         CHECK(slab.isInside(1.99));
         CHECK(slab.isInside(2.01));
       }
-      SECTION("max surface")
-      {
+      SECTION("max surface") {
         slab.setMaxSurfacePosition(1.0);
 
         CHECK(slab.isInside(0));
@@ -54,8 +52,7 @@ TEST_CASE("Structures")
       }
     }
 
-    SECTION("2 surface")
-    {
+    SECTION("2 surface") {
       slab.setMinSurfacePosition(1.0);
       slab.setMaxSurfacePosition(2.0);
 
@@ -75,8 +72,7 @@ TEST_CASE("Structures")
     Field<double, 1> field(10);
     field.setCoordinateSystem(Uniform(0., 5.));
   }
-  SECTION("Infinite")
-  {
+  SECTION("Infinite") {
     Structures::_1D::Infinite<double> structure;
 
     CHECK(structure.isInside(-100));
@@ -85,10 +81,9 @@ TEST_CASE("Structures")
     CHECK(structure.isInside(1));
     CHECK(structure.isInside(100));
   }
-  SECTION("AnyStructure")
-  {
+  SECTION("AnyStructure") {
     Structures::_1D::AnyStructure<double> structure;
-    Structures::_1D::Cartesian::Slab<double>         slab;
+    Structures::_1D::Cartesian::Slab<double> slab;
     slab.setMinSurfacePosition(0);
     slab.setThickness(1.5);
     structure = slab;
@@ -111,9 +106,9 @@ TEST_CASE("Structures")
   }
 }
 
-TEST_CASE("Material Structure")
-{
-  MaterialStructure<Materials::Basic<double>, Structures::_1D::Cartesian::Slab<double> >
+TEST_CASE("Material Structure") {
+  MaterialStructure<Materials::Basic<double>,
+                    Structures::_1D::Cartesian::Slab<double>>
       obj;
 
   obj.structure.setMinSurfacePosition(1.0);
@@ -152,10 +147,9 @@ TEST_CASE("Material Structure")
   CHECK(f(20) == Approx(12));
   CHECK(f(21) == Approx(0));
 }
-TEST_CASE("Collection of Material Structures")
-{
-  using MaterialType          = Materials::Basic<double>;
-  using StructureType         = Structures::_1D::AnyStructure<double>;
+TEST_CASE("Collection of Material Structures") {
+  using MaterialType = Materials::Basic<double>;
+  using StructureType = Structures::_1D::AnyStructure<double>;
   using MaterialStructureType = MaterialStructure<MaterialType, StructureType>;
 
   std::vector<MaterialStructureType> structures;
@@ -186,7 +180,7 @@ TEST_CASE("Collection of Material Structures")
   rho.setCoordinateSystem(Uniform(-1, 9));
   Field<double, 1> k(rho.getCoordinateSystemPtr());
 
-  for (auto& s : structures) {
+  for (auto &s : structures) {
     rho.set_f([&s](auto x) -> std::optional<double> {
       if (s.structure.isInside(x[0]) && s.material.getDensity())
         return s.material.getDensity().value();
@@ -194,7 +188,7 @@ TEST_CASE("Collection of Material Structures")
     });
   }
 
-  for (auto& s : structures) {
+  for (auto &s : structures) {
     k.set_f([&s](auto x) -> std::optional<double> {
       if (s.structure.isInside(x[0]) && s.material.getThermalConductivity())
         return s.material.getThermalConductivity().value();

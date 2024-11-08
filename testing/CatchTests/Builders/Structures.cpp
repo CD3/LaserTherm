@@ -1,4 +1,7 @@
-#include "catch.hpp"
+#include <catch2/catch_approx.hpp>
+#include <catch2/catch_test_macros.hpp>
+#include <catch2/matchers/catch_matchers_string.hpp>
+using namespace Catch;
 
 #include <fstream>
 #include <iostream>
@@ -12,8 +15,7 @@
 #include <LaserTherm/Structures/_1D/AnyStructure.hpp>
 #include <libField/Field.hpp>
 
-TEST_CASE("Material Map Builder")
-{
+TEST_CASE("Material Map Builder") {
   boost::property_tree::ptree config;
 
   config.put("simulation.dimensions", 1);
@@ -37,7 +39,7 @@ TEST_CASE("Material Map Builder")
   config.put("layers.1.position", 0);
   config.put("layers.1.thickness", 10e-4);
 
-  std::map<std::string, Materials::Basic<double> > materials;
+  std::map<std::string, Materials::Basic<double>> materials;
   Builders::build(materials, config.get_child("materials"));
 
   CHECK(materials.size() == 2);
@@ -61,8 +63,7 @@ TEST_CASE("Material Map Builder")
   CHECK(materials["water"].getAbsorptionCoefficient().value() == Approx(10));
 }
 
-TEST_CASE("1D Structure Set Builder")
-{
+TEST_CASE("1D Structure Set Builder") {
   boost::property_tree::ptree config;
 
   config.put("simulation.dimensions", 1);
@@ -84,7 +85,7 @@ TEST_CASE("1D Structure Set Builder")
   config.put("layers.2.thickness", 0.3);
 
   std::vector<MaterialStructure<Materials::Basic<double>,
-                                Structures::_1D::AnyStructure<double> > >
+                                Structures::_1D::AnyStructure<double>>>
       structures;
 
   Builders::build(structures, config);
@@ -97,7 +98,7 @@ TEST_CASE("1D Structure Set Builder")
   // |  material
 
   f.set(0);
-  for (auto& s : structures) {
+  for (auto &s : structures) {
     f.set_f([&s](auto x) -> std::optional<double> {
       if (s.structure.isInside(x[0]) && s.material.getThermalConductivity())
         return s.material.getThermalConductivity().value();
@@ -121,7 +122,7 @@ TEST_CASE("1D Structure Set Builder")
   // position |   0 |  10 |  10 | 100 | 100 | 100 |   0 |   0 |   0 |   0 |   0
   // |  material
   f.set(0);
-  for (auto& s : structures) {
+  for (auto &s : structures) {
     f.set_f([&s](auto x) -> std::optional<double> {
       auto mua = s.material.getAbsorptionCoefficient();
       if (s.structure.isInside(x[0]) && s.material.getAbsorptionCoefficient())

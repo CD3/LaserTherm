@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.13)
+cmake_minimum_required(VERSION 3.20)
 
 project(LaserTherm)
 
@@ -6,7 +6,6 @@ set(CMAKE_CXX_STANDARD 17)
 
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH}
                       "${PROJECT_SOURCE_DIR}/cmake/Modules")
-include(${CMAKE_BINARY_DIR}/conan_paths.cmake OPTIONAL)
 
 include(externals/Plugins.cmake)
 
@@ -15,9 +14,6 @@ option(BUILD_UNIT_TESTS "Build unit tests for the library" ON)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH}
                       "${PROJECT_SOURCE_DIR}/cmake/Modules")
-set(INSTALL_PATH ${INSTALL_PATH}
-                 "${CMAKE_CURRENT_SOURCE_DIR}/externals/install/")
-include(${CMAKE_BINARY_DIR}/conan_paths.cmake OPTIONAL)
 
 include(function-git_version)
 git_version(LaserTherm)
@@ -29,23 +25,18 @@ configure_file("${CMAKE_CURRENT_SOURCE_DIR}/src/${PROJECT_NAME}/version.h.in"
 configure_file("${CMAKE_CURRENT_BINARY_DIR}/include/${PROJECT_NAME}/version.h"
                "${CMAKE_CURRENT_BINARY_DIR}/include/${PROJECT_NAME}/version.h")
 
-include(macro-find_project_dependency)
-
 # dependencies
 find_package(Boost REQUIRED)
 find_package(Eigen3 3.3 REQUIRED)
+find_package(libField REQUIRED)
+find_package(UnitConvert REQUIRED)
 find_package(OpenMP)
 
-find_project_dependency(libField REQUIRED SUBDIRECTORY_PATHS
-                        ${CMAKE_CURRENT_SOURCE_DIR}/externals)
-find_project_dependency(UnitConvert REQUIRED SUBDIRECTORY_PATHS
-                        ${CMAKE_CURRENT_SOURCE_DIR}/externals)
 
-string(REGEX REPLACE "^lib" "" LIB_NAME ${PROJECT_NAME})
-add_library(${LIB_NAME})
-add_library(${PROJECT_NAME}::${LIB_NAME} ALIAS ${LIB_NAME})
+add_library(LaserTherm)
+add_library(LaserTherm::LaserTherm ALIAS LaserTherm)
 target_sources(
-  ${LIB_NAME}
+  LaserTherm
   PUBLIC
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src/LaserTherm/library.cpp>
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src/LaserTherm/Configuration/ptree_utils.cpp>
@@ -83,18 +74,18 @@ target_sources(
 )
 
 target_include_directories(
-  ${LIB_NAME}
+  LaserTherm
   INTERFACE
     $<BUILD_INTERFACE:${${PROJECT_NAME}_SOURCE_DIR}/src>
     $<BUILD_INTERFACE:${${PROJECT_NAME}_BINARY_DIR}/include>
     $<INSTALL_INTERFACE:include>)
 target_link_libraries(
-  ${LIB_NAME}
+  LaserTherm
   INTERFACE Boost::boost Eigen3::Eigen libField::Field
     $<$<BOOL:OPENMP_CXX_FOUND>:OpenMP::OpenMP_CXX>
   PUBLIC UnitConvert::UnitConvert)
 
-target_compile_definitions(${LIB_NAME}
+target_compile_definitions(LaserTherm
                            PUBLIC UNITCONVERT_NO_BACKWARD_COMPATIBLE_NAMESPACE)
 
 if(${CMAKE_SOURCE_DIR} STREQUAL ${CMAKE_CURRENT_SOURCE_DIR}
@@ -105,7 +96,7 @@ endif()
 
 # Install and Packaging
 install(
-  TARGETS ${LIB_NAME}
+  TARGETS LaserTherm
   EXPORT ${PROJECT_NAME}Targets
   LIBRARY DESTINATION lib
   ARCHIVE DESTINATION lib

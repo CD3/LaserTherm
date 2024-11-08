@@ -1,14 +1,15 @@
-#include "catch.hpp"
+#include <catch2/catch_approx.hpp>
+#include <catch2/catch_test_macros.hpp>
+#include <catch2/matchers/catch_matchers_string.hpp>
+using namespace Catch;
 
 #include <fstream>
 #include <iostream>
 
 #include <LaserTherm/Waveforms/ContinuousWave.hpp>
 
-TEST_CASE("Waveform Classes")
-{
-  SECTION("CW")
-  {
+TEST_CASE("Waveform Classes") {
+  SECTION("CW") {
     Waveforms::ContinuousWave<double> exp;
 
     exp.setExposureDuration(10);

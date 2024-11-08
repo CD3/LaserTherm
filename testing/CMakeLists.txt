@@ -1,10 +1,6 @@
-cmake_minimum_required(VERSION 3.1)
+cmake_minimum_required(VERSION 3.20)
 
-set(binDir ${CMAKE_BINARY_DIR}/testBin)
-set(buildDir ${CMAKE_BINARY_DIR})
-
-add_library(Catch INTERFACE)
-target_include_directories(Catch INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/include)
+find_package(Catch2 REQUIRED)
 
 # Find all sources.
 file(
@@ -19,13 +15,12 @@ endforeach()
 set(testName ${PROJECT_NAME}_CatchTests)
 add_executable(${testName} ${unitTest_SOURCES})
 target_compile_definitions(${testName} PRIVATE -DTESTING)
-target_link_libraries(${testName} Catch LaserTherm)
+target_link_libraries(${testName} Catch2::Catch2WithMain LaserTherm)
 target_include_directories(${testName}
                            PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/include")
-set_target_properties(${testName} PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${binDir})
 set_target_properties(${testName} PROPERTIES CXX_STANDARD 17)
 
 add_test(
   NAME ${testName}
-  WORKING_DIRECTORY ${buildDir}
-  COMMAND ${binDir}/${testName})
+  WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
+  COMMAND ${CMAKE_CURRENT_BINARY_DIR}/${testName})

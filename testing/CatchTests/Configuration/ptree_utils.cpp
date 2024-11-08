@@ -1,4 +1,7 @@
-#include "catch.hpp"
+#include <catch2/catch_approx.hpp>
+#include <catch2/catch_test_macros.hpp>
+#include <catch2/matchers/catch_matchers_string.hpp>
+using namespace Catch;
 
 #include <iostream>
 
@@ -7,8 +10,7 @@
 
 #include <LaserTherm/Configuration/ptree_utils.hpp>
 
-TEST_CASE("Property Tree Unit Conversion")
-{
+TEST_CASE("Property Tree Unit Conversion") {
   UnitConvert::UnitRegistry ureg;
 
   ureg.addBaseUnit<UnitConvert::Dimension::Name::Length>("cm");
@@ -39,10 +41,8 @@ TEST_CASE("Property Tree Unit Conversion")
   /* boost::property_tree::write_xml(std::cout, config); */
 }
 
-TEST_CASE("Property Tree Utils")
-{
-  SECTION("Get all paths in tree")
-  {
+TEST_CASE("Property Tree Utils") {
+  SECTION("Get all paths in tree") {
     using path_type = boost::property_tree::ptree::path_type;
 
     boost::property_tree::ptree tree;
@@ -60,8 +60,7 @@ TEST_CASE("Property Tree Utils")
     CHECK(paths[5].dump() == "l1.0|l1.0");
   }
 
-  SECTION("Flatten tree")
-  {
+  SECTION("Flatten tree") {
     boost::property_tree::ptree tree;
     tree.put("a1.b1.c1", "111");
     tree.put("a1.b1.c2", "112");
@@ -70,10 +69,9 @@ TEST_CASE("Property Tree Utils")
     tree.put("a3.b1.c1", "311");
     tree.put(boost::property_tree::ptree::path_type("a4|b1.1", '|'), "41.1");
 
-    SECTION("Unique Delimiter Char")
-    {
+    SECTION("Unique Delimiter Char") {
       using path_t = boost::property_tree::ptree::path_type;
-      auto ftree   = flatten_ptree(tree, '|');
+      auto ftree = flatten_ptree(tree, '|');
       CHECK(tree.size() == 4);
       CHECK(ftree.size() == 6);
       CHECK(tree.get_child("a1.b1.c1").data() ==
@@ -89,17 +87,16 @@ TEST_CASE("Property Tree Utils")
     }
   }
 
-  SECTION("Un-flatten tree")
-  {
+  SECTION("Un-flatten tree") {
     boost::property_tree::ptree ftree;
     ftree.put("a1|b1|c1", "111");
     ftree.put("a1|b1|c2", "112");
     ftree.put("a2|b1", "21");
     ftree.put("a3|b1", "31");
-    ftree.put("a3|b1.c1", "311");  // a two-level node
+    ftree.put("a3|b1.c1", "311"); // a two-level node
 
     using path_t = boost::property_tree::ptree::path_type;
-    auto tree    = unflatten_ptree(ftree, '|');
+    auto tree = unflatten_ptree(ftree, '|');
     CHECK(ftree.size() == 4);
     CHECK(tree.size() == 3);
     CHECK(tree.get_child("a1.b1.c1").data() ==
@@ -108,8 +105,7 @@ TEST_CASE("Property Tree Utils")
           ftree.get_child("a3|b1.c1").data());
   }
 
-  SECTION("Custom Integer Translator")
-  {
+  SECTION("Custom Integer Translator") {
     boost::property_tree::ptree tree;
     tree.put("x", "1");
     tree.put("y", "1.0");
