@@ -2,7 +2,6 @@
 #include "../../BoundaryConditions.hpp"
 #include "./FiniteDifferenceHeatSolver.hpp"
 #include <cmath>
-#include <exception>
 #include <libField/Field.hpp>
 #include <stdexcept>
 
@@ -12,9 +11,7 @@ namespace FDHS = HeatSolvers::_2D::Cylindrical;
 template <class IMP, class REAL>
 class ExplicitBase : public FDHS::FiniteDifferenceHeatSolver<REAL> {
 public:
-  // -------------------- PUBLIC CONSTRUCTORS --------------------
-  // Constructors must be defined in derived classes
-  // ---------------------- PUBLIC METHODS -----------------------
+  // NOTE: Constructors must be defined in derived classes
   void stepForward(REAL delta_t) {
     REAL T1, T2, T3, T4, T5;
     REAL beta;
@@ -25,7 +22,7 @@ public:
         rMax = j == rN - 1;
         rMin = j == 0;
         zMax = i == zN - 1;
-        zMin = i == 0; // coefficient for calculations
+        zMin = i == 0;
         beta = delta_t / this->VHC[i][j];
         T1 = this->T[i][j] * static_cast<IMP *>(this)->A_n(i, j);
         if (rMin) {
@@ -266,12 +263,12 @@ protected:
   int zN;
 
 private:
-  static double percErr(REAL num, REAL correct) {
+  static auto percErr(REAL num, REAL correct) -> double {
     return abs((num - correct) / (num + correct));
   }
 
-  double randSampleErr(Field<REAL, 2> &T1, Field<REAL, 2> &T2,
-                       double (*err)(REAL, REAL), int n) {
+  auto randSampleErr(Field<REAL, 2> &T1, Field<REAL, 2> &T2,
+                       double (*err)(REAL, REAL), int n) -> double {
     assert(T1.size(0) == T2.size(0));
     assert(T1.size(1) == T2.size(1));
     double e = 0;
@@ -286,8 +283,8 @@ private:
     return e / n;
   }
 
-  double avgErr(Field<REAL, 2> &T1, Field<REAL, 2> &T2,
-                double (*err)(double, double)) {
+  auto avgErr(Field<REAL, 2> &T1, Field<REAL, 2> &T2,
+                double (*err)(double, double)) -> double {
     assert(T1.size(0) == T2.size(0));
     assert(T1.size(1) == T2.size(1));
     double e = 0;
