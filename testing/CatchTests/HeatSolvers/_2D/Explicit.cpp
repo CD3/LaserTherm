@@ -151,6 +151,8 @@ TEST_CASE("UniformExplicit 2D Cylindrical Heat Solver Validation",
     };
 
     HeatSolver.T.set_f([&](auto x) { return solution(x[0], x[1], 0); });
+    auto fout = std::ofstream("___out.txt");
+    fout << HeatSolver.T << std::endl;
     Aplot.set_f([&](auto x) { return solution(x[0], x[1], Nt * dt); });
 
     auto T_init = HeatSolver.T(zN / 2, rN / 2);
@@ -162,15 +164,13 @@ TEST_CASE("UniformExplicit 2D Cylindrical Heat Solver Validation",
     }
     auto T_final = HeatSolver.T(zN / 2, rN / 2);
 
-    /* CHECK(T_init > T_final); */
+    // temperature at this position starts out negative and will
+    // warm toward zero. so initial temperature should be lower than final
+    CHECK(T_init < T_final);
+    // absolute value of initial temp should be larger though.
+    CHECK(T_init * T_init > T_final * T_final);
 
-    vector<string> Name;
-    Name.push_back("center");
-    Name.push_back("rmax");
-    Name.push_back("zmax");
-    Name.push_back("zmin");
-    Name.push_back("r=0");
-
+    // spot-check that the solution is correct
     vector<std::pair<int, int>> Points;
     Points.push_back(std::make_pair<int, int>(zN / 2, rN / 2));
     Points.push_back(std::make_pair<int, int>(zN / 2, rN - 5));
@@ -178,51 +178,13 @@ TEST_CASE("UniformExplicit 2D Cylindrical Heat Solver Validation",
     Points.push_back(std::make_pair<int, int>(3, rN / 2));
     Points.push_back(std::make_pair<int, int>(zN / 2, 3));
 
-    for (int i = 0; i < Points.size(); i++) {
-      std::pair<int, int> temp = Points[i];
-      // std::cout << "Testing " << Name[i] << "\n";
-      CHECK(HeatSolver.T(temp.first, temp.second) ==
-            Approx(Aplot(temp.first + 1, temp.second + 1)).epsilon(0.01));
+    for (auto point : Points) {
+      CHECK(HeatSolver.T(point.first, point.second) ==
+            Approx(Aplot(point.first + 1, point.second + 1)).epsilon(0.01));
     }
   }
 
-  SECTION("Green's Function") {
-    // Remember: reset values of HeatSolver(/aplot)
-    auto solution = [&](double z, double r, double t) { return 0; };
-
-    double dt = 0.001;
-    int Nt = 100;
-
-    HeatSolver.T.set(0);
-    Aplot.set_f([&](auto x) { return solution(x[0], x[1], Nt * dt); });
-
-    HeatSolver.A[zN / 2][rN / 2] = 1;
-
-    for (int i = 0; i < Nt / 2; i++) {
-      HeatSolver.stepForward(dt);
-    }
-
-    vector<string> Name;
-    Name.push_back("center");
-    Name.push_back("rmax");
-    Name.push_back("zmax");
-    Name.push_back("zmin");
-    Name.push_back("r=0");
-
-    vector<std::pair<int, int>> Points;
-    Points.push_back(std::make_pair<int, int>(zN / 2, rN / 2));
-    Points.push_back(std::make_pair<int, int>(zN / 2, rN - 5));
-    Points.push_back(std::make_pair<int, int>(zN - 5, rN / 2));
-    Points.push_back(std::make_pair<int, int>(3, rN / 2));
-    Points.push_back(std::make_pair<int, int>(zN / 2, 3));
-
-    for (int i = 0; i < Points.size(); i++) {
-      std::pair<int, int> temp = Points[i];
-      // std::cout << "Testing " << Name[i] << "\n";
-      // CHECK( HeatSolver.T(temp.first, temp.second) ==
-      // Approx(Aplot(temp.first+1, temp.second+1)).epsilon(0.01));
-    }
-  }
+  SECTION("Green's Function") {}
 }
 
 TEST_CASE("NonUniformExplicit 2D Cylindrical Heat Solver Validation",
@@ -366,43 +328,7 @@ TEST_CASE("NonUniformExplicit 2D Cylindrical Heat Solver Validation",
     }
   }
 
-  SECTION("Green's Function") {
-    // Remember: reset values of HeatSolver(/aplot)
-    auto solution = [&](double z, double r, double t) { return 0; };
-
-    double dt = 0.001;
-    int Nt = 100;
-
-    HeatSolver.T.set(0);
-    Aplot.set_f([&](auto x) { return solution(x[0], x[1], Nt * dt); });
-
-    HeatSolver.A[zN / 2][rN / 2] = 1;
-
-    for (int i = 0; i < Nt / 2; i++) {
-      HeatSolver.stepForward(dt);
-    }
-
-    vector<string> Name;
-    Name.push_back("center");
-    Name.push_back("rmax");
-    Name.push_back("zmax");
-    Name.push_back("zmin");
-    Name.push_back("r=0");
-
-    vector<std::pair<int, int>> Points;
-    Points.push_back(std::make_pair<int, int>(zN / 2, rN / 2));
-    Points.push_back(std::make_pair<int, int>(zN / 2, rN - 5));
-    Points.push_back(std::make_pair<int, int>(zN - 5, rN / 2));
-    Points.push_back(std::make_pair<int, int>(3, rN / 2));
-    Points.push_back(std::make_pair<int, int>(zN / 2, 3));
-
-    for (int i = 0; i < Points.size(); i++) {
-      std::pair<int, int> temp = Points[i];
-      // std::cout << "Testing " << Name[i] << "\n";
-      // CHECK( HeatSolver.T(temp.first, temp.second) ==
-      // Approx(Aplot(temp.first+1, temp.second+1)).epsilon(0.01));
-    }
-  }
+  SECTION("Green's Function") {}
 }
 
 TEST_CASE("Auto Adaptive Time Step", "[heatsolver][validation]") {
