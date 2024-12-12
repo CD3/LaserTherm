@@ -11,7 +11,8 @@ using namespace Catch::Matchers;
 
 #include <LaserTherm/Configuration/Manager.hpp>
 
-TEST_CASE("Configuration Manager", "[configuration]") {
+TEST_CASE("Configuration Manager", "[configuration]")
+{
   std::string config_text = R"(
   simulation.dimensions = 1
   simulation.grid.x.min = 0
@@ -24,19 +25,22 @@ TEST_CASE("Configuration Manager", "[configuration]") {
   )";
 
   Configuration::Manager config;
-  std::ofstream out("config-test.ini");
+  std::ofstream          out("config-test.ini");
   out << config_text;
   out.close();
 
-  SECTION("Loading") {
-    SECTION("from INI file") {
+  SECTION("Loading")
+  {
+    SECTION("from INI file")
+    {
       config.load("config-test.ini");
 
       CHECK(config.configuration.size() == 3);
     }
   }
 
-  SECTION("Element Access") {
+  SECTION("Element Access")
+  {
     config.unit_registry.addBaseUnit<UnitConvert::Dimension::Name::Length>(
         "cm");
     config.unit_registry.addBaseUnit<UnitConvert::Dimension::Name::Mass>("g");
@@ -62,7 +66,8 @@ TEST_CASE("Configuration Manager", "[configuration]") {
     CHECK(config.configuration.get<std::string>("simulation.dimensions") ==
           "1");
 
-    SECTION("Access Errors") {
+    SECTION("Access Errors")
+    {
       CHECK_THROWS_WITH(config.get<std::string>("missing"),
                         StartsWith("A parameter named 'missing'"));
       CHECK_THROWS_WITH(config.get<double>("simulation.grid.x.max"),
@@ -83,7 +88,8 @@ TEST_CASE("Configuration Manager", "[configuration]") {
     CHECK(config.get_quantity<double>("simulation.grid.x.max", "m") ==
           Approx(0.05));
 
-    SECTION("With Root Node") {
+    SECTION("With Root Node")
+    {
       config.root = Configuration::Manager::path_t("layers.0");
 
       CHECK_THROWS_WITH(config.get<std::string>("missing"),
@@ -92,7 +98,8 @@ TEST_CASE("Configuration Manager", "[configuration]") {
       CHECK(config.get_quantity<double>("thickness", "cm") == Approx(0.5));
     }
 
-    SECTION("Query Element Existence") {
+    SECTION("Query Element Existence")
+    {
       CHECK(config.has("simulation"));
       CHECK(config.has("layers.0"));
       CHECK(config.has("layers.0.material"));
@@ -105,7 +112,8 @@ TEST_CASE("Configuration Manager", "[configuration]") {
     }
   }
 
-  SECTION("Unit Support") {
+  SECTION("Unit Support")
+  {
     config.set_default_unit("simulation.grid.x.min", "cm");
 
     auto u = config.get_default_unit_optional("simulation.grid.x.min");

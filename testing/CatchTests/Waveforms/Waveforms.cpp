@@ -8,8 +8,10 @@ using namespace Catch;
 
 #include <LaserTherm/Waveforms/ContinuousWave.hpp>
 
-TEST_CASE("Waveform Classes") {
-  SECTION("CW") {
+TEST_CASE("Waveform Classes")
+{
+  SECTION("CW")
+  {
     Waveforms::ContinuousWave<double> exp;
 
     exp.setExposureDuration(10);

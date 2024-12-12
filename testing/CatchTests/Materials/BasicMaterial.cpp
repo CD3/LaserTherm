@@ -8,7 +8,8 @@ using namespace Catch;
 
 #include <LaserTherm/Materials/Basic.hpp>
 
-TEST_CASE("Basic Material Tests") {
+TEST_CASE("Basic Material Tests")
+{
   Materials::Basic<double> mat1, mat2;
 
   mat1.setDensity(1);

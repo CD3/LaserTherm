@@ -8,10 +8,15 @@ using namespace Catch;
 
 #include <LaserTherm/HeatSolvers/_1D/Cartesian/CrankNicholson.hpp>
 
-template <typename T> void nop(T &a) {}
+template<typename T>
+void nop(T &a)
+{
+}
 
-TEST_CASE("Heat Solver Construction and Setup", "[.][heatsolver]") {
-  SECTION("Crank-Nicholson") {
+TEST_CASE("Heat Solver Construction and Setup", "[.][heatsolver]")
+{
+  SECTION("Crank-Nicholson")
+  {
     HeatSolvers::_1D::Cartesian::CrankNicholson<double> HeatSolver(11);
     HeatSolver.T.setCoordinateSystem(Uniform(-2, 2));
 
@@ -52,21 +57,20 @@ TEST_CASE("Heat Solver Construction and Setup", "[.][heatsolver]") {
   }
 }
 
-TEST_CASE("Heat Solver Signals", "[heatsolver]") {
-  SECTION("Crank-Nicholson") {
+TEST_CASE("Heat Solver Signals", "[heatsolver]")
+{
+  SECTION("Crank-Nicholson")
+  {
     HeatSolvers::_1D::Cartesian::CrankNicholson<double> HeatSolver(10);
 
     HeatSolver.sig_askSourceTerm.connect([](auto &f, const auto &t) {
       f.set(2);
 
-      if (t > 10)
-        f.set(10);
+      if (t > 10) f.set(10);
 
-      if (t > 20)
-        f.set(20);
+      if (t > 20) f.set(20);
 
-      if (t < 0.5)
-        f.set(1);
+      if (t < 0.5) f.set(1);
     });
 
     HeatSolver.sig_askSourceTerm(HeatSolver.A, 11);
@@ -96,13 +100,13 @@ TEST_CASE("Heat Solver Signals", "[heatsolver]") {
     HeatSolver.sig_askMinBoundaryCondition.connect(
         [](auto &BC, const auto &T, const auto &t) {
           BC.type = HeatSolvers::BoundaryConditions::Type::Temperature;
-          BC.f = 10;
+          BC.f    = 10;
         });
 
     HeatSolver.sig_askMaxBoundaryCondition.connect(
         [](auto &BC, const auto &T, const auto &t) {
           BC.type = HeatSolvers::BoundaryConditions::Type::HeatFlux;
-          BC.f = 20;
+          BC.f    = 20;
           BC.dfdT = 2;
         });
 
@@ -128,31 +132,32 @@ TEST_CASE("Heat Solver Signals", "[heatsolver]") {
   }
 }
 
-TEST_CASE("1D Cartesian Heat Solver Validation",
-          "[.][heatsolver][validation]") {
+TEST_CASE("1D Cartesian Heat Solver Validation", "[.][heatsolver][validation]")
+{
   // see ./doc/writups/Validation/AnalyticalSolutions/AnalyticalSolutions.pdf
   // for a derivation of these tests
 
   int N = 600;
 
-  double L = 3.0;
+  double L    = 3.0;
   double xmin = 0;
   double xmax = L;
-  double dx = (xmax - xmin) / (N - 1);
+  double dx   = (xmax - xmin) / (N - 1);
 
   double rho = 1.0;
-  double c = 4.1868;
-  double k = 0.00628;
+  double c   = 4.1868;
+  double k   = 0.00628;
 
-  int Nt = 1000;
-  double dt = 0.1;
-  double Tmax = Nt * dt;
-  int m = 2;
+  int    Nt     = 1000;
+  double dt     = 0.1;
+  double Tmax   = Nt * dt;
+  int    m      = 2;
   double lambda = m * M_PI / L;
-  double alpha = k * pow(lambda, 2) / (rho * c); // decay rate for the mode
-  double beta = 5;
+  double alpha  = k * pow(lambda, 2) / (rho * c);  // decay rate for the mode
+  double beta   = 5;
 
-  SECTION("Crank-Nicholson Solver") {
+  SECTION("Crank-Nicholson Solver")
+  {
     HeatSolvers::_1D::Cartesian::CrankNicholson<double> HeatSolver(N);
 
     HeatSolver.T.setCoordinateSystem(Uniform(xmin, xmax));
@@ -161,8 +166,10 @@ TEST_CASE("1D Cartesian Heat Solver Validation",
 
     CHECK(HeatSolver.calcMaxTimeStep() == Approx(dx * rho * c / 2 / k));
 
-    SECTION("Without Source") {
-      SECTION("Sink Boundary Conditions") {
+    SECTION("Without Source")
+    {
+      SECTION("Sink Boundary Conditions")
+      {
         HeatSolver.T.set_f([&](auto i, auto cs) {
           auto x = cs->getCoord(i[0]);
           return sin(lambda * x);
@@ -181,12 +188,13 @@ TEST_CASE("1D Cartesian Heat Solver Validation",
         CHECK(HeatSolver.T(7 * N / 8) == Approx(sol(7 * N / 8)).epsilon(0.01));
       }
 
-      SECTION("Insulating Boundary Conditions") {
+      SECTION("Insulating Boundary Conditions")
+      {
         HeatSolver.minBC.type = HeatSolvers::BoundaryConditions::Type::HeatFlux;
         HeatSolver.maxBC.type = HeatSolvers::BoundaryConditions::Type::HeatFlux;
 
         for (int i = 0; i < N; ++i) {
-          double x = HeatSolver.T.getCoord(i);
+          double x        = HeatSolver.T.getCoord(i);
           HeatSolver.T(i) = cos(lambda * x);
         }
 
@@ -206,8 +214,10 @@ TEST_CASE("1D Cartesian Heat Solver Validation",
       }
     }
 
-    SECTION("With Source") {
-      SECTION("Sink Boundary Conditions") {
+    SECTION("With Source")
+    {
+      SECTION("Sink Boundary Conditions")
+      {
         HeatSolver.T.set(0.0);
 
         HeatSolver.A.set_f([&](auto i, auto cs) {
@@ -230,7 +240,8 @@ TEST_CASE("1D Cartesian Heat Solver Validation",
               Approx(sol(7 * N / 8, Nt)).epsilon(0.01));
       }
 
-      SECTION("Insulating Boundary Conditions") {
+      SECTION("Insulating Boundary Conditions")
+      {
         HeatSolver.minBC.type = HeatSolvers::BoundaryConditions::Type::HeatFlux;
         HeatSolver.maxBC.type = HeatSolvers::BoundaryConditions::Type::HeatFlux;
 
@@ -256,8 +267,10 @@ TEST_CASE("1D Cartesian Heat Solver Validation",
       }
     }
 
-    SECTION("Boundary Conditions") {
-      SECTION("Constant Temperature Boundaries") {
+    SECTION("Boundary Conditions")
+    {
+      SECTION("Constant Temperature Boundaries")
+      {
         HeatSolvers::BoundaryConditions::ConstantTemperature<double> min(-1);
         HeatSolvers::BoundaryConditions::ConstantTemperature<double> max(1);
 
@@ -279,10 +292,11 @@ TEST_CASE("1D Cartesian Heat Solver Validation",
         CHECK(HeatSolver.T(7 * N / 8) == Approx(sol(7 * N / 8)).epsilon(0.01));
       }
 
-      SECTION("Constant Heat Flux at Max Boundary") {
-        double Q = 0.01;
+      SECTION("Constant Heat Flux at Max Boundary")
+      {
+        double                                                       Q = 0.01;
         HeatSolvers::BoundaryConditions::ConstantTemperature<double> min(0);
-        HeatSolvers::BoundaryConditions::ConstantHeatFlux<double> max(-Q);
+        HeatSolvers::BoundaryConditions::ConstantHeatFlux<double>    max(-Q);
 
         min.setBoundaryCondition(HeatSolver.minBC);
         max.setBoundaryCondition(HeatSolver.maxBC);
@@ -300,9 +314,10 @@ TEST_CASE("1D Cartesian Heat Solver Validation",
         CHECK(HeatSolver.T(7 * N / 8) == Approx(sol(7 * N / 8)).epsilon(0.01));
       }
 
-      SECTION("Constant Heat Flux at Min Boundary") {
-        double Q = 0.01;
-        HeatSolvers::BoundaryConditions::ConstantHeatFlux<double> min(-Q);
+      SECTION("Constant Heat Flux at Min Boundary")
+      {
+        double                                                       Q = 0.01;
+        HeatSolvers::BoundaryConditions::ConstantHeatFlux<double>    min(-Q);
         HeatSolvers::BoundaryConditions::ConstantTemperature<double> max(0);
 
         min.setBoundaryCondition(HeatSolver.minBC);
@@ -321,9 +336,10 @@ TEST_CASE("1D Cartesian Heat Solver Validation",
         CHECK(HeatSolver.T(7 * N / 8) == Approx(sol(7 * N / 8)).epsilon(0.05));
       }
 
-      SECTION("Convective Heat Flux at Max Boundary") {
-        double Tinf = 10;
-        double he = 0.01;
+      SECTION("Convective Heat Flux at Max Boundary")
+      {
+        double                                                       Tinf = 10;
+        double                                                       he = 0.01;
         HeatSolvers::BoundaryConditions::ConstantTemperature<double> min(0);
         HeatSolvers::BoundaryConditions::Convective<double> max(Tinf, he);
 
@@ -350,9 +366,10 @@ TEST_CASE("1D Cartesian Heat Solver Validation",
         CHECK(HeatSolver.T(N - 1) == Approx(sol(N - 1)).epsilon(0.01));
       }
 
-      SECTION("Convective Heat Flux at Min Boundary") {
-        double Tinf = 10;
-        double he = 0.01;
+      SECTION("Convective Heat Flux at Min Boundary")
+      {
+        double                                                       Tinf = 10;
+        double                                                       he = 0.01;
         HeatSolvers::BoundaryConditions::ConstantTemperature<double> max(0);
         HeatSolvers::BoundaryConditions::Convective<double> min(Tinf, he);
 

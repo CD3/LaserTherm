@@ -48,6 +48,6 @@ void BeersLaw<REAL>::compute()
   }
 }
 
-}  // namespace HeatSources::_1D
+}  // namespace HeatSources::_1D::Cartesian
 
 #endif  // include protector

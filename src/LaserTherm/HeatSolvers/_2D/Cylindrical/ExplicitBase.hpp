@@ -1,18 +1,22 @@
 #pragma once
-#include "../../BoundaryConditions.hpp"
-#include "./FiniteDifferenceHeatSolver.hpp"
 #include <cmath>
-#include <libField/Field.hpp>
 #include <stdexcept>
 
-namespace BC = HeatSolvers::BoundaryConditions;
+#include <libField/Field.hpp>
+
+#include "../../BoundaryConditions.hpp"
+#include "./FiniteDifferenceHeatSolver.hpp"
+
+namespace BC   = HeatSolvers::BoundaryConditions;
 namespace FDHS = HeatSolvers::_2D::Cylindrical;
 
-template <class IMP, class REAL>
-class ExplicitBase : public FDHS::FiniteDifferenceHeatSolver<REAL> {
-public:
+template<class IMP, class REAL>
+class ExplicitBase : public FDHS::FiniteDifferenceHeatSolver<REAL>
+{
+ public:
   // NOTE: Constructors must be defined in derived classes
-  void stepForward(REAL delta_t) {
+  void stepForward(REAL delta_t)
+  {
     REAL T1, T2, T3, T4, T5;
     REAL beta;
     for (int i = 0; i < zN; i++) {
@@ -24,7 +28,7 @@ public:
         zMax = i == zN - 1;
         zMin = i == 0;
         beta = delta_t / this->VHC[i][j];
-        T1 = this->T[i][j] * static_cast<IMP *>(this)->A_n(i, j);
+        T1   = this->T[i][j] * static_cast<IMP *>(this)->A_n(i, j);
         if (rMin) {
           // r=0 case
           // overwrite T1
@@ -35,21 +39,21 @@ public:
         } else if (rMax) {
           // r = Rmax
           switch (this->maxRBC.type) {
-          case BC::Type::Temperature:
-            T2 = this->T[i][j - 1] * static_cast<IMP *>(this)->B_n(i, rN - 1);
-            T3 = this->maxRBC.f * static_cast<IMP *>(this)->C_n(i, rN - 1);
-            break;
-          case BC::Type::HeatFlux:
-            T2 = this->T[i][j - 1] * static_cast<IMP *>(this)->B_n(i, rN - 1);
-            T3 = (this->T[i][rN - 2] +
-                  static_cast<IMP *>(this)->get_dr(i, j) * this->maxRBC.f) *
-                 static_cast<IMP *>(this)->C_n(i, rN - 1);
-            break;
-          case BC::Type::None:
-            // do stuff for temp type
-            break;
-          default:
-            throw std::runtime_error(std::string("No BC Type!"));
+            case BC::Type::Temperature:
+              T2 = this->T[i][j - 1] * static_cast<IMP *>(this)->B_n(i, rN - 1);
+              T3 = this->maxRBC.f * static_cast<IMP *>(this)->C_n(i, rN - 1);
+              break;
+            case BC::Type::HeatFlux:
+              T2 = this->T[i][j - 1] * static_cast<IMP *>(this)->B_n(i, rN - 1);
+              T3 = (this->T[i][rN - 2] +
+                    static_cast<IMP *>(this)->get_dr(i, j) * this->maxRBC.f) *
+                   static_cast<IMP *>(this)->C_n(i, rN - 1);
+              break;
+            case BC::Type::None:
+              // do stuff for temp type
+              break;
+            default:
+              throw std::runtime_error(std::string("No BC Type!"));
           }
         } else {
           // if not on r boundary give 'normal T2 T3'
@@ -59,42 +63,42 @@ public:
         if (zMin) {
           // z = 0
           switch (this->minZBC.type) {
-          case BC::Type::Temperature:
-            // r = {0, rmax} caught by earlier ifs
-            T4 = this->minZBC.f * static_cast<IMP *>(this)->D_n(0, j);
-            T5 = this->T[1][j] * static_cast<IMP *>(this)->E_n(0, j);
-            break;
-          case BC::Type::HeatFlux:
-            T4 = (this->T[1][j] -
-                  static_cast<IMP *>(this)->get_dz(i, j) * this->minZBC.f) *
-                 static_cast<IMP *>(this)->D_n(0, j);
-            T5 = this->T[1][j] * static_cast<IMP *>(this)->E_n(0, j);
-            break;
-          case BC::Type::None:
-            // do stuff for temp type
-            break;
-          default:
-            throw std::runtime_error(std::string("No BC Type!"));
+            case BC::Type::Temperature:
+              // r = {0, rmax} caught by earlier ifs
+              T4 = this->minZBC.f * static_cast<IMP *>(this)->D_n(0, j);
+              T5 = this->T[1][j] * static_cast<IMP *>(this)->E_n(0, j);
+              break;
+            case BC::Type::HeatFlux:
+              T4 = (this->T[1][j] -
+                    static_cast<IMP *>(this)->get_dz(i, j) * this->minZBC.f) *
+                   static_cast<IMP *>(this)->D_n(0, j);
+              T5 = this->T[1][j] * static_cast<IMP *>(this)->E_n(0, j);
+              break;
+            case BC::Type::None:
+              // do stuff for temp type
+              break;
+            default:
+              throw std::runtime_error(std::string("No BC Type!"));
           }
         } else if (zMax) {
           // z = Zmax
           switch (this->maxZBC.type) {
-          case BC::Type::Temperature:
-            // r = {0, rmax} caught by earlier ifs
-            T4 = this->T[i - 1][j] * static_cast<IMP *>(this)->D_n(zN - 1, j);
-            T5 = this->maxZBC.f * static_cast<IMP *>(this)->E_n(zN - 1, j);
-            break;
-          case BC::Type::HeatFlux:
-            T4 = this->T[i - 1][j] * static_cast<IMP *>(this)->D_n(zN - 1, j);
-            T5 = (this->T[zN - 2][j] +
-                  static_cast<IMP *>(this)->get_dz(i, j) * this->maxZBC.f) *
-                 static_cast<IMP *>(this)->E_n(zN - 1, j);
-            break;
-          case BC::Type::None:
-            // do stuff for temp type
-            break;
-          default:
-            throw std::runtime_error(std::string("No BC Type!"));
+            case BC::Type::Temperature:
+              // r = {0, rmax} caught by earlier ifs
+              T4 = this->T[i - 1][j] * static_cast<IMP *>(this)->D_n(zN - 1, j);
+              T5 = this->maxZBC.f * static_cast<IMP *>(this)->E_n(zN - 1, j);
+              break;
+            case BC::Type::HeatFlux:
+              T4 = this->T[i - 1][j] * static_cast<IMP *>(this)->D_n(zN - 1, j);
+              T5 = (this->T[zN - 2][j] +
+                    static_cast<IMP *>(this)->get_dz(i, j) * this->maxZBC.f) *
+                   static_cast<IMP *>(this)->E_n(zN - 1, j);
+              break;
+            case BC::Type::None:
+              // do stuff for temp type
+              break;
+            default:
+              throw std::runtime_error(std::string("No BC Type!"));
           }
         } else {
           // if not on z boundary give 'normal T4 T5'
@@ -118,7 +122,8 @@ public:
    * @param delta_t the desired time to 'move forward' in one step
    * @param n the number of steps to take
    * */
-  void stepForward(REAL delta_t, int n) {
+  void stepForward(REAL delta_t, int n)
+  {
     for (int i = 0; i < n; i++) {
       this->stepForward(delta_t);
     }
@@ -131,7 +136,8 @@ public:
    * @param delta_t the total desired time to 'move forward' (non inclusive)
    * @param dt the increment taken to reach delta_t
    * */
-  void stepForward(REAL delta_t, REAL dt) {
+  void stepForward(REAL delta_t, REAL dt)
+  {
     assert(delta_t > dt);
     this->stepForward(dt, static_cast<int>(delta_t / dt));
   }
@@ -150,7 +156,8 @@ public:
    * T is convergent
    *
    * */
-  REAL findTimeStep(REAL Delta_t, REAL t_min = 0.0, REAL alpha = 0.01) {
+  REAL findTimeStep(REAL Delta_t, REAL t_min = 0.0, REAL alpha = 0.01)
+  {
     assert(t_min >= 0);
     assert(Delta_t > 0);
 
@@ -247,7 +254,8 @@ public:
    * @param alpha is the maximum perc. error allowed for a valid node, by
    * default 1%, 0.01
    * */
-  void moveForward(REAL Delta_t, REAL t_min = 0.0, REAL alpha = 0.01) {
+  void moveForward(REAL Delta_t, REAL t_min = 0.0, REAL alpha = 0.01)
+  {
     assert(Delta_t > t_min);
     REAL dt = this->findTimeStep(Delta_t, t_min, alpha);
     stepForward(Delta_t, dt);
@@ -257,24 +265,26 @@ public:
 
   int get_zdims() { return this->zN; }
 
-protected:
+ protected:
   Field<REAL, 2> T_prime;
-  int rN;
-  int zN;
+  int            rN;
+  int            zN;
 
-private:
-  static auto percErr(REAL num, REAL correct) -> double {
+ private:
+  static auto percErr(REAL num, REAL correct) -> double
+  {
     return abs((num - correct) / (num + correct));
   }
 
   auto randSampleErr(Field<REAL, 2> &T1, Field<REAL, 2> &T2,
-                       double (*err)(REAL, REAL), int n) -> double {
+                     double (*err)(REAL, REAL), int      n) -> double
+  {
     assert(T1.size(0) == T2.size(0));
     assert(T1.size(1) == T2.size(1));
     double e = 0;
-    int zi, rj;
-    int rMAX = T1.size(1);
-    int zMAX = T1.size(0);
+    int    zi, rj;
+    int    rMAX = T1.size(1);
+    int    zMAX = T1.size(0);
     for (int i = 0; i < n; i++) {
       rj = rand() % rMAX;
       zi = rand() % zMAX;
@@ -284,12 +294,13 @@ private:
   }
 
   auto avgErr(Field<REAL, 2> &T1, Field<REAL, 2> &T2,
-                double (*err)(double, double)) -> double {
+              double (*err)(double, double)) -> double
+  {
     assert(T1.size(0) == T2.size(0));
     assert(T1.size(1) == T2.size(1));
-    double e = 0;
-    int rMAX = T1.size(1);
-    int zMAX = T1.size(0);
+    double e    = 0;
+    int    rMAX = T1.size(1);
+    int    zMAX = T1.size(0);
     for (int i = 0; i < zMAX; i++) {
       for (int j = 0; j < rMAX; j++) {
         e += err(T1[i][j], T2[i][j]);
@@ -300,12 +311,13 @@ private:
   }
 
   double totalErr(Field<REAL, 2> &T1, Field<REAL, 2> &T2,
-                  double (*err)(double, double)) {
+                  double (*err)(double, double))
+  {
     assert(T1.size(0) == T2.size(0));
     assert(T1.size(1) == T2.size(1));
-    double e = 0;
-    int rMAX = T1.size(1);
-    int zMAX = T1.size(0);
+    double e    = 0;
+    int    rMAX = T1.size(1);
+    int    zMAX = T1.size(0);
     for (int i = 0; i < zMAX; i++) {
       for (int j = 0; j < rMAX; j++) {
         e += err(T1[i][j], T2[i][j]);

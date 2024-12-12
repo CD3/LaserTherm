@@ -20,8 +20,8 @@
 #include "../Materials/Basic.hpp"
 #include "../Simulations/SingleEmitterExposure.hpp"
 #include "../Structures/_1D/AnyStructure.hpp"
-#include "../Structures/_1D/Infinite.hpp"
 #include "../Structures/_1D/Cartesian/Slab.hpp"
+#include "../Structures/_1D/Infinite.hpp"
 #include "../Waveforms/ContinuousWave.hpp"
 
 namespace Builders

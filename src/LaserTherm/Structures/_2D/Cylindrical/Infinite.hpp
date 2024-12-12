@@ -14,7 +14,6 @@ class Infinite
   bool isInside(REAL r, REAL z) { return true; }
 };
 
-}  // namespace Structures::_1D
+}  // namespace Structures::_2D::Cylindrical
 
 #endif  // include protector
-

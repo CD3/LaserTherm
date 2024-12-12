@@ -54,5 +54,4 @@ class Slab
   }
 };
 
-}  // namespace Structures::_1D
-
+}  // namespace Structures::_1D::Cartesian

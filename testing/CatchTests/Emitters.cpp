@@ -13,8 +13,10 @@ using namespace Catch;
 #include <LaserTherm/Waveforms/SinglePulse.hpp>
 #include <libField/Field.hpp>
 
-TEST_CASE("Linear Absorption Emitter") {
-  SECTION("CW Exposure") {
+TEST_CASE("Linear Absorption Emitter")
+{
+  SECTION("CW Exposure")
+  {
     Emitters::Basic<HeatSources::_1D::Cartesian::BeersLaw<double>,
                     Waveforms::ContinuousWave<double>>
         emitter(11);
@@ -53,7 +55,8 @@ TEST_CASE("Linear Absorption Emitter") {
     CHECK(A(10) == Approx(40 * exp(-20)));
   }
 
-  SECTION("Multi-Pulse Exposure") {
+  SECTION("Multi-Pulse Exposure")
+  {
     Emitters::Basic<HeatSources::_1D::Cartesian::BeersLaw<double>,
                     Waveforms::RegularPulseTrain<double>>
         emitter(11);

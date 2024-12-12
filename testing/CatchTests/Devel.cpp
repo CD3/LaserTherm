@@ -10,7 +10,8 @@ using namespace Catch;
 
 #include <UnitConvert.hpp>
 
-TEST_CASE("General", "[devel]") {
+TEST_CASE("General", "[devel]")
+{
   UnitConvert::UnitRegistry ureg;
 
   ureg.addBaseUnit<UnitConvert::Dimension::Name::Length>("cm");

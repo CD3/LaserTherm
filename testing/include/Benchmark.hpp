@@ -99,7 +99,7 @@ class Measurement
     //
     T diff = abs(this->m_nominal - other.m_nominal);
     T unc  = sqrt(this->m_uncertainty * this->m_uncertainty +
-                 other.m_uncertainty * other.m_uncertainty);
+                  other.m_uncertainty * other.m_uncertainty);
 
     // don't want to inadvertently divide by zero.
     return diff <= 2 * unc;

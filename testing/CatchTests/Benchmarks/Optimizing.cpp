@@ -12,11 +12,12 @@ using namespace Catch;
 #include <LaserTherm/HeatSolvers/_1D/Cartesian/CrankNicholson.hpp>
 #include <LaserTherm/HeatSolvers/_2D/Cylindrical/UniformExplicit.hpp>
 
-TEST_CASE("CrankNicholson Heat Solver Optimizations", "[.][benchmarks]") {
+TEST_CASE("CrankNicholson Heat Solver Optimizations", "[.][benchmarks]")
+{
   // this test case is for benchmarking the crank-nicholson
   // heat solver and comparing them
   BM::PerformanceBenchmark bm("reduce-copies");
-  BM::Benchmark meter;
+  BM::Benchmark            meter;
 
   HeatSolvers::_1D::Cartesian::CrankNicholson<double> HeatSolver(1000);
   HeatSolver.T.setCoordinateSystem(Uniform(-5, 5));
@@ -39,26 +40,27 @@ TEST_CASE("CrankNicholson Heat Solver Optimizations", "[.][benchmarks]") {
 }
 
 TEST_CASE("2D Cylindrical Explicit Heat Solver Optimizations",
-          "[.][benchmarks]") {
+          "[.][benchmarks]")
+{
   // this test case is for benchmarking the crank-nicholson
   // heat solver and comparing them
   BM::PerformanceBenchmark bm("2d-cyl-exp-stepforward");
-  BM::Benchmark meter;
+  BM::Benchmark            meter;
 
-  double R = 2;
-  double L = 4;
-  int rN = 141;
-  int zN = 282;
-  double dR = R / rN;
-  double dL = L / zN;
+  double                  R  = 2;
+  double                  L  = 4;
+  int                     rN = 141;
+  int                     zN = 282;
+  double                  dR = R / rN;
+  double                  dL = L / zN;
   UniformExplicit<double> HeatSolver(zN - 2, rN - 2);
-  Field<double, 2> Aplot(zN, rN);
+  Field<double, 2>        Aplot(zN, rN);
   HeatSolver.T.setCoordinateSystem(Uniform(dL, L - dL), Uniform(dR, R - dR));
   Aplot.setCoordinateSystem(Uniform(0., L), Uniform(0., R));
 
-  double k = 0.5;    // W/m/K
-  double rho = 1000; // kg/m^3
-  double c = 4.18;   // J/kg/K
+  double k   = 0.5;   // W/m/K
+  double rho = 1000;  // kg/m^3
+  double c   = 4.18;  // J/kg/K
   HeatSolver.A.set(0.0);
   HeatSolver.VHC.set(rho * c);
   HeatSolver.k.set(k);
@@ -66,7 +68,8 @@ TEST_CASE("2D Cylindrical Explicit Heat Solver Optimizations",
   HeatSolver.maxZBC.f = 0;
   HeatSolver.maxRBC.f = 0;
 
-  BENCHMARK("stepForward") {
+  BENCHMARK("stepForward")
+  {
     HeatSolver.stepForward(0.01);
     return HeatSolver.T(0, 0);
   };

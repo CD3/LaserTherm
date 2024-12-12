@@ -15,12 +15,16 @@ using namespace Catch;
 #include <LaserTherm/Structures/_1D/Infinite.hpp>
 #include <libField/Field.hpp>
 
-TEST_CASE("Structures") {
-  SECTION("Slab") {
+TEST_CASE("Structures")
+{
+  SECTION("Slab")
+  {
     Structures::_1D::Cartesian::Slab<double> slab;
 
-    SECTION("1 surface") {
-      SECTION("min surface") {
+    SECTION("1 surface")
+    {
+      SECTION("min surface")
+      {
         slab.setMinSurfacePosition(1.0);
 
         CHECK(!slab.isInside(0));
@@ -35,7 +39,8 @@ TEST_CASE("Structures") {
         CHECK(slab.isInside(1.99));
         CHECK(slab.isInside(2.01));
       }
-      SECTION("max surface") {
+      SECTION("max surface")
+      {
         slab.setMaxSurfacePosition(1.0);
 
         CHECK(slab.isInside(0));
@@ -52,7 +57,8 @@ TEST_CASE("Structures") {
       }
     }
 
-    SECTION("2 surface") {
+    SECTION("2 surface")
+    {
       slab.setMinSurfacePosition(1.0);
       slab.setMaxSurfacePosition(2.0);
 
@@ -72,7 +78,8 @@ TEST_CASE("Structures") {
     Field<double, 1> field(10);
     field.setCoordinateSystem(Uniform(0., 5.));
   }
-  SECTION("Infinite") {
+  SECTION("Infinite")
+  {
     Structures::_1D::Infinite<double> structure;
 
     CHECK(structure.isInside(-100));
@@ -81,8 +88,9 @@ TEST_CASE("Structures") {
     CHECK(structure.isInside(1));
     CHECK(structure.isInside(100));
   }
-  SECTION("AnyStructure") {
-    Structures::_1D::AnyStructure<double> structure;
+  SECTION("AnyStructure")
+  {
+    Structures::_1D::AnyStructure<double>    structure;
     Structures::_1D::Cartesian::Slab<double> slab;
     slab.setMinSurfacePosition(0);
     slab.setThickness(1.5);
@@ -106,7 +114,8 @@ TEST_CASE("Structures") {
   }
 }
 
-TEST_CASE("Material Structure") {
+TEST_CASE("Material Structure")
+{
   MaterialStructure<Materials::Basic<double>,
                     Structures::_1D::Cartesian::Slab<double>>
       obj;
@@ -147,9 +156,10 @@ TEST_CASE("Material Structure") {
   CHECK(f(20) == Approx(12));
   CHECK(f(21) == Approx(0));
 }
-TEST_CASE("Collection of Material Structures") {
-  using MaterialType = Materials::Basic<double>;
-  using StructureType = Structures::_1D::AnyStructure<double>;
+TEST_CASE("Collection of Material Structures")
+{
+  using MaterialType          = Materials::Basic<double>;
+  using StructureType         = Structures::_1D::AnyStructure<double>;
   using MaterialStructureType = MaterialStructure<MaterialType, StructureType>;
 
   std::vector<MaterialStructureType> structures;

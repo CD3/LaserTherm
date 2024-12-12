@@ -379,7 +379,7 @@ REAL CrankNicholson<REAL>::dp2(int _i)
   return REAL(0);
 }
 
-}  // namespace HeatSolvers::_1D
+}  // namespace HeatSolvers::_1D::Cartesian
 
 template<typename REAL>
 struct get_real_type<HeatSolvers::_1D::Cartesian::CrankNicholson<REAL> > {

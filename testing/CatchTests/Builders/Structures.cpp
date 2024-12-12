@@ -15,7 +15,8 @@ using namespace Catch;
 #include <LaserTherm/Structures/_1D/AnyStructure.hpp>
 #include <libField/Field.hpp>
 
-TEST_CASE("Material Map Builder") {
+TEST_CASE("Material Map Builder")
+{
   boost::property_tree::ptree config;
 
   config.put("simulation.dimensions", 1);
@@ -63,7 +64,8 @@ TEST_CASE("Material Map Builder") {
   CHECK(materials["water"].getAbsorptionCoefficient().value() == Approx(10));
 }
 
-TEST_CASE("1D Structure Set Builder") {
+TEST_CASE("1D Structure Set Builder")
+{
   boost::property_tree::ptree config;
 
   config.put("simulation.dimensions", 1);

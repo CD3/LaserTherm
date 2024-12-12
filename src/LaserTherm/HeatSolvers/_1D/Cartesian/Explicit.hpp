@@ -41,6 +41,6 @@ void Explicit<REAL>::stepForward(const REAL& dt)
 {
 }
 
-}  // namespace HeatSolvers::_1D
+}  // namespace HeatSolvers::_1D::Cartesian
 
 #endif  // include protector

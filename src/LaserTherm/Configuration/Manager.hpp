@@ -36,12 +36,10 @@ class Manager
   T get_quantity(const path_t& path, std::string unit) const;
 
   void set_default_unit(const path_t& path, const std::string& unit);
-  boost::optional<std::string> get_default_unit_optional(const path_t& path) const;
+  boost::optional<std::string> get_default_unit_optional(
+      const path_t& path) const;
   std::string get_default_unit(const path_t& path) const;
   std::string get_default_unit(const path_t& path, std::string def) const;
-
-
-
 
   bool   has(const path_t& key) const;
   path_t addRoot(const path_t& path) const;
@@ -63,10 +61,11 @@ T Manager::get(const path_t& path) const
   path_t apath = addRoot(path);
   auto   node  = configuration.get_child_optional(apath);
   if (!node) {
-    throw std::runtime_error("A parameter named '" + path.dump() +
-                             "' under the node '" + root.dump() +
-                             "' was requested, but was not found in the tree.\nDid "
-                             "you spell it correctly?");
+    throw std::runtime_error(
+        "A parameter named '" + path.dump() + "' under the node '" +
+        root.dump() +
+        "' was requested, but was not found in the tree.\nDid "
+        "you spell it correctly?");
   }
 
   try {

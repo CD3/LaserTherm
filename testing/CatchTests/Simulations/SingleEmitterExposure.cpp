@@ -25,7 +25,8 @@ using namespace Catch;
 #include <LaserTherm/Structures/_1D/Infinite.hpp>
 #include <LaserTherm/Waveforms/ContinuousWave.hpp>
 
-TEST_CASE("Simple Simulation Test", "[.][simulations][longrunning]") {
+TEST_CASE("Simple Simulation Test", "[.][simulations][longrunning]")
+{
   // this is basically a testing ground for building and running a simulation
 
   Configuration::Manager config;
@@ -49,7 +50,7 @@ TEST_CASE("Simple Simulation Test", "[.][simulations][longrunning]") {
   config.unit_registry.addUnit("degC = K - 273.15");
   config.unit_registry.addUnit("degK = K");
 
-  std::string config_text = R"(
+  std::string       config_text = R"(
   simulation.dimensions = 1
 
   simulation.grid.x.n = 100
@@ -97,11 +98,11 @@ TEST_CASE("Simple Simulation Test", "[.][simulations][longrunning]") {
       HeatSolvers::_1D::Cartesian::CrankNicholson<double>>
       sim;
 
-  size_t xN = config.get<size_t>("simulation.grid.x.n");
+  size_t xN   = config.get<size_t>("simulation.grid.x.n");
   double xmin = config.get<double>("simulation.grid.x.min");
   double xmax = config.get<double>("simulation.grid.x.max");
-  sim.tmax = config.get<long double>("simulation.time.end");
-  sim.dt = config.get<long double>("simulation.time.dt.max");
+  sim.tmax    = config.get<long double>("simulation.time.end");
+  sim.dt      = config.get<long double>("simulation.time.dt.max");
 
   sim.heat_solver =
       decltype(sim.heat_solver)(config.get<size_t>("simulation.grid.x.n"));
@@ -198,7 +199,8 @@ TEST_CASE("Simple Simulation Test", "[.][simulations][longrunning]") {
   sim.run();
 }
 
-TEST_CASE("Simulation Builder Test") {
+TEST_CASE("Simulation Builder Test")
+{
   // this is basically a testing ground for building and running a simulation
 
   Configuration::Manager config;
@@ -221,7 +223,7 @@ TEST_CASE("Simulation Builder Test") {
   config.unit_registry.addUnit("cal = 4.184 J");
   config.unit_registry.addUnit("degC = K - 273.15");
 
-  std::string config_text = R"(
+  std::string       config_text = R"(
   simulation.dimensions = 1
 
   simulation.grid.type = "uniform"

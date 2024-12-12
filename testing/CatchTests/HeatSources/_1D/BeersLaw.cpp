@@ -8,12 +8,14 @@ using namespace Catch;
 
 #include <LaserTherm/HeatSources/_1D/Cartesian/BeersLaw.hpp>
 
-TEST_CASE("Beers Law Source") {
+TEST_CASE("Beers Law Source")
+{
   HeatSources::_1D::Cartesian::BeersLaw<double> HeatSource(11);
   HeatSource.A.setCoordinateSystem(Uniform(-2, 2));
   HeatSource.E0 = 10;
 
-  SECTION("Single Absorption Coefficient") {
+  SECTION("Single Absorption Coefficient")
+  {
     HeatSource.mu_a.set(2);
     HeatSource.compute();
 
@@ -21,10 +23,10 @@ TEST_CASE("Beers Law Source") {
     CHECK(HeatSource.A(10) == Approx(2 * 10 * exp(-2 * 4)));
   }
 
-  SECTION("Two Absorption Coefficient") {
+  SECTION("Two Absorption Coefficient")
+  {
     HeatSource.mu_a.set_f([](auto i, auto cs) {
-      if (i[0] <= 5)
-        return 2;
+      if (i[0] <= 5) return 2;
       return 4;
     });
     HeatSource.compute();
